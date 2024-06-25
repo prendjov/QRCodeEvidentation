@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace FinkiEvidentationProject.Models;
+
+public partial class Semester
+{
+    [Key]
+    public string Code { get; set; } = null!;
+
+    public string? SemesterType { get; set; }
+
+    public string? Year { get; set; }
+
+    public DateOnly? StartDate { get; set; }
+
+    public DateOnly? EndDate { get; set; }
+
+    public DateOnly? EnrollmentStartDate { get; set; }
+
+    public DateOnly? EnrollmentEndDate { get; set; }
+
+    public string? State { get; set; }
+
+    public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
+
+    public virtual ICollection<StudentGroup> StudentGroups { get; set; } = new List<StudentGroup>();
+
+    public virtual ICollection<StudentSubjectEnrollment> StudentSubjectEnrollments { get; set; } = new List<StudentSubjectEnrollment>();
+
+}
