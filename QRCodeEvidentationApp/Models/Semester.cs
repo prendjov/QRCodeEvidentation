@@ -25,8 +25,4 @@ public partial class Semester
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
 
-    public virtual ICollection<StudentGroup> StudentGroups { get; set; } = new List<StudentGroup>();
-
-    public virtual ICollection<StudentSubjectEnrollment> StudentSubjectEnrollments { get; set; } = new List<StudentSubjectEnrollment>();
-
 }

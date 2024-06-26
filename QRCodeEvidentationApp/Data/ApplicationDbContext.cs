@@ -1,6 +1,7 @@
 ﻿using FinkiEvidentationProject.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Data
 {
@@ -11,15 +12,7 @@ namespace QRCodeEvidentationApp.Data
         {
         }
 
-        public virtual DbSet<AuthUser> AuthUsers { get; set; }
-
         public virtual DbSet<Course> Courses { get; set; }
-
-        public virtual DbSet<CourseProfessorEvaluation> CourseProfessorEvaluations { get; set; }
-
-        public virtual DbSet<CourseStudentGroup> CourseStudentGroups { get; set; }
-
-        public virtual DbSet<JoinedSubject> JoinedSubjects { get; set; }
 
         public virtual DbSet<Lecture> Lectures { get; set; }
 
@@ -39,37 +32,22 @@ namespace QRCodeEvidentationApp.Data
 
         public virtual DbSet<StudentCourse> StudentCourses { get; set; }
 
-        public virtual DbSet<StudentGroup> StudentGroups { get; set; }
-
-        public virtual DbSet<StudentSubjectEnrollment> StudentSubjectEnrollments { get; set; }
-
         public virtual DbSet<StudyProgram> StudyPrograms { get; set; }
 
-        public virtual DbSet<StudyProgramSubject> StudyProgramSubjects { get; set; }
+        public virtual DbSet<CourseAssistant> CourseAssistants { get; set; }
 
-        public virtual DbSet<StudyProgramSubjectProfessor> StudyProgramSubjectProfessors { get; set; }
-
-        public virtual DbSet<Subject> Subjects { get; set; }
-
-        public virtual DbSet<SubjectDetail> SubjectDetails { get; set; }
-
-        public virtual DbSet<SubjectNameMapping> SubjectNameMappings { get; set; }
-
-        public virtual DbSet<TeacherSubject> TeacherSubjects { get; set; }
+        public virtual DbSet<CourseProfessor> CourseProfessors{ get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Course>()
-                .HasOne(c => c.Assistant)
-                .WithMany(p => p.CourseAssistants)
-                .HasForeignKey(c => c.AssistantId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Course>()
-                .HasOne(c => c.Professor)
-                .WithMany(p => p.CourseProfessors)
-                .HasForeignKey(c => c.ProfessorId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<CourseAssistant>(entity =>
+            {
+                // Configure the relationship with Professor (Assistant)
+                entity.HasOne(e => e.Assistant)
+                      .WithMany()
+                      .HasForeignKey(e => e.AssistantId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
 
             base.OnModelCreating(modelBuilder);
         }

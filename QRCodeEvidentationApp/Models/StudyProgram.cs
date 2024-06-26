@@ -15,6 +15,4 @@ public partial class StudyProgram
     public string? Name { get; set; }
 
     public virtual ICollection<Student> Students { get; set; } = new List<Student>();
-
-    public virtual ICollection<StudyProgramSubject> StudyProgramSubjects { get; set; } = new List<StudyProgramSubject>();
 }

@@ -21,7 +21,5 @@ public partial class Student
 
     public virtual ICollection<StudentCourse> StudentCourses { get; set; } = new List<StudentCourse>();
 
-    public virtual ICollection<StudentSubjectEnrollment> StudentSubjectEnrollments { get; set; } = new List<StudentSubjectEnrollment>();
-
     public virtual StudyProgram? StudyProgramCodeNavigation { get; set; }
 }
