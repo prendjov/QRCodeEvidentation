@@ -14,6 +14,8 @@
 
         public string? Type { get; set; }
 
+        public DateTime? ValidRegistrationUntil { get; set; }
+
         public virtual Room? Room { get; set; }
 
         public virtual Professor? Professor { get; set; }
