@@ -12,6 +12,8 @@
 
         public string? ProfessorId { get; set; }
 
+        public string? Type { get; set; }
+
         public virtual Room? Room { get; set; }
 
         public virtual Professor? Professor { get; set; }
