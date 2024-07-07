@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using QRCodeEvidentationApp.Data;
+using QRCodeEvidentationApp.Repository.Implementation;
+using QRCodeEvidentationApp.Repository.Interface;
+using QRCodeEvidentationApp.Service.Implementation;
+using QRCodeEvidentationApp.Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +22,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddRazorPages();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped(typeof(ILectureRepository), typeof(LectureRepository));
+
+builder.Services.AddTransient<ILectureService, LectureService>();
 
 var app = builder.Build();
 

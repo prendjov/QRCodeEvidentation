@@ -33,13 +33,28 @@ public class LectureService : ILectureService
         return _lectureRepository.FilterLectureByDateOrCourse(dateFrom, dateTo, coursesIds).Result;
     }
 
-    public Lecture EditLecture(string? lectureId)
+    public Lecture EditLecture(Lecture lecture)
     {
-        throw new NotImplementedException();
+        return _lectureRepository.UpdateLecture(lecture);
     }
 
     public Lecture DisableLecture(string? lectureId)
     {
-        throw new NotImplementedException();
+        Lecture forDisabeling = _lectureRepository.GetLectureById(lectureId).Result;
+        
+        forDisabeling.ValidRegistrationUntil = DateTime.Now;
+
+        return _lectureRepository.UpdateLecture(forDisabeling);
+    }
+
+    public Lecture DeleteLecture(string? lectureId)
+    {
+        var lecture = _lectureRepository.GetLectureById(lectureId).Result;
+        return _lectureRepository.DeleteLecture(lecture).Result;
+    }
+
+    public Lecture CreateLecture(Lecture lecture)
+    { 
+        return _lectureRepository.CreateNewLecture(lecture).Result;
     }
 }

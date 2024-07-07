@@ -8,32 +8,32 @@ namespace QRCodeEvidentationApp.Repository.Implementation;
 public class LectureRepository : ILectureRepository
 {
     private readonly ApplicationDbContext _context;
-    private DbSet<Lecture> entities;
+    private readonly DbSet<Lecture> _entities;
     
     public LectureRepository(ApplicationDbContext context)
     {
         this._context = context;
-        entities = context.Set<Lecture>();
+        _entities = context.Set<Lecture>();
     }
     
     public async Task<List<Lecture>> GetAllByProfessor(string? professorId)
     {
-        return await entities.Where(l => l.ProfessorId != null && l.ProfessorId.Equals(professorId)).ToListAsync();
+        return await _entities.Where(l => l.ProfessorId != null && l.ProfessorId.Equals(professorId)).ToListAsync();
     }
 
     public async Task<Lecture> GetLectureByProfessorId(string? professorId)
     {
-        return await entities.FindAsync(professorId) ?? throw new InvalidOperationException();
+        return await _entities.FindAsync(professorId) ?? throw new InvalidOperationException();
     }
 
     public async Task<Lecture> GetLectureById(string? lectureId)
     {
-        return await entities.FindAsync(lectureId) ?? throw new InvalidOperationException();
+        return await _entities.FindAsync(lectureId) ?? throw new InvalidOperationException();
     }
 
     public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateOnly? dateFrom, DateOnly? dateTo, List<long>? coursesIds)
     {
-        var query = entities.AsQueryable();
+        var query = _entities.AsQueryable();
 
         if (dateFrom.HasValue)
         {
@@ -53,13 +53,27 @@ public class LectureRepository : ILectureRepository
         return await query.ToListAsync();
     }
 
-    public Task<Lecture> EditLecture(string? lectureId)
+    public Lecture UpdateLecture(Lecture lecture)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(lecture);
+        _entities.Update(lecture);
+        _context.SaveChanges();
+        return lecture;
     }
 
-    public Task<Lecture> DisableLecture(string? lectureId)
+    public async Task<Lecture> DeleteLecture(Lecture lecture)
     {
-        throw new NotImplementedException();
+        _entities.Remove(lecture);
+        await _context.SaveChangesAsync();
+
+        return lecture;
+    }
+
+    public async Task<Lecture> CreateNewLecture(Lecture lecture)
+    {
+        var createdLecture = await _entities.AddAsync(lecture);
+        await _context.SaveChangesAsync();
+
+        return createdLecture.Entity;
     }
 }

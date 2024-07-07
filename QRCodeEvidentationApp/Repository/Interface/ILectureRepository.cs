@@ -34,16 +34,23 @@ public interface ILectureRepository
     public Task<List<Lecture>> FilterLectureByDateOrCourse(DateOnly? dateFrom, DateOnly? dateTo, List<long>? coursesIds);
 
     /// <summary>
-    /// Edits the lecture with the specified identifier.
+    /// Updates the specified lecture.
     /// </summary>
-    /// <param name="lectureId">The identifier of the lecture to be edited.</param>
+    /// <param name="lecture">Lecture to be edited.</param>
     /// <returns>The edited lecture.</returns>
-    public Task<Lecture> EditLecture(string? lectureId);
+    public Lecture UpdateLecture(Lecture lecture);
 
     /// <summary>
-    /// Disables the lecture with the specified identifier.
+    /// Delete the specified lecture.
     /// </summary>
-    /// <param name="lectureId">The identifier of the lecture to be disabled.</param>
-    /// <returns>The disabled lecture.</returns>
-    public Task<Lecture> DisableLecture(string? lectureId);
+    /// <param name="lecture">The lecture to be deleted.</param>
+    /// <returns>The delete lecture.</returns>
+    public Task<Lecture> DeleteLecture(Lecture lecture);
+
+    /// <summary>
+    /// Creates new lecture
+    /// </summary>
+    /// <param name="lecture">The lecture that should be created.</param>
+    /// <returns>The created lecture.</returns>
+    public Task<Lecture> CreateNewLecture(Lecture lecture);
 }

@@ -26,5 +26,4 @@ public partial class Professor
     public virtual ICollection<LectureGroup> ProfessorLectureGroups { get; set; } = new List<LectureGroup>();
 
     public virtual ProfessorDetail? ProfessorDetail { get; set; }
-
 }

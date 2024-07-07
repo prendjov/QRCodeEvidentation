@@ -39,7 +39,7 @@ public interface ILectureService
     /// </summary>
     /// <param name="lectureId">The identifier of the lecture to be edited.</param>
     /// <returns>The edited lecture.</returns>
-    public Lecture EditLecture(string? lectureId);
+    public Lecture EditLecture(Lecture lecture);
 
     /// <summary>
     /// Disables the lecture with the specified identifier.
@@ -47,4 +47,18 @@ public interface ILectureService
     /// <param name="lectureId">The identifier of the lecture to be disabled.</param>
     /// <returns>The disabled lecture.</returns>
     public Lecture DisableLecture(string? lectureId);
+
+    /// <summary>
+    /// Delete the lecture with the specified identifier.
+    /// </summary>
+    /// <param name="lectureId">The identifier of the lecture to be deleted.</param>
+    /// <returns>The delete lecture.</returns>
+    public Lecture DeleteLecture(string? lectureId);
+
+    /// <summary>
+    /// Creates new lecture
+    /// </summary>
+    /// <param name="lecture">The lecture that should be created.</param>
+    /// <returns>The created lecture.</returns>
+    public Lecture CreateLecture(Lecture lecture);
 }
