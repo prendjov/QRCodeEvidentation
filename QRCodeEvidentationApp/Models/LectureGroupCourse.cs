@@ -1,4 +1,4 @@
-﻿using FinkiEvidentationProject.Models;
+﻿using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Models
 {

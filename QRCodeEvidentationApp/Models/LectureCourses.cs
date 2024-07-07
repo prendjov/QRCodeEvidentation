@@ -1,4 +1,4 @@
-﻿namespace FinkiEvidentationProject.Models
+﻿namespace QRCodeEvidentationApp.Models
 {
     public class LectureCourses
     {

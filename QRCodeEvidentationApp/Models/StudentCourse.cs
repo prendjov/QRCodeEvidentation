@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FinkiEvidentationProject.Models;
+namespace QRCodeEvidentationApp.Models;
 
 public partial class StudentCourse
 {

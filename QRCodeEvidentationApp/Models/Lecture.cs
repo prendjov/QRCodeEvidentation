@@ -1,4 +1,4 @@
-﻿namespace FinkiEvidentationProject.Models
+﻿namespace QRCodeEvidentationApp.Models
 {
     public class Lecture
     {
@@ -21,6 +21,5 @@
         public virtual Professor? Professor { get; set; }
 
         public virtual ICollection<LectureCourses> Courses { get; set; } = new List<LectureCourses>();
-
     }
 }

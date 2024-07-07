@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FinkiEvidentationProject.Models;
+namespace QRCodeEvidentationApp.Models;
 
 public partial class ProfessorDetail
 {
