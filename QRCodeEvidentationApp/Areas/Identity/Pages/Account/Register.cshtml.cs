@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.Extensions.Logging;
+using QRCodeEvidentationApp.Data;
+using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 {
@@ -33,14 +35,16 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-
+        private readonly ApplicationDbContext _context;
+        
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -49,6 +53,7 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
             _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
@@ -83,7 +88,11 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "UserName")]
             public string UserName { get; set; }
-
+            
+            [Required]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+            
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -120,18 +129,49 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, (Input.UserName + "@finki.ukim.mk"), CancellationToken.None);
-                var result = await _userManager.CreateAsync(user, Input.Password);               
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                var roleId = GetRoleId(Input.UserName);
+
+                IdentityResult result;
+
+                if (roleId == "PROFESSOR")
+                {
+                    var professor = new Professor
+                    {
+                        UserName = Input.UserName,
+                        Email = Input.Email
+                    };
+
+                    result = await _userManager.CreateAsync(professor, Input.Password);
+                    user = professor;
+                }
+                else if (roleId == "STUDENT")
+                {
+                    var student = new Student
+                    {
+                        UserName = Input.UserName,
+                        Email = Input.Email,
+                        StudentIndex = Input.UserName
+                    };
+
+                    result = await _userManager.CreateAsync(student, Input.Password);
+                    user = student;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid role detected.");
+                    return Page();
+                }
+                
+                var defaultrole = _roleManager.FindByNameAsync(roleId).Result;
+
+                if (defaultrole != null)
+                {
+                    await _userManager.AddToRoleAsync(user, defaultrole.Name);
+                }
 
                 if (result.Succeeded)
                 {
-                    var defaultrole = _roleManager.FindByNameAsync(GetRoleId(user.UserName)).Result;
-
-                    if (defaultrole != null)
-                    {
-                        IdentityResult roleresult = await _userManager.AddToRoleAsync(user, defaultrole.Name);
-                    }
-
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -148,7 +188,7 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = (Input.UserName + "@finki.ukim.mk"), returnUrl = returnUrl });
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
                     else
                     {

@@ -37,7 +37,7 @@ public interface ILectureService
     /// <summary>
     /// Edits the lecture with the specified identifier.
     /// </summary>
-    /// <param name="lectureId">The identifier of the lecture to be edited.</param>
+    /// <param name="lecture">The lecture to be edited.</param>
     /// <returns>The edited lecture.</returns>
     public Lecture EditLecture(Lecture lecture);
 

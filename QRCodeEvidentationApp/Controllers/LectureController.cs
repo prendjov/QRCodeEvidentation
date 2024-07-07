@@ -100,7 +100,7 @@ namespace QRCodeEvidentationApp.Controllers
             }
 
             var lecture = _lectureService.GetLectureById(id);
-
+            
             return View(lecture);
         }
 

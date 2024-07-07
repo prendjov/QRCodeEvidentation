@@ -2,15 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace QRCodeEvidentationApp.Models;
 
-public partial class Professor
+public class Professor : IdentityUser
 {
-    public string Id { get; set; } = null!;
-
-    public string Email { get; set; } = null!;
-
     public string Name { get; set; } = null!;
 
     public string? Title { get; set; }

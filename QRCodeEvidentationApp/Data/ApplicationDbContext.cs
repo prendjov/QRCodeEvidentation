@@ -48,6 +48,11 @@ namespace QRCodeEvidentationApp.Data
                       .HasForeignKey(e => e.AssistantId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
+            
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.HasIndex(e => e.StudentIndex).IsUnique();
+            });
 
             base.OnModelCreating(modelBuilder);
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QRCodeEvidentationApp.Data;
 
@@ -11,9 +12,11 @@ using QRCodeEvidentationApp.Data;
 namespace QRCodeEvidentationApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240707172416_Professor_n_Student_Update")]
+    partial class Professor_n_Student_Update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -499,6 +502,76 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.ToTable("Semesters");
                 });
 
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ParentName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentIndex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudyProgramCode")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudyProgramCode");
+
+                    b.ToTable("Students");
+                });
+
             modelBuilder.Entity("QRCodeEvidentationApp.Models.StudentCourse", b =>
                 {
                     b.Property<long>("Id")
@@ -566,41 +639,6 @@ namespace QRCodeEvidentationApp.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Professor");
-                });
-
-            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentIndex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("StudyProgramCode")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasIndex("StudentIndex")
-                        .IsUnique()
-                        .HasFilter("[StudentIndex] IS NOT NULL");
-
-                    b.HasIndex("StudyProgramCode");
-
-                    b.ToTable("AspNetUsers", t =>
-                        {
-                            t.Property("Name")
-                                .HasColumnName("Student_Name");
-                        });
-
-                    b.HasDiscriminator().HasValue("Student");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -769,6 +807,15 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.Navigation("Professor");
                 });
 
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
+                {
+                    b.HasOne("QRCodeEvidentationApp.Models.StudyProgram", "StudyProgramCodeNavigation")
+                        .WithMany("Students")
+                        .HasForeignKey("StudyProgramCode");
+
+                    b.Navigation("StudyProgramCodeNavigation");
+                });
+
             modelBuilder.Entity("QRCodeEvidentationApp.Models.StudentCourse", b =>
                 {
                     b.HasOne("QRCodeEvidentationApp.Models.Professor", "Assistant")
@@ -796,15 +843,6 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
-                {
-                    b.HasOne("QRCodeEvidentationApp.Models.StudyProgram", "StudyProgramCodeNavigation")
-                        .WithMany("Students")
-                        .HasForeignKey("StudyProgramCode");
-
-                    b.Navigation("StudyProgramCodeNavigation");
-                });
-
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Course", b =>
                 {
                     b.Navigation("CourseAssistants");
@@ -829,6 +867,11 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.Navigation("Courses");
                 });
 
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
+                {
+                    b.Navigation("StudentCourses");
+                });
+
             modelBuilder.Entity("QRCodeEvidentationApp.Models.StudyProgram", b =>
                 {
                     b.Navigation("Students");
@@ -843,11 +886,6 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.Navigation("ProfessorDetail");
 
                     b.Navigation("ProfessorLectureGroups");
-                });
-
-            modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
-                {
-                    b.Navigation("StudentCourses");
                 });
 #pragma warning restore 612, 618
         }
