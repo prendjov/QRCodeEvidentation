@@ -24,5 +24,4 @@ public partial class Semester
     public string? State { get; set; }
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
-
 }

@@ -28,7 +28,7 @@ public class LectureService : ILectureService
         return _lectureRepository.GetLectureById(lectureId).Result;
     }
 
-    public List<Lecture> FilterLectureByDateOrCourse(DateOnly? dateFrom, DateOnly? dateTo, List<long>? coursesIds)
+    public List<Lecture> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
     {
         return _lectureRepository.FilterLectureByDateOrCourse(dateFrom, dateTo, coursesIds).Result;
     }

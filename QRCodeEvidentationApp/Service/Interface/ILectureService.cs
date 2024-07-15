@@ -32,7 +32,7 @@ public interface ILectureService
     /// <param name="dateTo">The date up to which the lectures are filtered. If null, the filter will include all lectures from dateFrom onwards.</param>
     /// <param name="coursesIds">A list of course identifiers to filter lectures. If null, the course filter is not applied.</param>
     /// <returns>A list of lectures that match the specified date span or course identifiers.</returns>
-    public List<Lecture> FilterLectureByDateOrCourse(DateOnly? dateFrom, DateOnly? dateTo, List<long>? coursesIds);
+    public List<Lecture> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds);
 
     /// <summary>
     /// Edits the lecture with the specified identifier.

@@ -12,7 +12,7 @@ public class LectureRepository : ILectureRepository
     
     public LectureRepository(ApplicationDbContext context)
     {
-        this._context = context;
+        _context = context;
         _entities = context.Set<Lecture>();
     }
     
@@ -31,18 +31,18 @@ public class LectureRepository : ILectureRepository
         return await _entities.FindAsync(lectureId) ?? throw new InvalidOperationException();
     }
 
-    public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateOnly? dateFrom, DateOnly? dateTo, List<long>? coursesIds)
+    public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
     {
         var query = _entities.AsQueryable();
 
         if (dateFrom.HasValue)
         {
-            query = query.Where(l => l.StartsAt.Date >= dateFrom.Value.ToDateTime(TimeOnly.MinValue));
+            query = query.Where(l => l.StartsAt.Date >= dateFrom);
         }
 
         if (dateTo.HasValue)
         {
-            query = query.Where(l => l.StartsAt.Date <= dateTo.Value.ToDateTime(TimeOnly.MaxValue));
+            query = query.Where(l => l.StartsAt.Date <= dateTo);
         }
 
         if (coursesIds != null)
