@@ -1,7 +1,10 @@
-﻿namespace QRCodeEvidentationApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace QRCodeEvidentationApp.Models
 {
     public class Lecture
     {
+        [Key]
         public string Id { get; set; } = null!;
 
         public string Title { get; set; }
