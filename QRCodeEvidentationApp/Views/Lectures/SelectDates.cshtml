@@ -1,0 +1,31 @@
+@model QRCodeEvidentationApp.Models.DTO.LectureDto
+
+@{
+    ViewData["Title"] = "Select dates";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Lecture</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CheckRoomsAvailability">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="StartsAt" class="control-label"></label>
+                <input asp-for="StartsAt" class="form-control" />
+                <span asp-validation-for="StartsAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndsAt" class="control-label"></label>
+                <input asp-for="EndsAt" class="form-control" id="EndsAt" />
+                <span asp-validation-for="EndsAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

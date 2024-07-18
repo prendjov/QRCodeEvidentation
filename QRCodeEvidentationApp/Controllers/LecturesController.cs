@@ -70,6 +70,7 @@ namespace QRCodeEvidentationApp.Controllers
             
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
+            dto.loggedInProfessorId = loggedInProfessor.Id;
             
             List<Room> availableRooms = await _roomService.GetAvailableRoomsForDates(dto.StartsAt, dto.EndsAt);
 
@@ -87,7 +88,7 @@ namespace QRCodeEvidentationApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _lectureService.CreateLecture(new Lecture());
+                _lectureService.CreateLecture(dtoFilled);
                 return RedirectToAction(nameof(Index));
             }
             return View();

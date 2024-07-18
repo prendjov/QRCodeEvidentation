@@ -11,6 +11,8 @@ public class LectureDto
         "Аудиториски", "Предавања"
     };
     
+    public string? TypeSelected { get; set; }
+    
     public List<CourseProfessor>? CoursesProfessor { get; set; }
     
     public List<CourseAssistant>? CoursesAssistant { get; set; }
@@ -28,4 +30,6 @@ public class LectureDto
     public DateTime ValidRegistrationUntil { get; set; }
     
     public string? Title { get; set; }
+    
+    public string? loggedInProfessorId { get; set; }
 }

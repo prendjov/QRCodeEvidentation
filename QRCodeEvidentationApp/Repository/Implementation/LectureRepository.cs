@@ -23,7 +23,7 @@ public class LectureRepository : ILectureRepository
 
     public async Task<Lecture> GetLectureByProfessorId(string? professorId)
     {
-        return await _entities.FindAsync(professorId) ?? throw new InvalidOperationException();
+        return await _entities.Include("Room").Where(z => z.ProfessorId != null && z.ProfessorId.Equals(professorId)).FirstOrDefaultAsync();
     }
 
     public async Task<Lecture> GetLectureById(string? lectureId)

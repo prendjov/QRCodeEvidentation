@@ -24,7 +24,7 @@
             </div>
             <div class="form-group">
                 <label for="Type">Select Room</label>
-                @Html.DropDownListFor(model => model.Type, new SelectList(Model.Type), "Select a type", new { @class = "form-control", id = "Type" })
+                @Html.DropDownListFor(model => model.TypeSelected, new SelectList(Model.Type), "Select a type", new { @class = "form-control", id = "Type" })
             </div>
             <div class="form-group">
                 <label asp-for="ValidRegistrationUntil" class="control-label"></label>
@@ -34,11 +34,11 @@
 
             <div class="form-group" id="courseAssistantGroup" style="display: none;">
                 <label for="CoursesAssistant">Select Assistant</label>
-                @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "AssistantId", "Assistant.Name"), "Select an Assistant", new { @class = "form-control", id = "CoursesAssistant" })
+                @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex"), "Select an Assistant", new { @class = "form-control", id = "CoursesAssistant" })
             </div>
             <div class="form-group" id="courseProfessorGroup" style="display: none;">
                 <label for="CoursesProfessor">Select Professor</label>
-                @Html.DropDownListFor(model => model.CourseId, new SelectList(Model.CoursesProfessor, "ProfessorId", "Professor.Name"), "Select a Professor", new { @class = "form-control", id = "CoursesProfessor" })
+                @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex"), "Select a Professor", new { @class = "form-control", id = "CoursesProfessor" })
             </div>
 
             <input type="hidden" asp-for="StartsAt" />
@@ -46,6 +46,7 @@
             <input type="hidden" asp-for="CoursesProfessor" />
             <input type="hidden" asp-for="CoursesAssistant" />
             <input type="hidden" asp-for="GetAvailableRooms" />
+            <input type="hidden" asp-for="loggedInProfessorId" />
             
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

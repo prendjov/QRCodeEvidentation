@@ -27,6 +27,7 @@ builder.Services.AddScoped(typeof(ILectureRepository), typeof(LectureRepository)
 builder.Services.AddScoped(typeof(IProfessorRepository), typeof(ProfessorRepository));
 builder.Services.AddScoped(typeof(ICourseRepository<CourseUserBaseEntity>), typeof(CourseRepository<CourseUserBaseEntity>));
 builder.Services.AddScoped(typeof(IRoomRepository), typeof(RoomRepository));
+builder.Services.AddScoped(typeof(ILectureCoursesRepository), typeof(LectureCoursesRepository));
 
 builder.Services.AddTransient<ILectureService, LectureService>();
 builder.Services.AddTransient<IProfessorService, ProfessorService>();

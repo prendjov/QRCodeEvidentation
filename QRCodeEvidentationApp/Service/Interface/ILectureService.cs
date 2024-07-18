@@ -1,4 +1,5 @@
 using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.DTO;
 
 namespace QRCodeEvidentationApp.Service.Interface;
 
@@ -58,7 +59,7 @@ public interface ILectureService
     /// <summary>
     /// Creates new lecture
     /// </summary>
-    /// <param name="lecture">The lecture that should be created.</param>
+    /// <param name="dtoFilled">The DTO from the lecture that should be created.</param>
     /// <returns>The created lecture.</returns>
-    public Lecture CreateLecture(Lecture lecture);
+    public Lecture CreateLecture(LectureDto dtoFilled);
 }

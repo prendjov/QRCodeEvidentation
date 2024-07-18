@@ -1,4 +1,5 @@
 using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.DTO;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Interface;
 
@@ -7,10 +8,12 @@ namespace QRCodeEvidentationApp.Service.Implementation;
 public class LectureService : ILectureService
 {
     private readonly ILectureRepository _lectureRepository;
+    private readonly ILectureCoursesRepository _lectureCourseRepository;
 
-    public LectureService(ILectureRepository lectureRepository)
+    public LectureService(ILectureRepository lectureRepository, ILectureCoursesRepository lectureCoursesRepository)
     {
         _lectureRepository = lectureRepository;
+        _lectureCourseRepository = lectureCoursesRepository;
     }
     
     public List<Lecture> GetLecturesForProfessor(string? professorId)
@@ -53,8 +56,30 @@ public class LectureService : ILectureService
         return _lectureRepository.DeleteLecture(lecture).Result;
     }
 
-    public Lecture CreateLecture(Lecture lecture)
+    public Lecture CreateLecture(LectureDto dtoFilled)
     { 
+        // Create the lecture entity from the DTO
+        Lecture lecture = new Lecture
+        {
+            Id = Guid.NewGuid().ToString(), // Assuming you want to generate a new ID
+            Title = dtoFilled.Title ?? string.Empty,
+            StartsAt = dtoFilled.StartsAt,
+            EndsAt = dtoFilled.EndsAt,
+            RoomName = dtoFilled.RoomId,
+            ProfessorId = dtoFilled.loggedInProfessorId,
+            Type = dtoFilled.TypeSelected,
+            ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil
+        };
+
+        // Add the courses related to the lecture
+        if (dtoFilled.CourseId.HasValue)
+        {
+            lecture.Courses.Add(_lectureCourseRepository.CreateLectureCourse(new LectureCourses
+            {
+                LectureId = lecture.Id,
+                CourseId = dtoFilled.CourseId.Value,
+            }));
+        }
         return _lectureRepository.CreateNewLecture(lecture).Result;
     }
 }
