@@ -17,7 +17,15 @@ public class LectureDto
     
     public long? CourseId { get; set; }
     
-    public DateTime DateFrom { get; set; }
+    public long? CourseProfessorId { get; set; }
     
-    public DateTime DateTo { get; set; }
+    public long? CourseAssistantId { get; set; }
+    
+    public DateTime StartsAt { get; set; }
+    
+    public DateTime EndsAt { get; set; }
+    
+    public DateTime ValidRegistrationUntil { get; set; }
+    
+    public string? Title { get; set; }
 }

@@ -270,7 +270,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("SemesterCode");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.CourseAssistant", b =>
@@ -290,7 +290,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseAssistants", (string)null);
+                    b.ToTable("CourseAssistants");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.CourseProfessor", b =>
@@ -310,13 +310,16 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("ProfessorId");
 
-                    b.ToTable("CourseProfessors", (string)null);
+                    b.ToTable("CourseProfessors");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Lecture", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProfessorId")
                         .HasColumnType("nvarchar(450)");
@@ -343,7 +346,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("RoomName");
 
-                    b.ToTable("Lectures", (string)null);
+                    b.ToTable("Lectures");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureAttendance", b =>
@@ -369,7 +372,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("StudentIndex1");
 
-                    b.ToTable("LectureAttendances", (string)null);
+                    b.ToTable("LectureAttendances");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureCourses", b =>
@@ -389,7 +392,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("LectureId");
 
-                    b.ToTable("LectureCourses", (string)null);
+                    b.ToTable("LectureCourses");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureGroup", b =>
@@ -409,7 +412,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("ProfessorId");
 
-                    b.ToTable("LectureGroup", (string)null);
+                    b.ToTable("LectureGroup");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Professor", b =>
@@ -436,7 +439,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Professors", (string)null);
+                    b.ToTable("Professors");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.ProfessorDetail", b =>
@@ -461,7 +464,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasKey("ProfessorId");
 
-                    b.ToTable("ProfessorDetails", (string)null);
+                    b.ToTable("ProfessorDetails");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Room", b =>
@@ -483,7 +486,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasKey("Name");
 
-                    b.ToTable("Rooms", (string)null);
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Semester", b =>
@@ -514,7 +517,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("Semesters", (string)null);
+                    b.ToTable("Semesters");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Student", b =>
@@ -541,7 +544,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("StudyProgramCode");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.StudentCourse", b =>
@@ -574,7 +577,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasIndex("StudentStudentIndex");
 
-                    b.ToTable("StudentCourses", (string)null);
+                    b.ToTable("StudentCourses");
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.StudyProgram", b =>
@@ -587,7 +590,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("StudyPrograms", (string)null);
+                    b.ToTable("StudyPrograms");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

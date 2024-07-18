@@ -10,6 +10,8 @@ namespace QRCodeEvidentationApp.Models
         public string Title { get; set; }
 
         public DateTime StartsAt { get; set; }
+        
+        public DateTime EndsAt { get; set; }
 
         public string? RoomName { get; set; }
 

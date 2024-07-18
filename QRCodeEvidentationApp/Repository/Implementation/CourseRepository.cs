@@ -19,14 +19,14 @@ public class CourseRepository<T> : ICourseRepository<T> where T : CourseUserBase
     public async Task<List<CourseProfessor>> GetCoursesForProfessor(string? professorId)
     {
         return await _context.Set<CourseProfessor>()
-            .Where(cp => cp.Id == professorId)
+            .Where(cp => cp.Id == professorId).Include("Course")
             .ToListAsync();
     }
 
     public async Task<List<CourseAssistant>> GetCoursesForAssistant(string? assistantId)
     {
         return await _context.Set<CourseAssistant>()
-            .Where(cp => cp.Id == assistantId)
+            .Where(cp => cp.Id == assistantId).Include("Course")
             .ToListAsync();    
     }
 }

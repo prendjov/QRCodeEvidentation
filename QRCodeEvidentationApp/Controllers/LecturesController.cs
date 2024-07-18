@@ -61,19 +61,21 @@ namespace QRCodeEvidentationApp.Controllers
         }
 
         // GET: Lecture/Create
-        public async Task<IActionResult> Create()
+        [HttpGet]
+        public async Task<IActionResult> Create(LectureDto dto)
         {
-            // take the logged in user
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             
-        
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
             
-            LectureDto dto = new LectureDto();
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
             
-            return View();
+            List<Room> availableRooms = await _roomService.GetAvailableRoomsForDates(dto.StartsAt, dto.EndsAt);
+
+            dto.GetAvailableRooms = availableRooms;
+            
+            return View(dto);
         }
 
         // POST: Lecture/Create
@@ -81,14 +83,14 @@ namespace QRCodeEvidentationApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,Title,StartsAt,RoomName,ProfessorId,Type,ValidRegistrationUntil")] Lecture lecture)
+        public IActionResult CreatePost(LectureDto dtoFilled)
         {
             if (ModelState.IsValid)
             {
-                _lectureService.CreateLecture(lecture);
+                _lectureService.CreateLecture(new Lecture());
                 return RedirectToAction(nameof(Index));
             }
-            return View(lecture);
+            return View();
         }
 
         // GET: Lecture/Edit/5
@@ -145,6 +147,32 @@ namespace QRCodeEvidentationApp.Controllers
         {
             _lectureService.DeleteLecture(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult SelectDates()
+        {
+        //     var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        //
+        //     Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+        //     
+        //     LectureDto dto = new LectureDto();
+        //     dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
+        //     dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
+        
+            LectureDto dto = new LectureDto();
+
+            return View(dto);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> CheckRoomsAvailability(LectureDto lectureDto)
+        {
+            if (lectureDto == null || lectureDto.StartsAt == default || lectureDto.EndsAt == default)
+            {
+                return Json(new { isAvailable = false, rooms = new List<Room>() });
+            }
+            return RedirectToAction("Create", lectureDto);
         }
     }
 }

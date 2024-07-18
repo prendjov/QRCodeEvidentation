@@ -1,4 +1,4 @@
-@model QRCodeEvidentationApp.Models.Lecture
+@model QRCodeEvidentationApp.Models.DTO.LectureDto
 
 @{
     ViewData["Title"] = "Create";
@@ -11,20 +11,44 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="CreatePost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="StartsAt" class="control-label"></label>
-                <input asp-for="StartsAt" class="form-control" />
-                <span asp-validation-for="StartsAt" class="text-danger"></span>
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="Room">Select Room</label>
+                @Html.DropDownListFor(model => model.RoomId, new SelectList(Model.GetAvailableRooms, "Name", "Name"), "Select a Room", new { @class = "form-control", id = "RoomId" })
+            </div>
+            <div class="form-group">
+                <label for="Type">Select Room</label>
+                @Html.DropDownListFor(model => model.Type, new SelectList(Model.Type), "Select a type", new { @class = "form-control", id = "Type" })
             </div>
             <div class="form-group">
                 <label asp-for="ValidRegistrationUntil" class="control-label"></label>
                 <input asp-for="ValidRegistrationUntil" class="form-control" />
                 <span asp-validation-for="ValidRegistrationUntil" class="text-danger"></span>
             </div>
+
+            <div class="form-group" id="courseAssistantGroup" style="display: none;">
+                <label for="CoursesAssistant">Select Assistant</label>
+                @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "AssistantId", "Assistant.Name"), "Select an Assistant", new { @class = "form-control", id = "CoursesAssistant" })
+            </div>
+            <div class="form-group" id="courseProfessorGroup" style="display: none;">
+                <label for="CoursesProfessor">Select Professor</label>
+                @Html.DropDownListFor(model => model.CourseId, new SelectList(Model.CoursesProfessor, "ProfessorId", "Professor.Name"), "Select a Professor", new { @class = "form-control", id = "CoursesProfessor" })
+            </div>
+
+            <input type="hidden" asp-for="StartsAt" />
+            <input type="hidden" asp-for="EndsAt" />
+            <input type="hidden" asp-for="CoursesProfessor" />
+            <input type="hidden" asp-for="CoursesAssistant" />
+            <input type="hidden" asp-for="GetAvailableRooms" />
+            
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -33,3 +57,22 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("Type").addEventListener("change", function () {
+            var selectedValue = this.value;
+            var courseAssistantGroup = document.getElementById("courseAssistantGroup");
+            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
+
+            courseAssistantGroup.style.display = "none";
+            courseProfessorGroup.style.display = "none";
+
+            if (selectedValue === "Аудиториски") {
+                courseAssistantGroup.style.display = "block";
+            } else if (selectedValue === "Предавања") {
+                courseProfessorGroup.style.display = "block";
+            }
+        });
+    </script>
+}

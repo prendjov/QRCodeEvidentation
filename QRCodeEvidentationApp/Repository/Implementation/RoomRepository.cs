@@ -21,4 +21,17 @@ public class RoomRepository : IRoomRepository
     {
         return await _entities.ToListAsync();
     }
+
+    public async Task<List<Room>> GetAvailableRoomsForDates(DateTime? startDate, DateTime? endDate)
+    {
+        if (startDate == null || endDate == null)
+        {
+            throw new ArgumentNullException("Start date and end date must be provided.");
+        }
+
+        return await _context.Rooms
+            .Where(room => !room.Lectures
+                .Any(lecture => lecture.StartsAt < endDate && lecture.EndsAt > startDate))
+            .ToListAsync();
+    }
 }
