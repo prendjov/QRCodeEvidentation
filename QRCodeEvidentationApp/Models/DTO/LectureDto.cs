@@ -6,7 +6,7 @@ public class LectureDto
     
     public string? RoomId { get; set; }
 
-    public List<string> Type = new List<string>()
+    public List<string>? Type = new List<string>()
     {
         "Аудиториски", "Предавања"
     };
@@ -32,4 +32,6 @@ public class LectureDto
     public string? Title { get; set; }
     
     public string? loggedInProfessorId { get; set; }
+    
+    public string? ErrMessage { get; set; }
 }

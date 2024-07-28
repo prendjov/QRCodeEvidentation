@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="CheckRoomsAvailability">
+        <form id="createForm" asp-action="CheckRoomsAvailability" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="StartsAt" class="control-label"></label>
@@ -26,6 +26,18 @@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
+
+            <p id="errorMessage" style="color: red;"></p>
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        let errorMessage = document.getElementById("errorMessage");
+             // Display error message if present
+             if ('@Model.ErrMessage') {
+                 errorMessage.textContent = '@Model.ErrMessage';
+             }
+    </script>
+}

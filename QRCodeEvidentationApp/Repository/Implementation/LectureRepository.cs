@@ -23,7 +23,7 @@ public class LectureRepository : ILectureRepository
 
     public async Task<Lecture> GetLectureByProfessorId(string? professorId)
     {
-        return await _entities.Include("Room").Where(z => z.ProfessorId != null && z.ProfessorId.Equals(professorId)).FirstOrDefaultAsync();
+        return await _entities.Include("Room").Include("Professor").Where(z => z.ProfessorId != null && z.ProfessorId.Equals(professorId)).FirstOrDefaultAsync();
     }
 
     public async Task<Lecture> GetLectureById(string? lectureId)
@@ -33,16 +33,23 @@ public class LectureRepository : ILectureRepository
 
     public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
     {
+        // var filterByDate = _entities.Where(l =>
+        //     l.StartsAt >= dateFrom && l.EndsAt <= dateTo);
+        //
+        // if (coursesIds != null)
+        // {
+        //     filterByDate
+        // }
         var query = _entities.AsQueryable();
 
         if (dateFrom.HasValue)
         {
-            query = query.Where(l => l.StartsAt.Date >= dateFrom);
+            query = query.Where(l => l.StartsAt >= dateFrom);
         }
 
         if (dateTo.HasValue)
         {
-            query = query.Where(l => l.StartsAt.Date <= dateTo);
+            query = query.Where(l => l.StartsAt <= dateTo);
         }
 
         if (coursesIds != null)

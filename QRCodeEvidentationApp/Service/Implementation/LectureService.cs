@@ -82,4 +82,34 @@ public class LectureService : ILectureService
         }
         return _lectureRepository.CreateNewLecture(lecture).Result;
     }
+
+    public bool CheckValidRegistrationDate(DateTime startsAt, DateTime endsAt, DateTime? validRegistrationUntil)
+    {
+        if (validRegistrationUntil == null)
+        {
+            return true;
+        }
+        if (startsAt <= validRegistrationUntil && endsAt >= validRegistrationUntil)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool CheckStartAndEndDateTime(DateTime startsAt, DateTime endsAt)
+    {
+        if (endsAt < startsAt)
+        {
+            return false;
+        }
+
+        var timeDifference = endsAt - startsAt;
+        if (timeDifference.Hours > 12)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

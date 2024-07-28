@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
 using QRCodeEvidentationApp.Repository.Interface;
@@ -62,7 +63,7 @@ namespace QRCodeEvidentationApp.Controllers
 
         // GET: Lecture/Create
         [HttpGet]
-        public async Task<IActionResult> Create(LectureDto dto)
+        public async Task<IActionResult> CreateView(LectureDto dto)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             
@@ -74,9 +75,14 @@ namespace QRCodeEvidentationApp.Controllers
             
             List<Room> availableRooms = await _roomService.GetAvailableRoomsForDates(dto.StartsAt, dto.EndsAt);
 
+            if (availableRooms.Count == 0)
+            {
+                return RedirectToAction("SelectDates");
+            }
+
             dto.GetAvailableRooms = availableRooms;
             
-            return View(dto);
+            return View("Create", dto);
         }
 
         // POST: Lecture/Create
@@ -84,27 +90,52 @@ namespace QRCodeEvidentationApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreatePost(LectureDto dtoFilled)
+        public IActionResult Create(LectureDto dtoFilled)
         {
             if (ModelState.IsValid)
             {
+                bool ValidRegistrationResult =
+                    _lectureService.CheckValidRegistrationDate(dtoFilled.StartsAt, dtoFilled.EndsAt, dtoFilled.ValidRegistrationUntil);
+
+                if (!ValidRegistrationResult)
+                {
+                        dtoFilled.ErrMessage = "Valid Registration Until is not in the scheduled lecture range.";
+                        return View("Create", dtoFilled);
+                }
+
                 _lectureService.CreateLecture(dtoFilled);
                 return RedirectToAction(nameof(Index));
             }
-            return View();
+            
+            return View(dtoFilled);
         }
 
         // GET: Lecture/Edit/5
-        public IActionResult Edit(string? id)
+        public async Task<IActionResult> Edit(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
+            
 
             var lecture = _lectureService.GetLectureById(id);
-           
-            return View(lecture);
+            LectureEditDto dto = new LectureEditDto();
+            
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+            
+            dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
+            dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
+
+            List<Room> availableRooms = await _roomService.GetAllRooms();
+
+            dto.lecture = lecture;
+            dto.lectureId = id;
+            dto.GetAvailableRooms = availableRooms;
+            
+            return View(dto);
         }
 
         // POST: Lecture/Edit/5
@@ -112,22 +143,76 @@ namespace QRCodeEvidentationApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(string id, [Bind("Id,Title,StartsAt,RoomName,ProfessorId,Type,ValidRegistrationUntil")] Lecture lecture)
+        public IActionResult Edit(string id, LectureEditDto lectureDto)
         {
-            if (id != lecture.Id)
+            if (id != lectureDto.lectureId)
             {
                 return NotFound();
             }
 
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                _lectureService.EditLecture(lecture);
-                
+                var existingLecture = _lectureService.GetLectureById(id);
+                if (existingLecture == null)
+                {
+                    return NotFound();
+                }
+
+                // Update the properties of the existing lecture with the properties from the DTO
+                existingLecture.Title = lectureDto.lecture.Title;
+                existingLecture.StartsAt = lectureDto.lecture.StartsAt;
+                existingLecture.EndsAt = lectureDto.lecture.EndsAt;
+                existingLecture.ValidRegistrationUntil = lectureDto.lecture.ValidRegistrationUntil;
+                existingLecture.RoomName = lectureDto.lecture.RoomName;
+                existingLecture.Type = lectureDto.lecture.Type;
+
+                bool ValidRegistrationResult = _lectureService.CheckValidRegistrationDate(existingLecture.StartsAt, existingLecture.EndsAt, existingLecture.ValidRegistrationUntil);
+                bool DateTimeInOrder = _lectureService.CheckStartAndEndDateTime(existingLecture.StartsAt, existingLecture.EndsAt);
+
+                if (!DateTimeInOrder)
+                {
+                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, "StartsAt can't be after EndsAt or the lecture is scheduled for too long time range.");
+                    return View(lectureEditDto);
+                }
+
+                if (!ValidRegistrationResult)
+                {
+                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, "Valid Registration Until is not in the scheduled lecture range.");
+                    return View(lectureEditDto);
+                }
+
+                bool roomAvailability = _roomService.CheckRoomAvailability(existingLecture.StartsAt, existingLecture.EndsAt, existingLecture.RoomName, existingLecture.Id);
+
+                if (!roomAvailability)
+                {
+                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, $"The specified room is not available on {existingLecture.StartsAt} - {existingLecture.EndsAt}.");
+                    return View(lectureEditDto);
+                }
+             
+                _lectureService.EditLecture(existingLecture);
                 return RedirectToAction(nameof(Index));
             }
-            return View(lecture);
+            return View(lectureDto);
         }
 
+        private LectureEditDto PopulateLectureEditDto(LectureEditDto lectureDto, string id, string errMessage)
+        {
+            var lecture = _lectureService.GetLectureById(id);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException()).Result;
+
+            lectureDto.CoursesProfessor = _courseService.GetCoursesForProfessor(loggedInProfessor.Id).Result;
+            lectureDto.CoursesAssistant = _courseService.GetCoursesForAssistant(loggedInProfessor.Id).Result;
+
+            List<Room> availableRooms = _roomService.GetAllRooms().Result;
+
+            lectureDto.lecture = lecture;
+            lectureDto.lectureId = id;
+            lectureDto.GetAvailableRooms = availableRooms;
+            lectureDto.ErrMessage = errMessage;
+
+            return lectureDto;
+        }
         // GET: Lecture/Delete/5
         public IActionResult Delete(string? id)
         {
@@ -153,27 +238,22 @@ namespace QRCodeEvidentationApp.Controllers
         [HttpGet]
         public IActionResult SelectDates()
         {
-        //     var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-        //
-        //     Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-        //     
-        //     LectureDto dto = new LectureDto();
-        //     dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
-        //     dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
-        
             LectureDto dto = new LectureDto();
-
             return View(dto);
         }
         
         [HttpPost]
-        public async Task<IActionResult> CheckRoomsAvailability(LectureDto lectureDto)
+        public IActionResult CheckRoomsAvailability(LectureDto lectureDto)
         {
-            if (lectureDto == null || lectureDto.StartsAt == default || lectureDto.EndsAt == default)
+            bool DateTimeInOrder = _lectureService.CheckStartAndEndDateTime(lectureDto.StartsAt, lectureDto.EndsAt);
+
+            if (!DateTimeInOrder)
             {
-                return Json(new { isAvailable = false, rooms = new List<Room>() });
+                lectureDto.ErrMessage = "StartsAt cant be after EndsAt or the lecture is scheduled for too long time range.";
+                return View("SelectDates", lectureDto);
             }
-            return RedirectToAction("Create", lectureDto);
+            
+            return RedirectToAction("CreateView", lectureDto);
         }
     }
 }

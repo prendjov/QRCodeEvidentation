@@ -30,9 +30,12 @@ public class RoomService : IRoomService
         HashSet<Room> occupiedRooms = new HashSet<Room>();
         foreach (Lecture l in lecturesOnDate)
         {
-            if (l.StartsAt > startDate && l.EndsAt < endDate)
+            if ((startDate >= l.StartsAt && l.EndsAt >= startDate) ||
+                (endDate >= l.StartsAt && l.EndsAt >= endDate) || 
+                (endDate >= l.EndsAt && startDate <= l.StartsAt))
             {
                 if (l.Room != null) occupiedRooms.Add(l.Room);
+
             }
         }
 
@@ -46,5 +49,32 @@ public class RoomService : IRoomService
         }
 
         return allRooms;
+    }
+
+    public bool CheckRoomAvailability(DateTime startDate, DateTime endDate, string roomName, string lectureId)
+    {
+        // takes the available rooms on the specified date
+        List<Lecture> lecturesOnDate = _lectureRepository.FilterLectureByDateOrCourse(startDate, endDate, null).Result;
+
+        List<Lecture> roomInOccupiedFlag = new List<Lecture>();
+        foreach (Lecture l in lecturesOnDate)
+        {
+            if ((startDate >= l.StartsAt && l.EndsAt >= startDate) ||
+                (endDate >= l.StartsAt && l.EndsAt >= endDate) || 
+                (endDate >= l.EndsAt && startDate <= l.StartsAt) && l.RoomName.Equals(roomName))
+            {
+                roomInOccupiedFlag.Add(l);
+            }
+        }
+
+        foreach (Lecture l in roomInOccupiedFlag)
+        {
+            if (l.Id.Equals(lectureId))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

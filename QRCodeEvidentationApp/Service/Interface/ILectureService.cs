@@ -62,4 +62,23 @@ public interface ILectureService
     /// <param name="dtoFilled">The DTO from the lecture that should be created.</param>
     /// <returns>The created lecture.</returns>
     public Lecture CreateLecture(LectureDto dtoFilled);
+
+    /// <summary>
+    /// Checks whether the ValidRegistrationUntil field is within the StartsAt-EndsAt values for the lecture
+    /// </summary>
+    /// <param name="startsAt">When the lecture starts.</param>
+    /// <param name="endsAt">When the lecture ends.</param>
+    /// <param name="validRegistrationUntil">The value for validRegistrationUntil field.</param>
+    /// <returns>True if the datetime in ValidRegistrationUntil is okay, else false.</returns>
+    public bool CheckValidRegistrationDate(DateTime startsAt, DateTime endsAt, DateTime? validRegistrationUntil);
+
+
+    /// <summary>
+    /// Checks if the date time range in which the lecture is scheduled is okay.
+    /// (Used to ensure if StartAt>EndsAt and other validations)
+    /// </summary>
+    /// <param name="startsAt">When the lecture starts.</param>
+    /// <param name="endsAt">When the lecture ends.</param>
+    /// <returns>True if the datetime for lecture is scheduled as it should, in the right order for datetime, else False.</returns>
+    public bool CheckStartAndEndDateTime(DateTime startsAt, DateTime endsAt);
 }

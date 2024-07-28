@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="CreatePost">
+        <form id="createForm" asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
@@ -51,6 +51,9 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
+
+            <!-- Error message display -->
+            <p id="errorMessage" style="color: red;"></p>
         </form>
     </div>
 </div>
@@ -61,19 +64,41 @@
 
 @section Scripts {
     <script>
-        document.getElementById("Type").addEventListener("change", function () {
-            var selectedValue = this.value;
+        let errorMessage = document.getElementById("errorMessage");
+             // Display error message if present
+             if ('@Model.ErrMessage') {
+                 errorMessage.textContent = '@Model.ErrMessage';
+             }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var typeDropdown = document.getElementById("Type");
             var courseAssistantGroup = document.getElementById("courseAssistantGroup");
             var courseProfessorGroup = document.getElementById("courseProfessorGroup");
+            var errorMessage = document.getElementById("errorMessage");
 
-            courseAssistantGroup.style.display = "none";
-            courseProfessorGroup.style.display = "none";
-
-            if (selectedValue === "Аудиториски") {
-                courseAssistantGroup.style.display = "block";
-            } else if (selectedValue === "Предавања") {
-                courseProfessorGroup.style.display = "block";
+            // Display error message if present
+            if ('@Model.ErrMessage') {
+                errorMessage.textContent = '@Model.ErrMessage';
             }
+
+            function displayCorrectDropdown(selectedValue) {
+                courseAssistantGroup.style.display = "none";
+                courseProfessorGroup.style.display = "none";
+
+                if (selectedValue === "Аудиториски") {
+                    courseAssistantGroup.style.display = "block";
+                } else if (selectedValue === "Предавања") {
+                    courseProfessorGroup.style.display = "block";
+                }
+            }
+
+            // Display the correct dropdown on page load based on the selected value
+            displayCorrectDropdown(typeDropdown.value);
+
+            // Add event listener for dropdown change
+            typeDropdown.addEventListener("change", function () {
+                displayCorrectDropdown(this.value);
+            });
         });
     </script>
 }

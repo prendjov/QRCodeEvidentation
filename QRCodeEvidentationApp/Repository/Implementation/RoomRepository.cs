@@ -31,7 +31,7 @@ public class RoomRepository : IRoomRepository
 
         return await _context.Rooms
             .Where(room => !room.Lectures
-                .Any(lecture => lecture.StartsAt < endDate && lecture.EndsAt > startDate))
+                .Any(lecture => lecture.StartsAt < endDate && lecture.EndsAt > startDate)).Include("Lectures")
             .ToListAsync();
     }
 }
