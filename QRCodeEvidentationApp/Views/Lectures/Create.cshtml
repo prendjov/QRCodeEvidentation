@@ -1,3 +1,5 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Newtonsoft.Json
 @model QRCodeEvidentationApp.Models.DTO.LectureDto
 
 @{
@@ -20,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label for="Room">Select Room</label>
-                @Html.DropDownListFor(model => model.RoomId, new SelectList(Model.GetAvailableRooms, "Name", "Name"), "Select a Room", new { @class = "form-control", id = "RoomId" })
+                <select id="RoomId" class="form-control" asp-for="RoomId"></select>
             </div>
             <div class="form-group">
                 <label for="Type">Select Room</label>
@@ -45,7 +47,6 @@
             <input type="hidden" asp-for="EndsAt" />
             <input type="hidden" asp-for="CoursesProfessor" />
             <input type="hidden" asp-for="CoursesAssistant" />
-            <input type="hidden" asp-for="GetAvailableRooms" />
             <input type="hidden" asp-for="loggedInProfessorId" />
             
             <div class="form-group">
@@ -78,6 +79,75 @@
             var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
             var submitBtn = document.getElementById("submitBtn");
 
+            var startsAt = new Date('@Model.StartsAt');
+            var endsAt = new Date('@Model.EndsAt');
+
+            function validateDates() {
+                var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
+
+                if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
+                    errorMessage.textContent = "";
+                    submitBtn.disabled = false;
+                } else {
+                    errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                    submitBtn.disabled = true;
+                }
+            }
+
+            validRegistrationUntilInput.addEventListener("input", validateDates);
+
+            // Initial validation check
+            validateDates();
+            
+
+            var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+            var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+            var roomDropdown = document.getElementById("RoomId");
+
+
+            function filterAvailableRooms() {
+                var occupiedRooms = new Set();
+                lecturesOnSpecificDate.forEach(function (lecture) {
+                    var lectureStart = new Date(lecture.StartsAt);
+                    var lectureEnd = new Date(lecture.EndsAt);
+                    
+                    var startDate = startsAt;
+                    var endDate = endsAt;
+                                        
+                    if ((startDate >= lectureStart && lectureEnd >= startDate) ||
+                        (endDate >= lectureStart && lectureEnd >= endDate) ||
+                        (endDate >= lectureEnd && startDate <= lectureStart)) {
+                        if (lecture.Room) occupiedRooms.add(lecture.Room.Name);
+                    }
+                });
+
+                var availableRooms = allRooms.filter(function (room) {
+                    return !occupiedRooms.has(room.Name);
+                });
+
+                updateRoomDropdown(availableRooms);
+            }
+
+            function updateRoomDropdown(availableRooms) {
+                // Clear existing options
+                roomDropdown.innerHTML = '<option value="">Select a Room</option>';
+
+                // Populate new options
+                availableRooms.forEach(function (room) {
+                    var option = document.createElement("option");
+                    option.value = room.Name; // Assuming Room has Id property
+                    option.textContent = room.Name;
+                    roomDropdown.appendChild(option);
+                });
+            }
+
+            // Initial filtering and dropdown update
+            filterAvailableRooms();
+
             // Display error message if present
             if ('@Model.ErrMessage') {
                 errorMessage.textContent = '@Model.ErrMessage';
@@ -101,26 +171,6 @@
             typeDropdown.addEventListener("change", function () {
                 displayCorrectDropdown(this.value);
             });
-
-            var startsAt = new Date('@Model.StartsAt');
-            var endsAt = new Date('@Model.EndsAt');
-
-            function validateDates() {
-                var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
-
-                if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
-                    errorMessage.textContent = "";
-                    submitBtn.disabled = false;
-                } else {
-                    errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
-                    submitBtn.disabled = true;
-                }
-            }
-
-            validRegistrationUntilInput.addEventListener("input", validateDates);
-
-            // Initial validation check
-            validateDates();
         });
     
     </script>

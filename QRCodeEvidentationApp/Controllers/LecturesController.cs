@@ -74,15 +74,15 @@ namespace QRCodeEvidentationApp.Controllers
             dto.loggedInProfessorId = loggedInProfessor.Id;
             dto.StartsAt = DateTime.Parse(startsAt);
             dto.EndsAt = DateTime.Parse(endsAt);
+            dto.AllRooms = _roomService.GetAllRooms().Result;
+            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(dto.StartsAt, dto.EndsAt, null);
             
-            List<Room> availableRooms = await _roomService.GetAvailableRoomsForDates(dto.StartsAt, dto.EndsAt);
+            // if (availableRooms.Count == 0)
+            // {
+            //     return RedirectToAction("SelectDates");
+            // }
 
-            if (availableRooms.Count == 0)
-            {
-                return RedirectToAction("SelectDates");
-            }
-
-            dto.GetAvailableRooms = availableRooms;
+            // dto.GetAvailableRooms = availableRooms;
             
             return View("Create", dto);
         }
