@@ -63,15 +63,17 @@ namespace QRCodeEvidentationApp.Controllers
 
         // GET: Lecture/Create
         [HttpGet]
-        public async Task<IActionResult> CreateView(LectureDto dto)
+        public async Task<IActionResult> CreateView(string startsAt, string endsAt)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            
+            LectureDto dto = new LectureDto();            
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-            
+
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
             dto.loggedInProfessorId = loggedInProfessor.Id;
+            dto.StartsAt = DateTime.Parse(startsAt);
+            dto.EndsAt = DateTime.Parse(endsAt);
             
             List<Room> availableRooms = await _roomService.GetAvailableRoomsForDates(dto.StartsAt, dto.EndsAt);
 
@@ -94,15 +96,6 @@ namespace QRCodeEvidentationApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool ValidRegistrationResult =
-                    _lectureService.CheckValidRegistrationDate(dtoFilled.StartsAt, dtoFilled.EndsAt, dtoFilled.ValidRegistrationUntil);
-
-                if (!ValidRegistrationResult)
-                {
-                        dtoFilled.ErrMessage = "Valid Registration Until is not in the scheduled lecture range.";
-                        return View("Create", dtoFilled);
-                }
-
                 _lectureService.CreateLecture(dtoFilled);
                 return RedirectToAction(nameof(Index));
             }
@@ -229,31 +222,29 @@ namespace QRCodeEvidentationApp.Controllers
         // POST: Lecture/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(string? id)
+        public IActionResult DeleteConfirmed(string id)
         {
-            _lectureService.DeleteLecture(id);
-            return RedirectToAction(nameof(Index));
-        }
+            if (string.IsNullOrEmpty(id))
+            {
+                return Json(new { success = false, message = "Invalid lecture ID." });
+            }
 
+            try
+            {
+                _lectureService.DeleteLecture(id);
+
+                return Json(new { success = true, message = "Lecture deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
         [HttpGet]
         public IActionResult SelectDates()
         {
             LectureDto dto = new LectureDto();
             return View(dto);
-        }
-        
-        [HttpPost]
-        public IActionResult CheckRoomsAvailability(LectureDto lectureDto)
-        {
-            bool DateTimeInOrder = _lectureService.CheckStartAndEndDateTime(lectureDto.StartsAt, lectureDto.EndsAt);
-
-            if (!DateTimeInOrder)
-            {
-                lectureDto.ErrMessage = "StartsAt cant be after EndsAt or the lecture is scheduled for too long time range.";
-                return View("SelectDates", lectureDto);
-            }
-            
-            return RedirectToAction("CreateView", lectureDto);
         }
         
         [HttpPost]

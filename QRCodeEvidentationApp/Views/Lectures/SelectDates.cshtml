@@ -9,35 +9,78 @@
 
 <h4>Lecture</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form id="createForm" asp-action="CheckRoomsAvailability" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="StartsAt" class="control-label"></label>
-                <input asp-for="StartsAt" class="form-control" />
-                <span asp-validation-for="StartsAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndsAt" class="control-label"></label>
-                <input asp-for="EndsAt" class="form-control" id="EndsAt" />
-                <span asp-validation-for="EndsAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+<div>
+    <div>
+        <div>
+            <div>
+                <form id="createForm" method="get">
+                    <div class="form-group">
+                        <label asp-for="StartsAt" class="control-label"></label>
+                        <input asp-for="StartsAt" class="form-control" />
+                        <span asp-validation-for="StartsAt" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="EndsAt" class="control-label"></label>
+                        <input asp-for="EndsAt" class="form-control" />
+                        <span asp-validation-for="EndsAt" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="button" value="Create" class="btn btn-primary" id="submitButton" />
+                    </div>
 
-            <p id="errorMessage" style="color: red;"></p>
-        </form>
+                    <p id="errorMessage" style="color: red;"></p>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        let errorMessage = document.getElementById("errorMessage");
-             // Display error message if present
-             if ('@Model.ErrMessage') {
-                 errorMessage.textContent = '@Model.ErrMessage';
-             }
+        function formatDateTime(date) {
+            let year = date.getFullYear();
+            let month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+            let day = ('0' + date.getDate()).slice(-2);
+            let hours = ('0' + date.getHours()).slice(-2);
+            let minutes = ('0' + date.getMinutes()).slice(-2);
+            let seconds = ('0' + date.getSeconds()).slice(-2);
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        $(document).ready(function () {
+            $('#submitButton').click(function () {
+                var startsAt = new Date($('#StartsAt').val())
+                var endsAt = new Date($('#EndsAt').val())
+                var errorMessage = $('#errorMessage');
+                errorMessage.text('');
+                
+                // Frontend validation
+                if (isNaN(startsAt) || isNaN(endsAt)) {
+                    errorMessage.text('Please enter valid start and end dates.');
+                    return;
+                }
+
+                if (endsAt < startsAt) {
+                    errorMessage.text('End date cannot be before start date.');
+                    return;
+                }
+
+                var timeDifference = (endsAt - startsAt) / 1000 / 60 / 60; // Difference in hours
+                if (timeDifference > 12) {
+                    errorMessage.text('Lecture duration cannot exceed 12 hours.');
+                    return;
+                }
+
+                var formattedStartsAt = formatDateTime(startsAt);
+                var formattedEndsAt = formatDateTime(endsAt);
+
+                // If validation passes, send AJAX request
+                var url = '@Url.Action("CreateView", "Lectures")' + '?StartsAt=' + encodeURIComponent(formattedStartsAt) + '&EndsAt=' + encodeURIComponent(formattedEndsAt);
+                window.location.href = url;
+            });
+        });
+    
     </script>
 }

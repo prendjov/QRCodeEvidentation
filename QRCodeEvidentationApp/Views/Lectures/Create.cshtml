@@ -28,7 +28,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="ValidRegistrationUntil" class="control-label"></label>
-                <input asp-for="ValidRegistrationUntil" class="form-control" />
+                <input asp-for="ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
                 <span asp-validation-for="ValidRegistrationUntil" class="text-danger"></span>
             </div>
 
@@ -49,7 +49,7 @@
             <input type="hidden" asp-for="loggedInProfessorId" />
             
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Save" id="submitBtn" class="btn btn-primary" />
             </div>
 
             <!-- Error message display -->
@@ -73,8 +73,10 @@
         document.addEventListener("DOMContentLoaded", function () {
             var typeDropdown = document.getElementById("Type");
             var courseAssistantGroup = document.getElementById("courseAssistantGroup");
-            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
+            var courseProfessorGroup = document.getElementById("courseProfessorGroup");                
             var errorMessage = document.getElementById("errorMessage");
+            var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
+            var submitBtn = document.getElementById("submitBtn");
 
             // Display error message if present
             if ('@Model.ErrMessage') {
@@ -99,6 +101,27 @@
             typeDropdown.addEventListener("change", function () {
                 displayCorrectDropdown(this.value);
             });
+
+            var startsAt = new Date('@Model.StartsAt');
+            var endsAt = new Date('@Model.EndsAt');
+
+            function validateDates() {
+                var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
+
+                if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
+                    errorMessage.textContent = "";
+                    submitBtn.disabled = false;
+                } else {
+                    errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                    submitBtn.disabled = true;
+                }
+            }
+
+            validRegistrationUntilInput.addEventListener("input", validateDates);
+
+            // Initial validation check
+            validateDates();
         });
+    
     </script>
 }
