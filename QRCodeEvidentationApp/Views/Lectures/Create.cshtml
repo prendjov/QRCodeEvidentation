@@ -21,36 +21,46 @@
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label for="Room">Select Room</label>
-                <select id="RoomId" class="form-control" asp-for="RoomId"></select>
+                <label asp-for="StartsAt" class="control-label"></label>
+                <input asp-for="StartsAt" class="form-control datetimepicker" />
+                <span class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label for="Type">Select Room</label>
-                @Html.DropDownListFor(model => model.TypeSelected, new SelectList(Model.Type), "Select a type", new { @class = "form-control", id = "Type" })
+                <label asp-for="EndsAt" class="control-label"></label>
+                <input asp-for="EndsAt" class="form-control datetimepicker" />
+                <span class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ValidRegistrationUntil" class="control-label"></label>
-                <input asp-for="ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
-                <span asp-validation-for="ValidRegistrationUntil" class="text-danger"></span>
-            </div>
+            <div id="lectureDetails" style="display: none;">
+                <div class="form-group">
+                        <label for="Room">Select Room</label>
+                        <select id="RoomId" class="form-control" asp-for="RoomId"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="Type">Select Room</label>
+                        @Html.DropDownListFor(model => model.TypeSelected, new SelectList(Model.Type), "Select a type", new { @class = "form-control", id = "Type" })
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ValidRegistrationUntil" class="control-label"></label>
+                        <input asp-for="ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
+                        <span asp-validation-for="ValidRegistrationUntil" class="text-danger"></span>
+                    </div>
 
-            <div class="form-group" id="courseAssistantGroup" style="display: none;">
-                <label for="CoursesAssistant">Select Assistant</label>
-                @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex"), "Select an Assistant", new { @class = "form-control", id = "CoursesAssistant" })
-            </div>
-            <div class="form-group" id="courseProfessorGroup" style="display: none;">
-                <label for="CoursesProfessor">Select Professor</label>
-                @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex"), "Select a Professor", new { @class = "form-control", id = "CoursesProfessor" })
-            </div>
+                    <div class="form-group" id="courseAssistantGroup" style="display: none;">
+                        <label for="CoursesAssistant">Select Assistant</label>
+                        @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex"), "Select an Assistant", new { @class = "form-control", id = "CoursesAssistant" })
+                    </div>
+                    <div class="form-group" id="courseProfessorGroup" style="display: none;">
+                        <label for="CoursesProfessor">Select Professor</label>
+                        @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex"), "Select a Professor", new { @class = "form-control", id = "CoursesProfessor" })
+                    </div>
 
-            <input type="hidden" asp-for="StartsAt" />
-            <input type="hidden" asp-for="EndsAt" />
-            <input type="hidden" asp-for="CoursesProfessor" />
-            <input type="hidden" asp-for="CoursesAssistant" />
-            <input type="hidden" asp-for="loggedInProfessorId" />
-            
-            <div class="form-group">
-                <input type="submit" value="Save" id="submitBtn" class="btn btn-primary" />
+                    <input type="hidden" asp-for="CoursesProfessor" />
+                    <input type="hidden" asp-for="CoursesAssistant" />
+                    <input type="hidden" asp-for="loggedInProfessorId" />
+                    
+                    <div class="form-group">
+                        <input type="submit" value="Save" id="submitBtn" class="btn btn-primary" />
+                    </div>
             </div>
 
             <!-- Error message display -->
@@ -65,62 +75,74 @@
 
 @section Scripts {
     <script>
-        let errorMessage = document.getElementById("errorMessage");
-             // Display error message if present
-             if ('@Model.ErrMessage') {
-                 errorMessage.textContent = '@Model.ErrMessage';
-             }
-
         document.addEventListener("DOMContentLoaded", function () {
+            let errorMessage = document.getElementById("errorMessage");
             var typeDropdown = document.getElementById("Type");
             var courseAssistantGroup = document.getElementById("courseAssistantGroup");
-            var courseProfessorGroup = document.getElementById("courseProfessorGroup");                
-            var errorMessage = document.getElementById("errorMessage");
+            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
             var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
             var submitBtn = document.getElementById("submitBtn");
+            var roomDropdown = document.getElementById("RoomId");
+            var startsAtInput = document.getElementById("StartsAt");
+            var endsAtInput = document.getElementById("EndsAt");
+            var lectureDetails = document.getElementById("lectureDetails");
 
-            var startsAt = new Date('@Model.StartsAt');
-            var endsAt = new Date('@Model.EndsAt');
+            var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings
+                           {
+                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                           }));
+            var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings
+                                         {
+                                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                         }));
+
+            // Display error message if present
+            if ('@Model.ErrMessage') {
+                errorMessage.textContent = '@Model.ErrMessage';
+            }
+
+            function validateStartAndEnd(){
+                var startsAt = new Date(startsAtInput.value);
+                var endsAt = new Date(endsAtInput.value);
+                
+                if (startsAt < new Date(Date.now()) || endsAt < new Date(Date.now())){
+                    return;
+                }
+                
+                if (startsAt > endsAt){
+                    errorMessage.innerText = "Start date cannot be bigger than end date";                
+                }else {
+                    errorMessage.innerText = "";
+                }
+
+                // Filter and update the room dropdown based on the dates
+                filterAvailableRooms(startsAt, endsAt);
+            }
 
             function validateDates() {
+                var startsAt = new Date(startsAtInput.value);
+                var endsAt = new Date(endsAtInput.value);
                 var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
-
                 if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
                     errorMessage.textContent = "";
                     submitBtn.disabled = false;
                 } else {
-                    errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
-                    submitBtn.disabled = true;
+                    if (lectureDetails.style.display == "block") {
+                        errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                        submitBtn.disabled = true;
+                    }
                 }
             }
 
-            validRegistrationUntilInput.addEventListener("input", validateDates);
-
-            // Initial validation check
-            validateDates();
-            
-
-            var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
-            var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
-            var roomDropdown = document.getElementById("RoomId");
-
-
-            function filterAvailableRooms() {
+            function filterAvailableRooms(startsAt, endsAt) {
                 var occupiedRooms = new Set();
                 lecturesOnSpecificDate.forEach(function (lecture) {
                     var lectureStart = new Date(lecture.StartsAt);
                     var lectureEnd = new Date(lecture.EndsAt);
-                    
-                    var startDate = startsAt;
-                    var endDate = endsAt;
-                                        
-                    if ((startDate >= lectureStart && lectureEnd >= startDate) ||
-                        (endDate >= lectureStart && lectureEnd >= endDate) ||
-                        (endDate >= lectureEnd && startDate <= lectureStart)) {
+
+                    if ((startsAt >= lectureStart && lectureEnd >= startsAt) ||
+                        (endsAt >= lectureStart && lectureEnd >= endsAt) ||
+                        (endsAt >= lectureEnd && startsAt <= lectureStart)) {
                         if (lecture.Room) occupiedRooms.add(lecture.Room.Name);
                     }
                 });
@@ -130,6 +152,13 @@
                 });
 
                 updateRoomDropdown(availableRooms);
+                // Show or hide lecture details based on available rooms
+                if (availableRooms.length > 0) {
+                    lectureDetails.style.display = "block";
+                } else {
+                    lectureDetails.style.display = "none";
+                    errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
+                }
             }
 
             function updateRoomDropdown(availableRooms) {
@@ -143,14 +172,6 @@
                     option.textContent = room.Name;
                     roomDropdown.appendChild(option);
                 });
-            }
-
-            // Initial filtering and dropdown update
-            filterAvailableRooms();
-
-            // Display error message if present
-            if ('@Model.ErrMessage') {
-                errorMessage.textContent = '@Model.ErrMessage';
             }
 
             function displayCorrectDropdown(selectedValue) {
@@ -171,7 +192,14 @@
             typeDropdown.addEventListener("change", function () {
                 displayCorrectDropdown(this.value);
             });
+
+            // Add event listeners for date inputs
+            startsAtInput.addEventListener("input", validateStartAndEnd);
+            endsAtInput.addEventListener("input", validateStartAndEnd);
+            validRegistrationUntilInput.addEventListener("input", validateDates);
+
+            // Initial validation check
+            validateDates();
         });
-    
     </script>
 }

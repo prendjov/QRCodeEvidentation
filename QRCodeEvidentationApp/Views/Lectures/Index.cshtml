@@ -8,7 +8,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 <h1>Index</h1>
 
 <p>
-    <a asp-action="SelectDates">Create New</a>
+    <a asp-action="CreateView">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -46,7 +46,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
         <td>
             @Html.DisplayFor(modelItem => item.Type)
         </td>
-        <td>
+        <td id="validRegistrationUntil">
             @Html.DisplayFor(modelItem => item.ValidRegistrationUntil)
         </td>
         <td>
@@ -67,7 +67,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 </table>
 
 @section Scripts {
-<script>
+    <script>
     $(document).ready(function () {
         $('.disable-lecture-btn').each(function () {
             var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
@@ -76,6 +76,15 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                 $(this).prop('disabled', true);
             }
         });
+
+        function formatDate(date) {
+            var options = {
+                month: 'numeric', day: 'numeric', year: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+                hour12: true
+            };
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        }
 
         $('.disable-lecture-btn').click(function (e) {
             e.preventDefault();
@@ -92,6 +101,8 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                     if (result.success) {
                         alert(result.message);
                         button.prop('disabled', true);
+                        var formattedDate = formatDate(new Date(result.validRegistrationUntil));
+                        $('#lecture-row-' + lectureId).find('#validRegistrationUntil').text(formattedDate);
                     } else {
                         alert('Error: ' + result.message);
                     }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -72,10 +73,8 @@ namespace QRCodeEvidentationApp.Controllers
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
             dto.loggedInProfessorId = loggedInProfessor.Id;
-            dto.StartsAt = DateTime.Parse(startsAt);
-            dto.EndsAt = DateTime.Parse(endsAt);
             dto.AllRooms = _roomService.GetAllRooms().Result;
-            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(dto.StartsAt, dto.EndsAt, null);
+            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
             
             // if (availableRooms.Count == 0)
             // {
@@ -121,12 +120,12 @@ namespace QRCodeEvidentationApp.Controllers
             
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
-
-            List<Room> availableRooms = await _roomService.GetAllRooms();
-
+            
             dto.lecture = lecture;
             dto.lectureId = id;
-            dto.GetAvailableRooms = availableRooms;
+            
+            dto.AllRooms = _roomService.GetAllRooms().Result;
+            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
             
             return View(dto);
         }
@@ -158,29 +157,8 @@ namespace QRCodeEvidentationApp.Controllers
                 existingLecture.ValidRegistrationUntil = lectureDto.lecture.ValidRegistrationUntil;
                 existingLecture.RoomName = lectureDto.lecture.RoomName;
                 existingLecture.Type = lectureDto.lecture.Type;
-
-                bool ValidRegistrationResult = _lectureService.CheckValidRegistrationDate(existingLecture.StartsAt, existingLecture.EndsAt, existingLecture.ValidRegistrationUntil);
-                bool DateTimeInOrder = _lectureService.CheckStartAndEndDateTime(existingLecture.StartsAt, existingLecture.EndsAt);
-
-                if (!DateTimeInOrder)
-                {
-                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, "StartsAt can't be after EndsAt or the lecture is scheduled for too long time range.");
-                    return View(lectureEditDto);
-                }
-
-                if (!ValidRegistrationResult)
-                {
-                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, "Valid Registration Until is not in the scheduled lecture range.");
-                    return View(lectureEditDto);
-                }
-
-                bool roomAvailability = _roomService.CheckRoomAvailability(existingLecture.StartsAt, existingLecture.EndsAt, existingLecture.RoomName, existingLecture.Id);
-
-                if (!roomAvailability)
-                {
-                    var lectureEditDto = PopulateLectureEditDto(lectureDto, id, $"The specified room is not available on {existingLecture.StartsAt} - {existingLecture.EndsAt}.");
-                    return View(lectureEditDto);
-                }
+                
+                
              
                 _lectureService.EditLecture(existingLecture);
                 return RedirectToAction(nameof(Index));
@@ -258,9 +236,8 @@ namespace QRCodeEvidentationApp.Controllers
 
             try
             {
-                _lectureService.DisableLecture(id);
-
-                return Json(new { success = true, message = "Lecture disabled successfully." });
+                Lecture l = _lectureService.DisableLecture(id);
+                return Json(new { success = true, message = "Lecture disabled successfully.", validRegistrationUntil = l.ValidRegistrationUntil});
             }
             catch (Exception ex)
             {
