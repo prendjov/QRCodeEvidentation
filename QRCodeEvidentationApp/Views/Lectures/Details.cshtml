@@ -51,5 +51,45 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@Model.Id" data-valid-registration-until="@Model.ValidRegistrationUntil">Disable Lecture</button>
     <a asp-action="Index">Back to List</a>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.disable-lecture-btn').each(function () {
+                var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
+                var now = new Date();
+                if (now > validRegistrationUntil) {
+                    $(this).prop('disabled', true);
+                }
+            });
+
+            $('.disable-lecture-btn').click(function (e) {
+                e.preventDefault();
+                var button = $(this);
+                var lectureId = button.data('lecture-id');
+                $.ajax({
+                    url: '@Url.Action("DisableLecture")',
+                    type: 'POST',
+                    data: {
+                        id: lectureId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            alert(result.message);
+                            button.prop('disabled', true);
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error disabling lecture');
+                    }
+                });
+            });
+        });
+    </script>
+}

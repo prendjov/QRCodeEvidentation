@@ -255,5 +255,26 @@ namespace QRCodeEvidentationApp.Controllers
             
             return RedirectToAction("CreateView", lectureDto);
         }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DisableLecture(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return Json(new { success = false, message = "Invalid lecture ID." });
+            }
+
+            try
+            {
+                _lectureService.DisableLecture(id);
+
+                return Json(new { success = true, message = "Lecture disabled successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
