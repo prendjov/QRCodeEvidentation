@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace QRCodeEvidentationApp.Models;
+namespace FinkiEvidentationProject.Models;
 
 public partial class Semester
 {
@@ -24,4 +24,5 @@ public partial class Semester
     public string? State { get; set; }
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
+
 }

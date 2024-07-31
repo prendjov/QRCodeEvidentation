@@ -1,9 +1,8 @@
-﻿using QRCodeEvidentationApp.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace QRCodeEvidentationApp.Models;
+namespace FinkiEvidentationProject.Models;
 
 public partial class Professor
 {
@@ -23,7 +22,6 @@ public partial class Professor
 
     public virtual ICollection<Course> CourseProfessors { get; set; } = new List<Course>();
 
-    public virtual ICollection<LectureGroup> ProfessorLectureGroups { get; set; } = new List<LectureGroup>();
-
     public virtual ProfessorDetail? ProfessorDetail { get; set; }
+
 }

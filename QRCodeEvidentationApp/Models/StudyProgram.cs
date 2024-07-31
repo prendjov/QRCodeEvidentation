@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 
-namespace QRCodeEvidentationApp.Models;
+namespace FinkiEvidentationProject.Models;
 
 public partial class StudyProgram
 {

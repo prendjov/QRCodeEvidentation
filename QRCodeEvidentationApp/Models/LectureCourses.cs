@@ -1,8 +1,8 @@
-﻿namespace QRCodeEvidentationApp.Models
+﻿namespace FinkiEvidentationProject.Models
 {
     public class LectureCourses
     {
-        public string Id { get; set; } = null!;
+        public string Id { get; set; }
 
         public string? LectureId { get; set; }
 

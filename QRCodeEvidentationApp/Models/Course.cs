@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace QRCodeEvidentationApp.Models;
+namespace FinkiEvidentationProject.Models;
 
 public partial class Course
 {

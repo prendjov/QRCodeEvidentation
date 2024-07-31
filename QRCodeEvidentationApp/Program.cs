@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using QRCodeEvidentationApp.Data;
-using QRCodeEvidentationApp.Models;
-using QRCodeEvidentationApp.Repository.Implementation;
-using QRCodeEvidentationApp.Repository.Interface;
-using QRCodeEvidentationApp.Service.Implementation;
-using QRCodeEvidentationApp.Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,17 +18,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddRazorPages();
 
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddScoped(typeof(ILectureRepository), typeof(LectureRepository));
-builder.Services.AddScoped(typeof(IProfessorRepository), typeof(ProfessorRepository));
-builder.Services.AddScoped(typeof(ICourseRepository<CourseUserBaseEntity>), typeof(CourseRepository<CourseUserBaseEntity>));
-builder.Services.AddScoped(typeof(IRoomRepository), typeof(RoomRepository));
-builder.Services.AddScoped(typeof(ILectureCoursesRepository), typeof(LectureCoursesRepository));
-
-builder.Services.AddTransient<ILectureService, LectureService>();
-builder.Services.AddTransient<IProfessorService, ProfessorService>();
-builder.Services.AddTransient<ICourseService, CourseService>();
-builder.Services.AddTransient<IRoomService, RoomService>();
 
 var app = builder.Build();
 

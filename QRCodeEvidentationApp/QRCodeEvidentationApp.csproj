@@ -20,17 +20,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Views\Lecture\Create.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lecture\Delete.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lecture\Details.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lecture\Edit.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lecture\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lectures\Create.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lectures\Delete.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lectures\Details.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lectures\Edit.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Lectures\Index.cshtml" />
-  </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if exist &quot;$(TargetPath).locked&quot; del &quot;$(TargetPath).locked&quot;&#xD;&#xA;if exist &quot;$(TargetPath)&quot; if not exist &quot;$(TargetPath).locked&quot; move &quot;$(TargetPath)&quot; &quot;$(TargetPath).locked&quot;" />
+  </Target>
 
 </Project>

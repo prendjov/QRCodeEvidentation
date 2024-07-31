@@ -196,9 +196,9 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 
             if (Regex.IsMatch(userName, professorPattern))
                 return "PROFESSOR";
-            if (Regex.IsMatch(userName, studentPattern))
+            else if (Regex.IsMatch(userName, studentPattern))
                 return "STUDENT";
-            return null;
+            else return null;
         }
     }
 }
