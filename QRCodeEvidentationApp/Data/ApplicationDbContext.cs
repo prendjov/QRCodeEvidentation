@@ -1,4 +1,4 @@
-﻿using FinkiEvidentationProject.Models;
+﻿using QRCodeEvidentationApp.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Models;
