@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace QRCodeEvidentationApp.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class LectureGroupsAdded : Migration
+    public partial class ReverseDatabaseState : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,6 +15,12 @@ namespace QRCodeEvidentationApp.Data.Migrations
                 name: "Type",
                 table: "Lectures",
                 type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ValidRegistrationUntil",
+                table: "Lectures",
+                type: "datetime2",
                 nullable: true);
 
             migrationBuilder.CreateTable(
@@ -49,6 +56,10 @@ namespace QRCodeEvidentationApp.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Type",
+                table: "Lectures");
+
+            migrationBuilder.DropColumn(
+                name: "ValidRegistrationUntil",
                 table: "Lectures");
         }
     }

@@ -1,0 +1,217 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Newtonsoft.Json
+@model QRCodeEvidentationApp.Models.DTO.LectureEditDto
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Lecture</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="lecture.Id" />
+            <input type="hidden" asp-for="lectureId" />
+            <input type="hidden" asp-for="lecture.ProfessorId" />
+            <div class="form-group">
+                <label asp-for="lecture.Title" class="control-label"></label>
+                <input asp-for="lecture.Title" class="form-control" />
+                <span asp-validation-for="lecture.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="lecture.StartsAt" class="control-label"></label>
+                <input asp-for="lecture.StartsAt" id="StartsAt" class="form-control" />
+                <span class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="lecture.EndsAt" class="control-label"></label>
+                <input asp-for="lecture.EndsAt" id="EndsAt" class="form-control" />
+                <span class="text-danger"></span>
+            </div>
+            <div id="lectureDetails">
+                <div class="form-group">
+                    <label for="Room">Select Room</label>
+                    <select id="RoomId" class="form-control" asp-for="lecture.RoomName"></select>
+                </div>
+                <div class="form-group">
+                    <label for="Type">Select Type</label>
+                    @Html.DropDownListFor(model => model.lecture.Type, new SelectList(Model.Type, Model.lecture.Type), new { @class = "form-control", id = "Type" })
+                </div>
+                <div class="form-group">
+                    <label asp-for="lecture.ValidRegistrationUntil" class="control-label"></label>
+                    <input asp-for="lecture.ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
+                    <span class="text-danger"></span>
+                </div>
+                <div class="form-group" id="courseAssistantGroup" style="display: none;">
+                    <label for="CoursesAssistant">Select Assistant</label>
+                    @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesAssistant" })
+                </div>
+                <div class="form-group" id="courseProfessorGroup" style="display: none;">
+                    <label for="CoursesProfessor">Select Professor</label>
+                    @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesProfessor" })
+                </div>
+                <div class="form-group">
+                    <input type="submit" id="submitBtn" value="Save" class="btn btn-primary" />
+                </div>
+                <!-- Error message display -->
+            </div>
+            <p id="errorMessage" style="color: red;"></p>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var typeDropdown = document.getElementById("Type");
+            var courseAssistantGroup = document.getElementById("courseAssistantGroup");
+            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
+            var errorMessage = document.getElementById("errorMessage");
+            var startsAtInput = document.getElementById("StartsAt");
+            var endsAtInput = document.getElementById("EndsAt");
+            var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
+            var roomDropdown = document.getElementById("RoomId");
+            var submitBtn = document.getElementById("submitBtn");
+
+
+            var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings
+                           {
+                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                           }));
+            var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings
+                                         {
+                                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                         }));
+
+
+            // Display error message if present
+            if ('@Model.ErrMessage') {
+                errorMessage.textContent = '@Model.ErrMessage';
+            }
+
+            function validateStartAndEnd(){
+                var startsAt = new Date(startsAtInput.value);
+                var endsAt = new Date(endsAtInput.value);
+
+                if (startsAt < new Date(Date.now()) || endsAt < new Date(Date.now())){
+                    console.log(startsAt + "////" + endsAt)
+                    return;
+                }
+
+                // Filter and update the room dropdown based on the dates
+                filterAvailableRooms(startsAt, endsAt);
+            }
+
+            function filterAvailableRooms(startsAt, endsAt) {
+                var occupiedRooms = new Set();
+                var currentLectureId = '@Model.lectureId';
+                lecturesOnSpecificDate.forEach(function (lecture) {
+                    var lectureStart = new Date(lecture.StartsAt);
+                    var lectureEnd = new Date(lecture.EndsAt);
+
+                    if ((startsAt >= lectureStart && lectureEnd >= startsAt) ||
+                        (endsAt >= lectureStart && lectureEnd >= endsAt) ||
+                        (endsAt >= lectureEnd && startsAt <= lectureStart)) {
+                        if (lecture.Room && !(lecture.Id === currentLectureId)) {
+                            occupiedRooms.add(lecture.Room.Name);
+                        }
+                    }
+                });
+
+                var availableRooms = allRooms.filter(function (room) {
+                    return !occupiedRooms.has(room.Name);
+                });
+                
+                console.log(availableRooms.length)
+
+                updateRoomDropdown(availableRooms);
+                // Show or hide lecture details based on available rooms
+                if (availableRooms.length > 0) {
+                    errorMessage.innerText = ""
+                    lectureDetails.style.display = "block";
+                } else {
+                    lectureDetails.style.display = "none";
+                    errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
+                }
+            }
+
+            function updateRoomDropdown(availableRooms) {
+                // Clear existing options
+                var defaultRoomName = '@Model.lecture.RoomName';
+                
+                // Populate new options
+                availableRooms.forEach(function (room) {
+                    // Check if this is the default room
+                    var option = document.createElement("option");
+                    option.value = room.Name; // Assuming Room has Id property
+                    option.textContent = room.Name;
+
+                    if (room.Name === defaultRoomName) {
+                        option.selected = true;
+                    }
+                    
+                    roomDropdown.appendChild(option);
+                });
+            }
+
+
+            function displayCorrectDropdown(selectedValue) {
+                courseAssistantGroup.style.display = "none";
+                courseProfessorGroup.style.display = "none";
+
+                if (selectedValue === "Аудиториски") {
+                    courseAssistantGroup.style.display = "block";
+                } else if (selectedValue === "Предавања") {
+                    courseProfessorGroup.style.display = "block";
+                }
+            }
+
+            // Display the correct dropdown on page load based on the selected value
+            displayCorrectDropdown(typeDropdown.value);
+
+            // Add event listener for dropdown change
+            typeDropdown.addEventListener("change", function () {
+                displayCorrectDropdown(this.value);
+            });
+
+            function validateDates() {
+                var startsAt = new Date(startsAtInput.value);
+                var endsAt = new Date(endsAtInput.value);
+                var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
+                console.log(startsAt)
+                console.log(endsAt)
+                console.log(validRegistrationUntil)
+                if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
+                    errorMessage.textContent = "";
+                    submitBtn.disabled = false;
+                } else {
+                    if (lectureDetails.style.display == "block") {
+                        errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                        submitBtn.disabled = true;
+                    }
+                }
+            }
+
+            validRegistrationUntilInput.addEventListener("input", validateDates);
+
+            // Initial validation check
+            validateDates();
+
+
+            // Add event listeners for date inputs
+            startsAtInput.addEventListener("input", validateStartAndEnd);
+            endsAtInput.addEventListener("input", validateStartAndEnd);
+            
+            validateStartAndEnd()
+        });
+    </script>
+}

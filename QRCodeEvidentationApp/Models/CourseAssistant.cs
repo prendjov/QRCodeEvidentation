@@ -1,17 +1,10 @@
-﻿using FinkiEvidentationProject.Models;
+﻿using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Models
 {
-    public class CourseAssistant
+    public class CourseAssistant : CourseUserBaseEntity
     {
-        public string Id { get; set; }
-
         public string? AssistantId { get; set; }
-
-        public long? CourseId { get; set; }
-
         public Professor? Assistant { get; set; }
-
-        public Course? Course { get; set; }
     }
 }

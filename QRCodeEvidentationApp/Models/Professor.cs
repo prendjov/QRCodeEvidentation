@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FinkiEvidentationProject.Models;
+namespace QRCodeEvidentationApp.Models;
 
 public partial class Professor
 {
@@ -26,5 +26,4 @@ public partial class Professor
     public virtual ICollection<LectureGroup> ProfessorLectureGroups { get; set; } = new List<LectureGroup>();
 
     public virtual ProfessorDetail? ProfessorDetail { get; set; }
-
 }
