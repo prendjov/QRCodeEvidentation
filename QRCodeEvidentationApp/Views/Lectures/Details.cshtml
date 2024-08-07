@@ -51,8 +51,12 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@Model.Id" data-valid-registration-until="@Model.ValidRegistrationUntil">Disable Lecture</button>
+    <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@Model.Id" data-valid-registration-until="@Model.ValidRegistrationUntil">Disable Lecture</button> |
+    <button class="btn btn-primary generate-qr-btn" data-lecture-id="@Model.Id">Generate QR</button> |
     <a asp-action="Index">Back to List</a>
+
+    <div id="qrCodeContainer"></div>
+
 </div>
 
 @section Scripts {
@@ -87,6 +91,45 @@
                     },
                     error: function (xhr, status, error) {
                         alert('Error disabling lecture');
+                    }
+                });
+            });
+
+            // Generate QR button click event
+            $('.generate-qr-btn').click(function (e) {
+                e.preventDefault();
+                var button = $(this);
+                var lectureId = button.data('lecture-id');
+
+                $.ajax({
+                    url: '@Url.Action("GenerateQRCode")',
+                    type: 'POST',
+                    data: {
+                        id: lectureId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    xhrFields: {
+                        responseType: 'blob' // Expect binary response
+                    },
+                    success: function (blob) {
+                        console.log(blob); // Check if this is a Blob
+                        if (blob instanceof Blob) {
+                            var url = URL.createObjectURL(blob);
+                            var qrImage = '<img src="' + url + '" alt="QR Code" />';
+
+                            // Create download link
+                            var downloadLink = '<a href="' + url + '" download="QRCode_' + lectureId + '.png">Download QR Code</a>';
+
+                            // Display QR code image and download link in a div
+                            $('#qrCodeContainer').html(qrImage + '<br>' + downloadLink);
+
+                            // Clean up the object URL after a short delay
+                            setTimeout(() => URL.revokeObjectURL(url), 10000); // Adjust delay as needed
+                        } else {
+                            console.error('Response is not a Blob');
+                        }},
+                    error: function (xhr, status, error) {
+                        alert('Error generating QR code');
                     }
                 });
             });

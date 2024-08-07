@@ -1,14 +1,15 @@
-using System.Globalization;
 using System.Security.Claims;
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
-using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
+using QRCoder;
 
 namespace QRCodeEvidentationApp.Controllers
 {
+    [Authorize]
     public class LecturesController : Controller
     {
         private readonly ILectureService _lectureService;
@@ -16,7 +17,8 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ICourseService _courseService;
         private readonly IRoomService _roomService;
 
-        public LecturesController(ILectureService lectureService, IProfessorService professorService,
+        public LecturesController(ILectureService lectureService, 
+            IProfessorService professorService,
             ICourseService courseService,
             IRoomService roomService)
         {
@@ -76,13 +78,6 @@ namespace QRCodeEvidentationApp.Controllers
             dto.AllRooms = _roomService.GetAllRooms().Result;
             dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
             
-            // if (availableRooms.Count == 0)
-            // {
-            //     return RedirectToAction("SelectDates");
-            // }
-
-            // dto.GetAvailableRooms = availableRooms;
-            
             return View("Create", dto);
         }
 
@@ -109,7 +104,6 @@ namespace QRCodeEvidentationApp.Controllers
             {
                 return NotFound();
             }
-            
 
             var lecture = _lectureService.GetLectureById(id);
             LectureEditDto dto = new LectureEditDto();
@@ -145,6 +139,7 @@ namespace QRCodeEvidentationApp.Controllers
             if (ModelState.IsValid)
             {
                 var existingLecture = _lectureService.GetLectureById(id);
+                
                 if (existingLecture == null)
                 {
                     return NotFound();
@@ -157,33 +152,13 @@ namespace QRCodeEvidentationApp.Controllers
                 existingLecture.ValidRegistrationUntil = lectureDto.lecture.ValidRegistrationUntil;
                 existingLecture.RoomName = lectureDto.lecture.RoomName;
                 existingLecture.Type = lectureDto.lecture.Type;
-                
-                
              
                 _lectureService.EditLecture(existingLecture);
                 return RedirectToAction(nameof(Index));
             }
             return View(lectureDto);
         }
-
-        private LectureEditDto PopulateLectureEditDto(LectureEditDto lectureDto, string id, string errMessage)
-        {
-            var lecture = _lectureService.GetLectureById(id);
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            Professor loggedInProfessor = _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException()).Result;
-
-            lectureDto.CoursesProfessor = _courseService.GetCoursesForProfessor(loggedInProfessor.Id).Result;
-            lectureDto.CoursesAssistant = _courseService.GetCoursesForAssistant(loggedInProfessor.Id).Result;
-
-            List<Room> availableRooms = _roomService.GetAllRooms().Result;
-
-            lectureDto.lecture = lecture;
-            lectureDto.lectureId = id;
-            lectureDto.GetAvailableRooms = availableRooms;
-            lectureDto.ErrMessage = errMessage;
-
-            return lectureDto;
-        }
+        
         // GET: Lecture/Delete/5
         public IActionResult Delete(string? id)
         {
@@ -244,5 +219,35 @@ namespace QRCodeEvidentationApp.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        
+        [HttpPost]
+        public IActionResult GenerateQRCode(string id)
+        {
+            // Directory to save the QR code image
+            string directoryPath = "/home/vane/Desktop";
+            string fileName = $"QRCode_{id}.png"; // Define the filename
+            string filePath = Path.Combine(directoryPath, fileName);
+
+            try
+            {
+                using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+                using (QRCodeData qrCodeData = qrGenerator.CreateQrCode("https://b95b-77-29-51-53.ngrok-free.app/Student/RegisterAttendance/" + id, QRCodeGenerator.ECCLevel.Q))
+                using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+                {
+                    // Get the QR code image as a byte array
+                    byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+                    // Return the byte array as a file result
+                    return File(qrCodeImage, "image/png");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (e.g., log the error)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        
     }
 }
