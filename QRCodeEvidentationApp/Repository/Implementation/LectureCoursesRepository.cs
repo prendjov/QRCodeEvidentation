@@ -19,8 +19,16 @@ public class LectureCoursesRepository : ILectureCoursesRepository
     public LectureCourses CreateLectureCourse(LectureCourses lectureCourse)
     {
         var createdLectureCourse = _entities.Add(lectureCourse); 
-        _context.SaveChangesAsync();
+        _context.SaveChanges();
 
         return createdLectureCourse.Entity;
+    }
+    public LectureCourses DeleteLectureCourse(LectureCourses lectureCourse)
+    {
+        var createdLectureCourse = _entities.Remove(lectureCourse);
+        _context.SaveChanges();
+
+        return createdLectureCourse.Entity;
+
     }
 }

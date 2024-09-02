@@ -15,13 +15,16 @@ public class LectureEditDto
     public List<CourseProfessor>? CoursesProfessor { get; set; }
     
     public List<CourseAssistant>? CoursesAssistant { get; set; }
+
+    public List<LectureGroup>? Groups { get; set; }
     
     public long? CourseId { get; set; }
     
     public string? CourseProfessorId { get; set; }
     
     public string? CourseAssistantId { get; set; }
-
+    
+    public string? GroupCourseId { get; set; }
     public string? ErrMessage { get; set; }
     
     // need these two fields to transfer the available rooms logic on the front-end

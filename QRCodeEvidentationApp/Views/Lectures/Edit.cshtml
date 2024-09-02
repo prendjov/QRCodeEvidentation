@@ -47,6 +47,10 @@
                     <input asp-for="lecture.ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
                     <span class="text-danger"></span>
                 </div>
+                <div class="form-group" id="courseGroups">
+                    <label for="GroupCourseId">Select Group of Course</label>
+                    @Html.DropDownListFor(model => model.GroupCourseId, new SelectList(Model.Groups, "Id", "Name"), "Select Group of Courses", new { @class = "form-control", id = "Groups" })
+                </div>
                 <div class="form-group" id="courseAssistantGroup" style="display: none;">
                     <label for="CoursesAssistant">Select Assistant</label>
                     @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesAssistant" })
@@ -75,6 +79,7 @@
             var typeDropdown = document.getElementById("Type");
             var courseAssistantGroup = document.getElementById("courseAssistantGroup");
             var courseProfessorGroup = document.getElementById("courseProfessorGroup");
+            var courseGroups = document.getElementById("courseGroups");
             var errorMessage = document.getElementById("errorMessage");
             var startsAtInput = document.getElementById("StartsAt");
             var endsAtInput = document.getElementById("EndsAt");
@@ -173,8 +178,10 @@
 
                 if (selectedValue === "Аудиториски") {
                     courseAssistantGroup.style.display = "block";
+                    courseGroups.style.display = "block";
                 } else if (selectedValue === "Предавања") {
                     courseProfessorGroup.style.display = "block";
+                    courseGroups.style.display = "block";
                 }
             }
 

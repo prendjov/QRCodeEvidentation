@@ -30,23 +30,14 @@ builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<ILectureCoursesRepository, LectureCoursesRepository>();
 builder.Services.AddScoped<ILectureGroupRepository, LectureGroupRepository>();
 builder.Services.AddScoped<ILectureGroupCourseRepository, LectureGroupCourseRepository>();
-builder.Services.AddScoped(typeof(ILectureRepository), typeof(LectureRepository));
-builder.Services.AddScoped(typeof(IProfessorRepository), typeof(ProfessorRepository));
-builder.Services.AddScoped(typeof(ICourseRepository<CourseUserBaseEntity>), typeof(CourseRepository<CourseUserBaseEntity>));
-builder.Services.AddScoped(typeof(IRoomRepository), typeof(RoomRepository));
-builder.Services.AddScoped(typeof(ILectureCoursesRepository), typeof(LectureCoursesRepository));
-builder.Services.AddScoped(typeof(ILectureAttendanceRepository), typeof(LectureAttendanceRepository));
-builder.Services.AddScoped(typeof(IStudentRepository), typeof(StudentRepository));
+builder.Services.AddScoped<ILectureAttendanceRepository, LectureAttendanceRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 builder.Services.AddScoped<ILectureService, LectureService>();
 builder.Services.AddScoped<ILectureGroupService, LectureGroupService>();
 builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
-builder.Services.AddTransient<ILectureService, LectureService>();
-builder.Services.AddTransient<IProfessorService, ProfessorService>();
-builder.Services.AddTransient<ICourseService, CourseService>();
-builder.Services.AddTransient<IRoomService, RoomService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 
 var app = builder.Build();

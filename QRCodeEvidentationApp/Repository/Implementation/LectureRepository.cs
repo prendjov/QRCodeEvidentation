@@ -28,7 +28,7 @@ public class LectureRepository : ILectureRepository
 
     public async Task<Lecture> GetLectureById(string? lectureId)
     {
-        return await _entities.FindAsync(lectureId) ?? throw new InvalidOperationException();
+        return _entities.Where(d => d.Id == lectureId).Include(d => d.Courses).ThenInclude(dc => dc.Course).FirstOrDefault();
     }
 
     public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
