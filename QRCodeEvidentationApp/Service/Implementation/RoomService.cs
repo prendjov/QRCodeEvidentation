@@ -53,7 +53,6 @@ public class RoomService : IRoomService
 
     public bool CheckRoomAvailability(DateTime startDate, DateTime endDate, string roomName, string lectureId)
     {
-        // takes the available rooms on the specified date
         List<Lecture> lecturesOnDate = _lectureRepository.FilterLectureByDateOrCourse(startDate, endDate, null).Result;
 
         List<Lecture> roomInOccupiedFlag = new List<Lecture>();

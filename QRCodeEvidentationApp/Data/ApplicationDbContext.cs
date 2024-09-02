@@ -51,5 +51,6 @@ namespace QRCodeEvidentationApp.Data
 
             base.OnModelCreating(modelBuilder);
         }
+        public DbSet<QRCodeEvidentationApp.Models.LectureGroup> LectureGroup { get; set; } = default!;
     }
 }

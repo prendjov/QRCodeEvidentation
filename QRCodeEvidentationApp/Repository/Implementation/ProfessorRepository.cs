@@ -21,4 +21,8 @@ public class ProfessorRepository : IProfessorRepository
     {
         return await _entities.SingleOrDefaultAsync(x => x.Email.Equals(email)) ?? throw new InvalidOperationException();
     }
+    public async Task<Professor> GetById(string id)
+    {
+        return await _entities.Where(d => d.Id == id).FirstOrDefaultAsync() ?? throw new InvalidOperationException();
+    }
 }

@@ -14,12 +14,14 @@ public class LectureDto
     public List<CourseProfessor>? CoursesProfessor { get; set; }
     
     public List<CourseAssistant>? CoursesAssistant { get; set; }
+    public List<LectureGroup>? Groups { get; set; }
     
     public long? CourseId { get; set; }
     
     public long? CourseProfessorId { get; set; }
     
     public long? CourseAssistantId { get; set; }
+    public string? GroupCourseId { get; set; }
     
     public DateTime StartsAt { get; set; }
     

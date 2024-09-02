@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
@@ -16,16 +17,19 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly IProfessorService _professorService;
         private readonly ICourseService _courseService;
         private readonly IRoomService _roomService;
+        private readonly ILectureGroupService _lectureGroupService;
 
         public LecturesController(ILectureService lectureService, 
             IProfessorService professorService,
             ICourseService courseService,
-            IRoomService roomService)
+            IRoomService roomService,
+            ILectureGroupService lectureGroupService)
         {
             _lectureService = lectureService;
             _professorService = professorService;
             _courseService = courseService;
             _roomService = roomService;
+            _lectureGroupService = lectureGroupService;
         }
 
         // GET: Lecture
@@ -41,7 +45,7 @@ namespace QRCodeEvidentationApp.Controllers
                 .ToList();
 
             List<Lecture> lectures = null;
-            bool isProfessor = User.IsInRole("Professor");
+            bool isProfessor = User.IsInRole("PROFESSOR");
             if (isProfessor)
             {
                 Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
@@ -69,15 +73,20 @@ namespace QRCodeEvidentationApp.Controllers
         public async Task<IActionResult> CreateView(string startsAt, string endsAt)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            LectureDto dto = new LectureDto();            
+            LectureDto dto = new LectureDto();
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
 
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
+            dto.Groups = await _lectureGroupService.ListByProfessor(loggedInProfessor.Id);
             dto.loggedInProfessorId = loggedInProfessor.Id;
             dto.AllRooms = _roomService.GetAllRooms().Result;
             dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
             
+            dto.StartsAt = DateTime.Now.Date;
+            dto.EndsAt = DateTime.Now.Date;
+            dto.ValidRegistrationUntil = DateTime.Now.Date;
+
             return View("Create", dto);
         }
 
@@ -111,10 +120,12 @@ namespace QRCodeEvidentationApp.Controllers
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-            
+
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
-            
+
+            dto.Groups = await _lectureGroupService.ListByProfessor(loggedInProfessor.Id);
+
             dto.lecture = lecture;
             dto.lectureId = id;
             
@@ -152,8 +163,15 @@ namespace QRCodeEvidentationApp.Controllers
                 existingLecture.ValidRegistrationUntil = lectureDto.lecture.ValidRegistrationUntil;
                 existingLecture.RoomName = lectureDto.lecture.RoomName;
                 existingLecture.Type = lectureDto.lecture.Type;
-             
+
                 _lectureService.EditLecture(existingLecture);
+
+                if(lectureDto.GroupCourseId != null)
+                    _lectureService.AddLectureCoursesFromGroup(lectureDto.GroupCourseId, id);
+
+
+                
+
                 return RedirectToAction(nameof(Index));
             }
             return View(lectureDto);

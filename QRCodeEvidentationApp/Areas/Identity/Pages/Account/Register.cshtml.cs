@@ -130,12 +130,13 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    var role = GetRoleId(user.UserName);
-                    var defaultrole = _roleManager.FindByNameAsync(role).Result;
+                    var roleId = GetRoleId(user.UserName);
+                    var defaultrole = _roleManager.FindByNameAsync(roleId).Result;
+                    var resultRandom = _roleManager.Roles.Where(d => d.Name == roleId).FirstOrDefault();
 
                     if (defaultrole != null)
                     {
-                        if (role.Equals("PROFESSOR"))
+                        if (roleId.Equals("PROFESSOR"))
                         {
                             _context.Professors.Add(new Professor()
                             {
@@ -144,7 +145,7 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
                             });
                             _context.SaveChanges();
                         }
-                        else if (role.Equals("STUDENT"))
+                        else if (roleId.Equals("STUDENT"))
                         {
                             _context.Students.Add(new Student()
                             {
