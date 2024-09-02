@@ -125,7 +125,9 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    var defaultrole = _roleManager.FindByNameAsync(GetRoleId(user.UserName)).Result;
+                    string roleId = GetRoleId(user.UserName);
+                    var defaultrole = _roleManager.FindByNameAsync(roleId).Result;
+                    var resultRandom = _roleManager.Roles.Where(d => d.Name == roleId).FirstOrDefault();
 
                     if (defaultrole != null)
                     {

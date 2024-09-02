@@ -2,31 +2,45 @@ using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Repository.Interface;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace QRCodeEvidentationApp.Repository.Implementation;
-
-public class CourseRepository<T> : ICourseRepository<T> where T : CourseUserBaseEntity
+namespace QRCodeEvidentationApp.Repository.Implementation
 {
-    private readonly ApplicationDbContext _context;
-    private readonly DbSet<T> _entities;
-    
-    public CourseRepository(ApplicationDbContext context)
+    public class CourseRepository : ICourseRepository
     {
-        _context = context;
-        _entities = context.Set<T>();
-    }
-    
-    public async Task<List<CourseProfessor>> GetCoursesForProfessor(string? professorId)
-    {
-        return await _context.Set<CourseProfessor>()
-            .Where(cp => cp.Id == professorId).Include("Course")
-            .ToListAsync();
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<List<CourseAssistant>> GetCoursesForAssistant(string? assistantId)
-    {
-        return await _context.Set<CourseAssistant>()
-            .Where(cp => cp.Id == assistantId).Include("Course")
-            .ToListAsync();    
+        public CourseRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<CourseProfessor>> GetCoursesForProfessor(string? professorId)
+        {
+            if (string.IsNullOrEmpty(professorId))
+            {
+                return new List<CourseProfessor>();
+            }
+
+            return await _context.CourseProfessors
+                .Where(cp => cp.ProfessorId == professorId)
+                .Include(cp => cp.Course)
+                .ToListAsync();
+        }
+
+        public async Task<List<CourseAssistant>> GetCoursesForAssistant(string? assistantId)
+        {
+            if (string.IsNullOrEmpty(assistantId))
+            {
+                return new List<CourseAssistant>();
+            }
+
+            return await _context.CourseAssistants
+                .Where(ca => ca.AssistantId == assistantId)
+                .Include(ca => ca.Course)
+                .ToListAsync();
+        }
     }
 }

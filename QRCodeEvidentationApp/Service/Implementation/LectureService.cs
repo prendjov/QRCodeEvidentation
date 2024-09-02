@@ -58,10 +58,9 @@ public class LectureService : ILectureService
 
     public Lecture CreateLecture(LectureDto dtoFilled)
     { 
-        // Create the lecture entity from the DTO
         Lecture lecture = new Lecture
         {
-            Id = Guid.NewGuid().ToString(), // Assuming you want to generate a new ID
+            Id = Guid.NewGuid().ToString(),
             Title = dtoFilled.Title ?? string.Empty,
             StartsAt = dtoFilled.StartsAt,
             EndsAt = dtoFilled.EndsAt,
@@ -71,7 +70,6 @@ public class LectureService : ILectureService
             ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil
         };
 
-        // Add the courses related to the lecture
         if (dtoFilled.CourseId.HasValue)
         {
             lecture.Courses.Add(_lectureCourseRepository.CreateLectureCourse(new LectureCourses

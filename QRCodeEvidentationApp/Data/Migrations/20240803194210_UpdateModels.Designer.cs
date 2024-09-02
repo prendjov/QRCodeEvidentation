@@ -12,8 +12,8 @@ using QRCodeEvidentationApp.Data;
 namespace QRCodeEvidentationApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240717214427_NewFieldInLecture")]
-    partial class NewFieldInLecture
+    [Migration("20240803194210_UpdateModels")]
+    partial class UpdateModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

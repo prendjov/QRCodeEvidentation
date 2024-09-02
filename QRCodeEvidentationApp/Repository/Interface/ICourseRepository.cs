@@ -2,7 +2,7 @@ using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Repository.Interface;
 
-public interface ICourseRepository<T>
+public interface ICourseRepository
 {
     /// <summary>
     /// Takes the courses that the specified id is professor for.

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QRCodeEvidentationApp.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class RemoveUnneededClasses : Migration
+    public partial class UpdateModels : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -133,6 +133,25 @@ namespace QRCodeEvidentationApp.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
 
+            migrationBuilder.AddColumn<DateTime>(
+                name: "EndsAt",
+                table: "Lectures",
+                type: "datetime2",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<string>(
+                name: "Type",
+                table: "Lectures",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ValidRegistrationUntil",
+                table: "Lectures",
+                type: "datetime2",
+                nullable: true);
+
             migrationBuilder.AlterColumn<string>(
                 name: "LectureId",
                 table: "LectureCourses",
@@ -220,6 +239,25 @@ namespace QRCodeEvidentationApp.Data.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "LectureGroup",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProfessorId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LectureGroup", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LectureGroup_Professors_ProfessorId",
+                        column: x => x.ProfessorId,
+                        principalTable: "Professors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_StudentCourses_AssistantId",
                 table: "StudentCourses",
@@ -248,6 +286,11 @@ namespace QRCodeEvidentationApp.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_CourseProfessors_ProfessorId",
                 table: "CourseProfessors",
+                column: "ProfessorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LectureGroup_ProfessorId",
+                table: "LectureGroup",
                 column: "ProfessorId");
 
             migrationBuilder.AddForeignKey(
@@ -359,6 +402,9 @@ namespace QRCodeEvidentationApp.Data.Migrations
             migrationBuilder.DropTable(
                 name: "CourseProfessors");
 
+            migrationBuilder.DropTable(
+                name: "LectureGroup");
+
             migrationBuilder.DropIndex(
                 name: "IX_StudentCourses_AssistantId",
                 table: "StudentCourses");
@@ -374,6 +420,18 @@ namespace QRCodeEvidentationApp.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "ProfessorId",
                 table: "StudentCourses");
+
+            migrationBuilder.DropColumn(
+                name: "EndsAt",
+                table: "Lectures");
+
+            migrationBuilder.DropColumn(
+                name: "Type",
+                table: "Lectures");
+
+            migrationBuilder.DropColumn(
+                name: "ValidRegistrationUntil",
+                table: "Lectures");
 
             migrationBuilder.RenameColumn(
                 name: "ProfessorId1",

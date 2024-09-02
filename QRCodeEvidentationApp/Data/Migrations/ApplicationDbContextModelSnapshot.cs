@@ -17,7 +17,7 @@ namespace QRCodeEvidentationApp.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -415,6 +415,27 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.ToTable("LectureGroup");
                 });
 
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureGroupCourse", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("LectureGroupId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LectureGroupId");
+
+                    b.ToTable("LectureGroupCourse");
+                });
+
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Professor", b =>
                 {
                     b.Property<string>("Id")
@@ -748,6 +769,25 @@ namespace QRCodeEvidentationApp.Data.Migrations
                     b.Navigation("Professor");
                 });
 
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureGroupCourse", b =>
+                {
+                    b.HasOne("QRCodeEvidentationApp.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QRCodeEvidentationApp.Models.LectureGroup", "LectureGroup")
+                        .WithMany("Courses")
+                        .HasForeignKey("LectureGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("LectureGroup");
+                });
+
             modelBuilder.Entity("QRCodeEvidentationApp.Models.ProfessorDetail", b =>
                 {
                     b.HasOne("QRCodeEvidentationApp.Models.Professor", "Professor")
@@ -805,6 +845,11 @@ namespace QRCodeEvidentationApp.Data.Migrations
                 });
 
             modelBuilder.Entity("QRCodeEvidentationApp.Models.Lecture", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("QRCodeEvidentationApp.Models.LectureGroup", b =>
                 {
                     b.Navigation("Courses");
                 });

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Models;
@@ -9,6 +10,7 @@ using QRCodeEvidentationApp.Service.Interface;
 
 namespace QRCodeEvidentationApp.Controllers
 {
+    [Authorize]
     public class LecturesController : Controller
     {
         private readonly ILectureService _lectureService;
@@ -39,7 +41,7 @@ namespace QRCodeEvidentationApp.Controllers
                 .ToList();
 
             List<Lecture> lectures = null;
-            bool isProfessor = User.IsInRole("Professor");
+            bool isProfessor = User.IsInRole("PROFESSOR");
             if (isProfessor)
             {
                 Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
@@ -67,7 +69,7 @@ namespace QRCodeEvidentationApp.Controllers
         public async Task<IActionResult> CreateView(string startsAt, string endsAt)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            LectureDto dto = new LectureDto();            
+            LectureDto dto = new LectureDto();
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
 
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
@@ -75,14 +77,10 @@ namespace QRCodeEvidentationApp.Controllers
             dto.loggedInProfessorId = loggedInProfessor.Id;
             dto.AllRooms = _roomService.GetAllRooms().Result;
             dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
-            
-            // if (availableRooms.Count == 0)
-            // {
-            //     return RedirectToAction("SelectDates");
-            // }
-
-            // dto.GetAvailableRooms = availableRooms;
-            
+            dto.StartsAt = DateTime.Now.Date;
+            dto.EndsAt = DateTime.Now.Date;
+            dto.ValidRegistrationUntil = DateTime.Now.Date;
+                        
             return View("Create", dto);
         }
 
