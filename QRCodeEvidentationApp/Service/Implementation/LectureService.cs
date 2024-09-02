@@ -9,11 +9,13 @@ public class LectureService : ILectureService
 {
     private readonly ILectureRepository _lectureRepository;
     private readonly ILectureCoursesRepository _lectureCourseRepository;
+    private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
 
-    public LectureService(ILectureRepository lectureRepository, ILectureCoursesRepository lectureCoursesRepository)
+    public LectureService(ILectureRepository lectureRepository, ILectureCoursesRepository lectureCoursesRepository, ILectureAttendanceRepository lectureAttendanceRepository)
     {
         _lectureRepository = lectureRepository;
         _lectureCourseRepository = lectureCoursesRepository;
+        _lectureAttendanceRepository = lectureAttendanceRepository;
     }
     
     public List<Lecture> GetLecturesForProfessor(string? professorId)
@@ -109,5 +111,19 @@ public class LectureService : ILectureService
         }
 
         return true;
+    }
+
+    public void RegisterAttendance(string? studentIndex, string? lectureId, DateTime evidentedAt)
+    {
+
+        LectureAttendance lectureAttendance = new LectureAttendance()
+        {
+            Id = Guid.NewGuid().ToString(),
+            StudentIndex = studentIndex,
+            LectureId = lectureId,
+            EvidentedAt = evidentedAt
+        };
+
+        _lectureAttendanceRepository.RegisterAttendance(lectureAttendance);
     }
 }

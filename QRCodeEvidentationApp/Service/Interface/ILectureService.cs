@@ -81,4 +81,12 @@ public interface ILectureService
     /// <param name="endsAt">When the lecture ends.</param>
     /// <returns>True if the datetime for lecture is scheduled as it should, in the right order for datetime, else False.</returns>
     public bool CheckStartAndEndDateTime(DateTime startsAt, DateTime endsAt);
+
+    /// <summary>
+    /// Registers the student as present at the lecture.
+    /// </summary>
+    /// <param name="studentIndex">The unique identifier for the student.</param>
+    /// <param name="lectureId">Unique identifier for the lecture.</param>
+    /// <param name="evidentedAt">The time when the student was registered as present.</param>
+    public void RegisterAttendance(string? studentIndex, string? lectureId, DateTime evidentedAt);
 }

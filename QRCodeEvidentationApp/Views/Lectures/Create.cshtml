@@ -155,6 +155,7 @@
                 // Show or hide lecture details based on available rooms
                 if (availableRooms.length > 0) {
                     lectureDetails.style.display = "block";
+                    validateDates()
                 } else {
                     lectureDetails.style.display = "none";
                     errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
@@ -164,6 +165,8 @@
             function updateRoomDropdown(availableRooms) {
                 // Clear existing options
                 roomDropdown.innerHTML = '<option value="">Select a Room</option>';
+
+                roomDropdown.innerHTML = '';
 
                 // Populate new options
                 availableRooms.forEach(function (room) {
