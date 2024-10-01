@@ -31,4 +31,10 @@ public class LectureCoursesRepository : ILectureCoursesRepository
         return createdLectureCourse.Entity;
 
     }
+
+    public long? GetCourseForLecture(string? lectureId)
+    {
+        LectureCourses temp = _entities.FirstOrDefault(c => c.LectureId == lectureId) ?? throw new InvalidOperationException();
+        return temp.CourseId;
+    }
 }

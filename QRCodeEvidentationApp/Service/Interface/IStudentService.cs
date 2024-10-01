@@ -10,4 +10,12 @@ public interface IStudentService
     /// <param name="email">The email of the student. (We match by email)</param>
     /// <returns>A student object.</returns>
     public Task<Student> GetStudentFromUserEmail(string email);
+    
+    /// <summary>
+    /// Checks if a given student is enrolled in some course.
+    /// </summary>
+    /// <param name="studentIndex">The index of the student</param>
+    /// <param name="courseId">The id of the course</param>
+    /// <returns>True if the student is in the course, else False.</returns>
+    public bool CheckStudentInCourse(string studentIndex, long? courseId);
 }

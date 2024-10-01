@@ -249,7 +249,7 @@ namespace QRCodeEvidentationApp.Controllers
             try
             {
                 using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-                using (QRCodeData qrCodeData = qrGenerator.CreateQrCode("https://b95b-77-29-51-53.ngrok-free.app/Student/RegisterAttendance/" + id, QRCodeGenerator.ECCLevel.Q))
+                using (QRCodeData qrCodeData = qrGenerator.CreateQrCode("https://localhost:5097/Student/RegisterAttendance/" + id, QRCodeGenerator.ECCLevel.Q))
                 using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
                 {
                     // Get the QR code image as a byte array

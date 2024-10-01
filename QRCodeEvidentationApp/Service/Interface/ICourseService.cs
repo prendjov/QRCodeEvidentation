@@ -17,4 +17,11 @@ public interface ICourseService
     /// <param name="assistantId">The id of the assistant.</param>
     /// <returns>A list of courses for the assistant.</returns>
     public Task<List<CourseAssistant>> GetCoursesForAssistant(string? assistantId);
+    
+    /// <summary>
+    /// Returns the courseid for a given lectureid.
+    /// </summary>
+    /// <param name="lectureId">The id of the lecture.</param>
+    /// <returns>The id of the course.</returns>
+    public long? GetCourseIdByLectureId(string? lectureId);
 }

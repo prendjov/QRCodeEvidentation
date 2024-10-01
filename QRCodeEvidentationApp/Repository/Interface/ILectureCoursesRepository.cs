@@ -17,4 +17,11 @@ public interface ILectureCoursesRepository
     /// <param name="lectureCourse">The LectureCourse object that needs to be deleted</param>
     /// <returns>The deleted lecture course</returns>
     public LectureCourses DeleteLectureCourse(LectureCourses lectureCourse);
+
+    /// <summary>
+    /// Returns the course for the given lecture.
+    /// </summary>
+    /// <param name="lectureId">The lecture id for which we want the course.</param>
+    /// <returns>The course associated with the given lecture.</returns>
+    public long? GetCourseForLecture(string? lectureId);
 }
