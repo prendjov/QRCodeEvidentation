@@ -237,7 +237,7 @@ namespace QRCodeEvidentationApp.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        
+
         [HttpPost]
         public IActionResult GenerateQRCode(string id)
         {
@@ -249,7 +249,9 @@ namespace QRCodeEvidentationApp.Controllers
             try
             {
                 using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-                using (QRCodeData qrCodeData = qrGenerator.CreateQrCode("https://localhost:5097/Student/RegisterAttendance/" + id, QRCodeGenerator.ECCLevel.Q))
+                using (QRCodeData qrCodeData =
+                       qrGenerator.CreateQrCode("https://localhost:5097/Student/RegisterAttendance/" + id,
+                           QRCodeGenerator.ECCLevel.Q))
                 using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
                 {
                     // Get the QR code image as a byte array
@@ -265,7 +267,5 @@ namespace QRCodeEvidentationApp.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        
     }
 }

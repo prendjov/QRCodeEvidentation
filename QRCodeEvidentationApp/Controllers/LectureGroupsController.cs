@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,14 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ICourseService _courseService;
         private readonly ILectureGroupService _lectureGroupService;
+        private readonly IProfessorService _professorService;
 
-        public LectureGroupsController(ApplicationDbContext context, ICourseService courseService, ILectureGroupService lectureGroupService)
+        public LectureGroupsController(ApplicationDbContext context, ICourseService courseService, ILectureGroupService lectureGroupService, IProfessorService professorService)
         {
             _context = context;
             _courseService = courseService;
             _lectureGroupService = lectureGroupService;
+            _professorService = professorService;
         }
 
         // GET: LectureGroups
@@ -45,8 +48,10 @@ namespace QRCodeEvidentationApp.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            string professorId = User.Identity.Name;
-            LectureGroupDTO data = await _lectureGroupService.PrepareForCreate(professorId);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor professor = _professorService.GetProfessorFromUserEmail(userEmail).Result;
+            
+            LectureGroupDTO data = await _lectureGroupService.PrepareForCreate(professor.Id);
 
             return View(data);
         }
