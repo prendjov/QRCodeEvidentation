@@ -150,15 +150,16 @@ public class LectureService : ILectureService
         return true;
     }
 
-    public void RegisterAttendance(string? studentIndex, string? lectureId, DateTime evidentedAt)
+    public void RegisterAttendance(Student student, string? lectureId, DateTime evidentedAt)
     {
 
         LectureAttendance lectureAttendance = new LectureAttendance()
         {
             Id = Guid.NewGuid().ToString(),
-            StudentIndex = studentIndex,
+            StudentIndex = student.StudentIndex,
             LectureId = lectureId,
-            EvidentedAt = evidentedAt
+            EvidentedAt = evidentedAt,
+            Student = student
         };
 
         _lectureAttendanceRepository.RegisterAttendance(lectureAttendance);

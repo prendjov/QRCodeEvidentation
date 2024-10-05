@@ -6,7 +6,12 @@ using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
 using QRCodeEvidentationApp.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
+using QRCodeEvidentationApp.Service.Implementation;
 using QRCoder;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
 
 namespace QRCodeEvidentationApp.Controllers
 {
@@ -18,18 +23,21 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ICourseService _courseService;
         private readonly IRoomService _roomService;
         private readonly ILectureGroupService _lectureGroupService;
+        private readonly ILectureAttendanceService _lectureAttendanceService;
 
         public LecturesController(ILectureService lectureService, 
             IProfessorService professorService,
             ICourseService courseService,
             IRoomService roomService,
-            ILectureGroupService lectureGroupService)
+            ILectureGroupService lectureGroupService,
+            ILectureAttendanceService lectureAttendanceService)
         {
             _lectureService = lectureService;
             _professorService = professorService;
             _courseService = courseService;
             _roomService = roomService;
             _lectureGroupService = lectureGroupService;
+            _lectureAttendanceService = lectureAttendanceService;
         }
 
         // GET: Lecture
@@ -266,6 +274,74 @@ namespace QRCodeEvidentationApp.Controllers
                 // Handle exceptions (e.g., log the error)
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        
+        private IContainer CellStyle(IContainer container)
+        {
+            return container.PaddingVertical(0).PaddingHorizontal(0).Border(1).BorderColor(Colors.Black);
+        }
+
+        [HttpGet]
+        public IActionResult GetLectureAnalytics(string id)
+        {
+            List<LectureAttendance> lectureAttends = _lectureAttendanceService.GetLectureAttendance(id).Result;
+            
+            // Generate the PDF in memory using QuestPDF
+            byte[] pdfBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                // Create the PDF document using QuestPDF's fluent API
+                Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Header().Text("Lecture Attendance Report").Bold().FontSize(20);
+
+                        page.Content().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(50); // Student Index
+                                columns.RelativeColumn();    // Student Name
+                                columns.RelativeColumn();    // Attendance Status
+                                columns.ConstantColumn(100); // Timestamp
+                            });
+
+                            // Add table header
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(CellStyle).Text("Index");
+                                header.Cell().Element(CellStyle).Text("Name");
+                                header.Cell().Element(CellStyle).Text("Last name");
+                                header.Cell().Element(CellStyle).Text("Timestamp");
+                            });
+
+                            // Add table rows from lecture attendance data
+                            foreach (var attendance in lectureAttends)
+                            {
+                                table.Cell().Element(CellStyle).Text(attendance?.StudentIndex);
+                                table.Cell().Element(CellStyle).Text(attendance?.Student?.Name);
+                                table.Cell().Element(CellStyle).Text(attendance?.Student?.LastName);
+                                table.Cell().Element(CellStyle).Text(attendance?.EvidentedAt.ToString());
+                            }
+                        });
+
+                        page.Footer()
+                            .AlignCenter()
+                            .Text(x =>
+                            {
+                                x.Span("Generated on: ");
+                                x.Span(DateTime.Now.ToString("yyyy-MM-dd"));
+                            });
+                    });
+                }).GeneratePdf(memoryStream);
+
+                // Convert memory stream to a byte array
+                pdfBytes = memoryStream.ToArray();
+            }
+
+            // Return the PDF as a downloadable file
+            return File(pdfBytes, "application/pdf", $"Lecture_{id}.pdf");
         }
     }
 }

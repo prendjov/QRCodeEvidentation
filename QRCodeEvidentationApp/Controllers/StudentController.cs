@@ -34,7 +34,7 @@ public class StudentController : Controller
 
         if (inCourse)
         {
-            _lectureService.RegisterAttendance(student.StudentIndex, id, DateTime.Now);
+            _lectureService.RegisterAttendance(student, id, DateTime.Now);
             return RedirectToAction("Index", "Home");
         }
 

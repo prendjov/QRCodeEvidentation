@@ -6,6 +6,7 @@ using QRCodeEvidentationApp.Repository.Implementation;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Implementation;
 using QRCodeEvidentationApp.Service.Interface;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddRazorPages();
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddControllersWithViews();
 
@@ -40,6 +43,7 @@ builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
+builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
 
 var app = builder.Build();
 

@@ -60,6 +60,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
             <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
             <button class="delete-lecture-btn btn btn-primary" data-delete-lecture-id="@item.Id">Delete</button> |
             <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@item.Id" data-valid-registration-until="@item.ValidRegistrationUntil">Disable Lecture</button>
+            <a asp-action="GetLectureAnalytics" asp-route-id="@item.Id" class="btn btn-primary">Analytics</a>
         </td>
     </tr>
     }
@@ -67,7 +68,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 </table>
 
 @section Scripts {
-<script>
+    <script>
     $(document).ready(function () {
         $('.disable-lecture-btn').each(function () {
             var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
@@ -138,6 +139,15 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                 }
             });
         });
+
+        /*$('.lecture-analytics-btn').click(function (e) {
+            e.preventDefault();
+            var button = $(this);
+            var lectureId = button.data('lecture-id');
+
+            // Redirect to the action that generates and downloads the PDF
+            window.location.href = '@Url.Action("GetLectureAnalytics")' + '?id=' + lectureId;
+        });*/
     });
 </script>
 }
