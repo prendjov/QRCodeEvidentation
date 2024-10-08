@@ -29,4 +29,13 @@ public class LectureAttendanceRepository : ILectureAttendanceRepository
             .Include(l => l.Student)
             .ToListAsync();
     }
+
+    public List<LectureAttendance> GetLectureAttendances(List<string> lectureIds)
+    {
+        List<LectureAttendance> matchedLectureIds = _entities
+            .Where(l => lectureIds.Contains(l.LectureId))
+            .ToList();
+
+        return matchedLectureIds;
+    }
 }

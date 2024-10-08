@@ -27,11 +27,11 @@ public class CourseService : ICourseService
         return await _courseRepository.GetCoursesForAssistant(assistantId);
     }
 
-    public long? GetCourseIdByLectureId(string? lectureId)
+    public List<long?> GetCoursesIdByLectureId(string? lectureId)
     {
         try
         {
-            return _lectureCoursesRepository.GetCourseForLecture(lectureId);
+            return _lectureCoursesRepository.GetCoursesForLecture(lectureId);
         }
         catch (Exception e)
         {

@@ -23,5 +23,5 @@ public interface ILectureCoursesRepository
     /// </summary>
     /// <param name="lectureId">The lecture id for which we want the course.</param>
     /// <returns>The course associated with the given lecture.</returns>
-    public long? GetCourseForLecture(string? lectureId);
+    public List<long?> GetCoursesForLecture(string? lectureId);
 }

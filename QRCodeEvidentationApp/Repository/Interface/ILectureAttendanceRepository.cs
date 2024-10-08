@@ -13,4 +13,6 @@ public interface ILectureAttendanceRepository
     /// <param name="lectureId">Id of the lecture that you want to check attendance for.</param>
     /// <returns>List of students that have attended the specified lecture.</returns>
     public Task<List<LectureAttendance>> GetLectureAttendance(string? lectureId);
+
+    public List<LectureAttendance> GetLectureAttendances(List<string> lectureIds);
 }

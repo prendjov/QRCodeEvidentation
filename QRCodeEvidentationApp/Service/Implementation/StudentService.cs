@@ -20,8 +20,25 @@ public class StudentService : IStudentService
         return _studentRepository.GetStudentByEmail(email);
     }
 
-    public bool CheckStudentInCourse(string studentIndex, long? courseId)
+    public bool CheckStudentInCourse(string studentIndex, List<long?> courseId)
     {
-        return _studentCourseRepository.CheckStudentCourse(studentIndex, courseId);
+        List<long?> coursesForStudent = _studentRepository.GetCoursesForStudent(studentIndex);
+        foreach (long? id in courseId)
+        {
+            foreach (long? id_student in coursesForStudent)
+            {
+                if (id_student == id)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public List<StudentCourse> GetStudentsForProfessor(string professorId)
+    {
+        return _studentCourseRepository.GetStudentsForProfessor(professorId);
     }
 }

@@ -23,4 +23,9 @@ public class StudentCourseRepository : IStudentCourseRepository
 
         return isEnrolled;
     }
+
+    public List<StudentCourse> GetStudentsForProfessor(string professorId)
+    {
+        return _entities.Where(x => x.ProfessorId.Equals(professorId) || x.AssistantId.Equals(professorId)).ToList();
+    }
 }

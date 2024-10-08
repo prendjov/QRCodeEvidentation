@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 using QRCodeEvidentationApp.Service.Interface;
 
 namespace QRCodeEvidentationApp.Controllers
@@ -20,13 +21,22 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ICourseService _courseService;
         private readonly ILectureGroupService _lectureGroupService;
         private readonly IProfessorService _professorService;
+        private readonly ILectureService _lectureService;
+        private readonly IStudentService _studentService;
 
-        public LectureGroupsController(ApplicationDbContext context, ICourseService courseService, ILectureGroupService lectureGroupService, IProfessorService professorService)
+        public LectureGroupsController(ApplicationDbContext context, 
+            ICourseService courseService, 
+            ILectureGroupService lectureGroupService, 
+            IProfessorService professorService,
+            ILectureService lectureService,
+            IStudentService studentService)
         {
             _context = context;
             _courseService = courseService;
             _lectureGroupService = lectureGroupService;
             _professorService = professorService;
+            _lectureService = lectureService;
+            _studentService = studentService;
         }
 
         // GET: LectureGroups
@@ -165,6 +175,26 @@ namespace QRCodeEvidentationApp.Controllers
         private bool LectureGroupExists(string id)
         {
             return _context.LectureGroup.Any(e => e.Id == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAnalytics(string id)
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+            List<Lecture> lectures = new List<Lecture>();
+            lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
+            List<StudentCourse> students = new List<StudentCourse>();
+            students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
+            
+            List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
+            
+            List<string> lecturesByLectureGroup = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
+
+            LectureGroupAnalyticsDTO lectureGroupAnalyticsDto =
+                _lectureGroupService.CalculateLectureGroupAnalytics(lecturesByLectureGroup, students, lectures);
+            
+            return View(lectureGroupAnalyticsDto);
         }
     }
 }

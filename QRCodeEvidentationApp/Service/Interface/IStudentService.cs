@@ -15,7 +15,9 @@ public interface IStudentService
     /// Checks if a given student is enrolled in some course.
     /// </summary>
     /// <param name="studentIndex">The index of the student</param>
-    /// <param name="courseId">The id of the course</param>
-    /// <returns>True if the student is in the course, else False.</returns>
-    public bool CheckStudentInCourse(string studentIndex, long? courseId);
+    /// <param name="courseId">The ids of the courses</param>
+    /// <returns>True if the student is in the courses, else False.</returns>
+    public bool CheckStudentInCourse(string studentIndex, List<long?> courseId);
+    
+    public List<StudentCourse> GetStudentsForProfessor(string professorId);
 }

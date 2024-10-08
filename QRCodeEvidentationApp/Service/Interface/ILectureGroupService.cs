@@ -1,6 +1,7 @@
 ﻿using NuGet.Protocol.Plugins;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 
 namespace QRCodeEvidentationApp.Service.Interface
 {
@@ -52,5 +53,25 @@ namespace QRCodeEvidentationApp.Service.Interface
         /// <param name="lectureGroupId">The lecture group which will be updated</param>
         /// <returns>Needed details for that professor and lecture group</returns>
         public Task<LectureGroupDTO> PrepareForUpdate(string professorId, string lectureGroupId);
+        
+        /// <summary>
+        /// Get all the courses for a certain Lecture Group.
+        /// </summary>
+        /// <param name="lectureGroupId">The id of the lecture group.</param>
+        /// <returns>A list of courses associated with the specified lecture group.</returns>
+        public Task<List<long?>> GetCoursesForLectureGroup(string lectureGroupId);
+
+        /// <summary>
+        /// Selects all the lectures that are connected with certain lecture group.
+        /// It groups the lectures based on ID and if a certain Lecture points to all the ids
+        /// that are in courseIds, it means that lecture is of that group and it should be added
+        /// to the result.
+        /// </summary>
+        /// <param name="lectures">The lectures for a certain professor.</param>
+        /// <param name="courseIds">The courses that are in the lecture group.</param>
+        /// <returns>A list of lecture ids that belong to certain lecture group.</returns>
+        public List<string> SelectLecturesForGroup(List<Lecture> lectures, List<long?> courseIds);
+
+        public LectureGroupAnalyticsDTO CalculateLectureGroupAnalytics(List<string> lectureIds, List<StudentCourse> studentCourses, List<Lecture> lectures);
     }
 }

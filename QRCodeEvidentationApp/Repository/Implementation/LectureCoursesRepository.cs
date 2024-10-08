@@ -32,9 +32,18 @@ public class LectureCoursesRepository : ILectureCoursesRepository
 
     }
 
-    public long? GetCourseForLecture(string? lectureId)
+    public List<long?> GetCoursesForLecture(string? lectureId)
     {
-        LectureCourses temp = _entities.FirstOrDefault(c => c.LectureId == lectureId) ?? throw new InvalidOperationException();
-        return temp.CourseId;
+        List<LectureCourses> temp = _entities.Where(c => c.LectureId == lectureId).ToList();
+        List<long?> ids = new List<long?>();
+
+        foreach (var lc in temp)
+        {
+            ids.Add(lc.CourseId);
+        }
+        
+        return ids;
     }
+    
+    // public List<
 }

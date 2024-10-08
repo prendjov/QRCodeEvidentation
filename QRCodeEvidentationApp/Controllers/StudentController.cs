@@ -28,9 +28,9 @@ public class StudentController : Controller
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
         Student student = _studentService.GetStudentFromUserEmail(userEmail).Result;
 
-        long? courseId = _courseService.GetCourseIdByLectureId(id);
+        List<long?> courseIds = _courseService.GetCoursesIdByLectureId(id);
 
-        bool inCourse = _studentService.CheckStudentInCourse(student.StudentIndex, courseId);
+        bool inCourse = _studentService.CheckStudentInCourse(student.StudentIndex, courseIds);
 
         if (inCourse)
         {
