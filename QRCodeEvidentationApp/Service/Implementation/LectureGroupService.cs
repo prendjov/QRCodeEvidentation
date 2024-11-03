@@ -212,6 +212,15 @@ namespace QRCodeEvidentationApp.Service.Implementation
                 .GroupBy(a => a.LectureId) // Group by LectureId
                 .ToDictionary(g => g.Key, g => g.ToList());
             
+            // Ensure all lectureIds are present in the dictionary with an empty list if not grouped
+            foreach (var lectureId in lectureIds)
+            {
+                if (!groupedAttendances.ContainsKey(lectureId))
+                {
+                    groupedAttendances[lectureId] = new List<LectureAttendance>();
+                }
+            }
+            
             foreach (var group in groupedAttendances)
             {
                 string lectureId = group.Key;

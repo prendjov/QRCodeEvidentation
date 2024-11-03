@@ -34,6 +34,11 @@
     <_ContentIncludedByDefault Remove="Views\Lectures\Details.cshtml" />
     <_ContentIncludedByDefault Remove="Views\Lectures\Edit.cshtml" />
     <_ContentIncludedByDefault Remove="Views\Lectures\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Courses\Create.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Courses\Delete.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Courses\Details.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Courses\Edit.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Courses\Index.cshtml" />
   </ItemGroup>
 
 </Project>

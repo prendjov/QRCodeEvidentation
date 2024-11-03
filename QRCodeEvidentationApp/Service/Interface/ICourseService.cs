@@ -1,4 +1,6 @@
 using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 
 namespace QRCodeEvidentationApp.Service.Interface;
 
@@ -24,4 +26,14 @@ public interface ICourseService
     /// <param name="lectureId">The id of the lecture.</param>
     /// <returns>List of course ids.</returns>
     public List<long?> GetCoursesIdByLectureId(string? lectureId);
+    
+    /// <param name="teacherId">The id of the teacher.</param>
+    /// <returns>Returns all the courses for a specific teahcer id, doesn't matter if professor
+    /// or assistant for the course.</returns>
+    public List<Course> GetCourses(string? teacherId);
+
+    public List<string?> GetLectureForCourseId(long? courseId);
+    
+    public CourseAnalyticsDTO GetCourseStatistics(List<Lecture> lecturesForProfessor, List<StudentCourse> studentCourses, List<string?> lecturesForCourse);
+
 }
