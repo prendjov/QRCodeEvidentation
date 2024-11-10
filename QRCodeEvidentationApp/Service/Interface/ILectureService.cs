@@ -85,10 +85,10 @@ public interface ILectureService
     /// <summary>
     /// Registers the student as present at the lecture.
     /// </summary>
-    /// <param name="studentIndex">The unique identifier for the student.</param>
+    /// <param name="student">Student object.</param>
     /// <param name="lectureId">Unique identifier for the lecture.</param>
     /// <param name="evidentedAt">The time when the student was registered as present.</param>
-    public void RegisterAttendance(string? studentIndex, string? lectureId, DateTime evidentedAt);
+    public void RegisterAttendance(Student student, string? lectureId, DateTime evidentedAt);
 
     /// <summary>
     /// Register new courses for a lecture by lecture group

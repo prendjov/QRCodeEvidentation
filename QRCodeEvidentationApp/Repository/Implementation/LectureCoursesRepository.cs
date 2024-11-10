@@ -31,4 +31,19 @@ public class LectureCoursesRepository : ILectureCoursesRepository
         return createdLectureCourse.Entity;
 
     }
+
+    public List<long?> GetCoursesForLecture(string? lectureId)
+    {
+        List<LectureCourses> temp = _entities.Where(c => c.LectureId == lectureId).ToList();
+        List<long?> ids = new List<long?>();
+
+        foreach (var lc in temp)
+        {
+            ids.Add(lc.CourseId);
+        }
+        
+        return ids;
+    }
+    
+    // public List<
 }

@@ -1,0 +1,77 @@
+@model IEnumerable<QRCodeEvidentationApp.Models.Course>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.StudyYear)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastNameRegex)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberOfFirstEnrollments)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberOfReEnrollments)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GroupPortion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Groups)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.English)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Semester)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.StudyYear)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastNameRegex)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumberOfFirstEnrollments)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumberOfReEnrollments)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GroupPortion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Groups)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.English)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Semester.Code)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Analytics" asp-route-id="@item.Id">Analytics</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

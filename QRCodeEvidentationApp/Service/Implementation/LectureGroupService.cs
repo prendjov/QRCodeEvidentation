@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using NuGet.Packaging;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 using QRCodeEvidentationApp.Repository.Implementation;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Interface;
@@ -14,13 +16,19 @@ namespace QRCodeEvidentationApp.Service.Implementation
         private readonly ILectureGroupCourseRepository _lectureGroupCourseRepository;
         private readonly IProfessorRepository _professorRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
 
-        public LectureGroupService(ILectureGroupRepository lectureGroupRepository, ILectureGroupCourseRepository lectureGroupCourseRepository, IProfessorRepository professorRepository, ICourseRepository courseRepository) 
+        public LectureGroupService(ILectureGroupRepository lectureGroupRepository,
+            ILectureGroupCourseRepository lectureGroupCourseRepository, 
+            IProfessorRepository professorRepository,
+            ICourseRepository courseRepository,
+            ILectureAttendanceRepository lectureAttendanceRepository) 
         {
             _lectureGroupCourseRepository = lectureGroupCourseRepository;
             _lectureGroupRepository = lectureGroupRepository;
             _professorRepository = professorRepository;
             _courseRepository = courseRepository;
+            _lectureAttendanceRepository = lectureAttendanceRepository;
         }
         public async Task<LectureGroup> Create(LectureGroupDTO data)
         {
@@ -151,5 +159,101 @@ namespace QRCodeEvidentationApp.Service.Implementation
             throw new InvalidOperationException();
         }
 
+        public async Task<List<long?>> GetCoursesForLectureGroup(string lectureGroupId)
+        { 
+            List<LectureGroupCourse> tempLgcList = await _lectureGroupCourseRepository.ListByLectureGroupId(lectureGroupId);
+            List<long?> courseIds = new List<long?>();
+            foreach (LectureGroupCourse l in tempLgcList)
+            {
+                courseIds.Add(l.CourseId);
+            }
+            
+            return courseIds;
+        }
+
+        public List<string> SelectLecturesForGroup(List<Lecture> lectures, List<long?> courseIds)
+        {
+            // Ensure courseIds is not empty to avoid unnecessary processing
+            if (courseIds == null || !courseIds.Any())
+            {
+                return new List<string>(); // Return an empty list if courseIds is empty
+            }
+
+            // Group the lectures by LectureId and return a list of Lecture IDs
+            var result = lectures
+                .GroupBy(l => l.Id) // Group by LectureId
+                .Where(g => g.SelectMany(l => l.Courses) // Flatten the courses in each group
+                    .Where(c => courseIds.Contains(c.CourseId)) // Filter courses by the provided courseIds
+                    .Select(c => c.CourseId) // Select only the CourseId
+                    .Distinct() // Get distinct CourseIds
+                    .Count() == courseIds.Count) // Compare the count with the original courseIds count
+                .Select(g => g.Key) // Select the LectureId
+                .ToList(); // Convert to a list
+
+            return result;
+        }
+
+        public LectureGroupAnalyticsDTO CalculateLectureGroupAnalytics(List<string> lectureIds, List<StudentCourse> studentCourses, List<Lecture> lectures)
+        {
+            List<LectureAttendance> lectureAttendances = _lectureAttendanceRepository.GetLectureAttendances(lectureIds);
+
+            LectureGroupAnalyticsDTO lectureGroupAnalyticsDto = new LectureGroupAnalyticsDTO();
+            lectureGroupAnalyticsDto.EachLectureAnalytics = new List<LectureGroupAnalyticsDTO>();
+            List<string?> studentsAtProfessor = new List<string?>();
+            foreach (StudentCourse studentCourse in studentCourses)
+            {
+                studentsAtProfessor.Add(studentCourse.StudentStudentIndex);
+            }
+            
+            Dictionary<string, Lecture> lectureDictionary = lectures.ToDictionary(l => l.Id);
+            
+            // Group lecture attendances by LectureId
+            var groupedAttendances = lectureAttendances
+                .GroupBy(a => a.LectureId) // Group by LectureId
+                .ToDictionary(g => g.Key, g => g.ToList());
+            
+            // Ensure all lectureIds are present in the dictionary with an empty list if not grouped
+            foreach (var lectureId in lectureIds)
+            {
+                if (!groupedAttendances.ContainsKey(lectureId))
+                {
+                    groupedAttendances[lectureId] = new List<LectureAttendance>();
+                }
+            }
+            
+            foreach (var group in groupedAttendances)
+            {
+                string lectureId = group.Key;
+                List<LectureAttendance> attendances = group.Value; // This is the list of LectureAttendance records for that LectureId
+                int AtProfessor = 0;
+                int notAtProfessor = 0;
+                foreach (var attendance in attendances)
+                {
+                    if (studentsAtProfessor.Contains(attendance.StudentIndex))
+                    {
+                        AtProfessor += 1;
+                        continue;
+                    }
+                    notAtProfessor += 1;
+                }
+
+                LectureGroupAnalyticsDTO analyticsDtoForLecture = new LectureGroupAnalyticsDTO();
+                analyticsDtoForLecture.NumberOfAttendees = attendances.Count();
+                analyticsDtoForLecture.AtProfessorNumberOfAttendees = AtProfessor;
+                analyticsDtoForLecture.NotAtProfessorNumberOfAttendees = notAtProfessor;
+                analyticsDtoForLecture.lectureId = lectureId;
+                analyticsDtoForLecture.lecture = lectureDictionary[lectureId];
+                lectureGroupAnalyticsDto.EachLectureAnalytics.Add(analyticsDtoForLecture);
+            }
+
+            foreach (var analytic in lectureGroupAnalyticsDto.EachLectureAnalytics)
+            {
+                lectureGroupAnalyticsDto.NumberOfAttendees += analytic.NumberOfAttendees;
+                lectureGroupAnalyticsDto.AtProfessorNumberOfAttendees += analytic.AtProfessorNumberOfAttendees;
+                lectureGroupAnalyticsDto.NotAtProfessorNumberOfAttendees += analytic.NotAtProfessorNumberOfAttendees;
+            }
+
+            return lectureGroupAnalyticsDto;
+        }
     }
 }

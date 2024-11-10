@@ -141,7 +141,8 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
                             _context.Professors.Add(new Professor()
                             {
                                 Id = Guid.NewGuid().ToString(),
-                                Email = user.Email
+                                Email = user.Email,
+                                Name = user.UserName.Split(".")[0]
                             });
                             _context.SaveChanges();
                         }

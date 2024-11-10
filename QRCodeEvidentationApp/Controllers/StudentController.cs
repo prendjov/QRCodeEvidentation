@@ -10,11 +10,13 @@ public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
     private readonly ILectureService _lectureService;
+    private readonly ICourseService _courseService;
 
-    public StudentController(IStudentService studentService, ILectureService lectureService)
+    public StudentController(IStudentService studentService, ILectureService lectureService, ICourseService courseService)
     { 
         _studentService = studentService;
         _lectureService = lectureService;
+        _courseService = courseService;
     }
     
     // Should edit cases where the student is already registered for the lecture
@@ -25,9 +27,17 @@ public class StudentController : Controller
     {
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
         Student student = _studentService.GetStudentFromUserEmail(userEmail).Result;
-            
-        _lectureService.RegisterAttendance(student.StudentIndex, id, DateTime.Now);
 
-        return RedirectToAction("Index", "Home");
+        List<long?> courseIds = _courseService.GetCoursesIdByLectureId(id);
+
+        bool inCourse = _studentService.CheckStudentInCourse(student.StudentIndex, courseIds);
+
+        if (inCourse)
+        {
+            _lectureService.RegisterAttendance(student, id, DateTime.Now);
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View();
     }
 }

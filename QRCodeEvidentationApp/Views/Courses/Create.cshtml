@@ -1,0 +1,64 @@
+@model QRCodeEvidentationApp.Models.Course
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Course</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="StudyYear" class="control-label"></label>
+                <input asp-for="StudyYear" class="form-control" />
+                <span asp-validation-for="StudyYear" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastNameRegex" class="control-label"></label>
+                <input asp-for="LastNameRegex" class="form-control" />
+                <span asp-validation-for="LastNameRegex" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SemesterCode" class="control-label"></label>
+                <select asp-for="SemesterCode" class ="form-control" asp-items="ViewBag.SemesterCode"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfFirstEnrollments" class="control-label"></label>
+                <input asp-for="NumberOfFirstEnrollments" class="form-control" />
+                <span asp-validation-for="NumberOfFirstEnrollments" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfReEnrollments" class="control-label"></label>
+                <input asp-for="NumberOfReEnrollments" class="form-control" />
+                <span asp-validation-for="NumberOfReEnrollments" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GroupPortion" class="control-label"></label>
+                <input asp-for="GroupPortion" class="form-control" />
+                <span asp-validation-for="GroupPortion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Groups" class="control-label"></label>
+                <input asp-for="Groups" class="form-control" />
+                <span asp-validation-for="Groups" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="English" class="control-label"></label>
+                <input asp-for="English" class="form-control" />
+                <span asp-validation-for="English" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

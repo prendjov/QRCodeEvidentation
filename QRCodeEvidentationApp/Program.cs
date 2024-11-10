@@ -6,6 +6,7 @@ using QRCodeEvidentationApp.Repository.Implementation;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Implementation;
 using QRCodeEvidentationApp.Service.Interface;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddRazorPages();
 
+QuestPDF.Settings.License = LicenseType.Community;
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<ILectureRepository, LectureRepository>();
@@ -32,6 +35,7 @@ builder.Services.AddScoped<ILectureGroupRepository, LectureGroupRepository>();
 builder.Services.AddScoped<ILectureGroupCourseRepository, LectureGroupCourseRepository>();
 builder.Services.AddScoped<ILectureAttendanceRepository, LectureAttendanceRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentCourseRepository, StudentCourseRepository>();
 
 builder.Services.AddScoped<ILectureService, LectureService>();
 builder.Services.AddScoped<ILectureGroupService, LectureGroupService>();
@@ -39,6 +43,7 @@ builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
+builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
 
 var app = builder.Build();
 

@@ -18,7 +18,9 @@ public class LectureRepository : ILectureRepository
     
     public async Task<List<Lecture>> GetAllByProfessor(string? professorId)
     {
-        return await _entities.Where(l => l.ProfessorId != null && l.ProfessorId.Equals(professorId)).ToListAsync();
+        return await _entities.Where(l => l.ProfessorId != null && l.ProfessorId.Equals(professorId))
+            .Include("Courses")
+            .ToListAsync();
     }
 
     public async Task<Lecture> GetLectureByProfessorId(string? professorId)

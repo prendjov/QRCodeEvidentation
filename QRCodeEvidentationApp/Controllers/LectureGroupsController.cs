@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 using QRCodeEvidentationApp.Service.Interface;
 
 namespace QRCodeEvidentationApp.Controllers
@@ -18,12 +20,23 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ICourseService _courseService;
         private readonly ILectureGroupService _lectureGroupService;
+        private readonly IProfessorService _professorService;
+        private readonly ILectureService _lectureService;
+        private readonly IStudentService _studentService;
 
-        public LectureGroupsController(ApplicationDbContext context, ICourseService courseService, ILectureGroupService lectureGroupService)
+        public LectureGroupsController(ApplicationDbContext context, 
+            ICourseService courseService, 
+            ILectureGroupService lectureGroupService, 
+            IProfessorService professorService,
+            ILectureService lectureService,
+            IStudentService studentService)
         {
             _context = context;
             _courseService = courseService;
             _lectureGroupService = lectureGroupService;
+            _professorService = professorService;
+            _lectureService = lectureService;
+            _studentService = studentService;
         }
 
         // GET: LectureGroups
@@ -45,8 +58,10 @@ namespace QRCodeEvidentationApp.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            string professorId = User.Identity.Name;
-            LectureGroupDTO data = await _lectureGroupService.PrepareForCreate(professorId);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor professor = _professorService.GetProfessorFromUserEmail(userEmail).Result;
+            
+            LectureGroupDTO data = await _lectureGroupService.PrepareForCreate(professor.Id);
 
             return View(data);
         }
@@ -160,6 +175,26 @@ namespace QRCodeEvidentationApp.Controllers
         private bool LectureGroupExists(string id)
         {
             return _context.LectureGroup.Any(e => e.Id == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAnalytics(string id)
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+            List<Lecture> lectures = new List<Lecture>();
+            lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
+            List<StudentCourse> students = new List<StudentCourse>();
+            students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
+            
+            List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
+            
+            List<string> lecturesByLectureGroup = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
+
+            LectureGroupAnalyticsDTO lectureGroupAnalyticsDto =
+                _lectureGroupService.CalculateLectureGroupAnalytics(lecturesByLectureGroup, students, lectures);
+            
+            return View(lectureGroupAnalyticsDto);
         }
     }
 }

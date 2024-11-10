@@ -1,0 +1,52 @@
+@model QRCodeEvidentationApp.Models.DTO.AnalyticsDTO.CourseAnalyticsDTO
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<h2>Course Analytics</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.lecture.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NumberOfAttendees)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AtProfessorNumberOfAttendees)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NotAtProfessorNumberOfAttendees)
+        </th>
+        
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.EachLectureAnalytics) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.lecture.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumberOfAttendees)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AtProfessorNumberOfAttendees)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NotAtProfessorNumberOfAttendees)
+            </td>
+        
+            <td>
+                <a asp-action="Details" asp-controller="Lectures" asp-route-id="@item.lectureId">Details</a> |
+                <a asp-action="GetLectureAnalytics" asp-controller="Lectures" asp-route-id="@item.lectureId">Analytics</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
