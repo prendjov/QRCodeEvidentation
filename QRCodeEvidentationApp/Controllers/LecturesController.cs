@@ -281,11 +281,21 @@ namespace QRCodeEvidentationApp.Controllers
             return container.PaddingVertical(0).PaddingHorizontal(0).Border(1).BorderColor(Colors.Black);
         }
 
+        private IContainer LateAttendanceStyle(IContainer container)
+        {
+            return container
+                .Background("#FF0000") // Set the background color to red
+                .PaddingVertical(0)
+                .PaddingHorizontal(0)
+                .Border(1)
+                .BorderColor("#000000");
+        }
+        
         [HttpGet]
         public IActionResult GetLectureAnalytics(string id)
         {
             List<LectureAttendance> lectureAttends = _lectureAttendanceService.GetLectureAttendance(id).Result;
-            
+            Lecture lecture = _lectureService.GetLectureById(id);
             // Generate the PDF in memory using QuestPDF
             byte[] pdfBytes;
             using (var memoryStream = new MemoryStream())
@@ -319,10 +329,20 @@ namespace QRCodeEvidentationApp.Controllers
                             // Add table rows from lecture attendance data
                             foreach (var attendance in lectureAttends)
                             {
-                                table.Cell().Element(CellStyle).Text(attendance?.StudentIndex);
-                                table.Cell().Element(CellStyle).Text(attendance?.Student?.Name);
-                                table.Cell().Element(CellStyle).Text(attendance?.Student?.LastName);
-                                table.Cell().Element(CellStyle).Text(attendance?.EvidentedAt.ToString());
+                                if (attendance?.EvidentedAt > lecture.ValidRegistrationUntil)
+                                {
+                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.StudentIndex);
+                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.Student?.Name);
+                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.Student?.LastName);
+                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.EvidentedAt.ToString());
+                                }
+                                else
+                                {
+                                    table.Cell().Element(CellStyle).Text(attendance?.StudentIndex);
+                                    table.Cell().Element(CellStyle).Text(attendance?.Student?.Name);
+                                    table.Cell().Element(CellStyle).Text(attendance?.Student?.LastName);
+                                    table.Cell().Element(CellStyle).Text(attendance?.EvidentedAt.ToString());
+                                }
                             }
                         });
 

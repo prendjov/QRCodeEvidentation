@@ -24,4 +24,9 @@ public class LectureAttendanceService : ILectureAttendanceService
 
         return await _lectureAttendanceRepository.GetLectureAttendancesByStudent(studentIndex);
     }
+
+    public LectureAttendance? FindStudentRegistration(string studentIndex, string lectureId)
+    {
+        return _lectureAttendanceRepository.FindStudentRegistration(studentIndex, lectureId);
+    }
 }
