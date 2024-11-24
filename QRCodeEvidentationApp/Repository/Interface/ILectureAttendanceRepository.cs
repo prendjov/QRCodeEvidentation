@@ -15,4 +15,6 @@ public interface ILectureAttendanceRepository
     public Task<List<LectureAttendance>> GetLectureAttendance(string? lectureId);
 
     public List<LectureAttendance> GetLectureAttendances(List<string> lectureIds);
+
+    public Task<List<LectureAttendance>> GetLectureAttendancesByStudent(string? studentIndex);
 }

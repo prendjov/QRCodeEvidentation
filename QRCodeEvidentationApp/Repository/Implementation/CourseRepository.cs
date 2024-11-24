@@ -79,5 +79,10 @@ namespace QRCodeEvidentationApp.Repository.Implementation
         {
             return await _context.LectureCourses.Where(l => l.CourseId.Equals(id)).Select(l => l.LectureId).ToListAsync();
         }
+
+        public async Task<List<Lecture>> GetLectureObjectForCourseId(long? id)
+        {
+            return await _context.LectureCourses.Where(l => l.CourseId.Equals(id)).Select(l => l.Lecture).ToListAsync();
+        }
     }
 }

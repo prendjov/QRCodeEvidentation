@@ -85,4 +85,9 @@ public class LectureRepository : ILectureRepository
 
         return createdLecture.Entity;
     }
+
+    public List<Lecture> GetLecturesByIds(List<string> lectureIds)
+    {
+        return _entities.Where(l => lectureIds.Contains(l.Id)).ToList();
+    }
 }
