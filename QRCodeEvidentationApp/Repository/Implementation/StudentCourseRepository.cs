@@ -29,6 +29,11 @@ public class StudentCourseRepository : IStudentCourseRepository
         return _entities.Where(x => x.ProfessorId.Equals(professorId) || x.AssistantId.Equals(professorId)).ToList();
     }
 
+    public List<StudentCourse> GetCoursesByStudentIndex(string studentIndex)
+    {
+        return _entities.Where(x => x.StudentStudentIndex == studentIndex).ToList();
+    }
+
     public List<Student> GetStudentsForCourse(long? courseId)
     {
         return _entities.Where(x => x.CourseId.Equals(courseId)).Select(x => x.Student).ToList();

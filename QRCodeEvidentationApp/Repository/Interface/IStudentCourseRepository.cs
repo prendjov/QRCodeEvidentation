@@ -8,5 +8,7 @@ public interface IStudentCourseRepository
 
     public List<StudentCourse> GetStudentsForProfessor(string professorId);
     
+    public List<StudentCourse> GetCoursesByStudentIndex(string studentIndex);
+    
     public List<Student> GetStudentsForCourse(long? courseId);
 }

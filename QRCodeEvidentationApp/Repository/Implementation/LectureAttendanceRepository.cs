@@ -39,6 +39,14 @@ public class LectureAttendanceRepository : ILectureAttendanceRepository
         return matchedLectureIds;
     }
 
+    public Task<List<LectureAttendance>> GetLectureByStudentId(string studentIndex)
+    {
+        return _entities.Where(l => l.StudentIndex == studentIndex)
+            .Include(l => l.Lecture)
+            .Include(l => l.Lecture.Professor)
+            .ToListAsync();
+    }
+
     public async Task<List<LectureAttendance>> GetLectureAttendancesByStudent(string? studentIndex)
     {
         return await _entities.Where(l => l.StudentIndex == studentIndex).ToListAsync();

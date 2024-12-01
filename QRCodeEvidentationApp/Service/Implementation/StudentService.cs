@@ -50,4 +50,9 @@ public class StudentService : IStudentService
     {
         return _studentCourseRepository.GetStudentsForCourse(courseId);
     }
+
+    public List<StudentCourse> GetCoursesForStudent(string studentIndex)
+    {
+        return _studentCourseRepository.GetCoursesByStudentIndex(studentIndex);
+    }
 }

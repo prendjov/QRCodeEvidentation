@@ -74,6 +74,11 @@ public class LectureService : ILectureService
         return lecture.Courses.Select(c => c.Course).ToList();
     }
 
+    public List<LectureCourses> GetUpcomingLecturesForStudent(List<StudentCourse> studentCourses)
+    {
+        return _lectureCourseRepository.GetUpcomingLecturesForStudent(studentCourses);
+    }
+
     public Lecture DisableLecture(string? lectureId)
     {
         Lecture forDisabeling = _lectureRepository.GetLectureById(lectureId).Result;
