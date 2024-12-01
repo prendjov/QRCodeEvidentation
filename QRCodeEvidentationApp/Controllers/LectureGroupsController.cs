@@ -42,8 +42,11 @@ namespace QRCodeEvidentationApp.Controllers
         // GET: LectureGroups
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.LectureGroup.Include(l => l.Professor);
-            return View(await applicationDbContext.ToListAsync());
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor professor = _professorService.GetProfessorFromUserEmail(userEmail).Result;
+
+            List<LectureGroup> lectureGroups = _lectureGroupService.ListByProfessor(professor.Id).Result;
+            return View(lectureGroups);
         }
 
         // GET: LectureGroups/Details/5
