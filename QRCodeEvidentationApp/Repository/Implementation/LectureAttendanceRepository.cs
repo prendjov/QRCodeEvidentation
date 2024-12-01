@@ -43,6 +43,7 @@ public class LectureAttendanceRepository : ILectureAttendanceRepository
     {
         return _entities.Where(l => l.StudentIndex == studentIndex)
             .Include(l => l.Lecture)
+            .Include(l => l.Lecture.Professor)
             .ToListAsync();
     }
 

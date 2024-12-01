@@ -53,14 +53,16 @@ public class LectureCoursesRepository : ILectureCoursesRepository
             .Select(sc => new { CourseId = sc.CourseId.Value, ProfessorId = sc.ProfessorId })
             .ToList();
 
-        // Query the LectureCourses table
+        // Bring LectureCourses into memory for filtering with the courseProfessorPairs
         var upcomingLectures = _entities
+            .Include(x => x.Lecture)
+            .Include(l => l.Lecture.Professor)
+            .AsEnumerable() // Force client-side evaluation
             .Where(lc => lc.CourseId.HasValue && lc.Lecture != null
                                               && courseProfessorPairs.Any(cp => 
                                                   cp.CourseId == lc.CourseId &&
                                                   cp.ProfessorId == lc.Lecture.ProfessorId)
                                               && lc.Lecture.StartsAt > DateTime.Now)
-            .Include(x => x.Lecture) // Only future lectures
             .ToList();
 
         return upcomingLectures;
