@@ -97,4 +97,6 @@ public interface ILectureService
     /// <param name="lectureId">The Lecture Id</param>
     /// <returns>The new courses that have been registered to the lecture</returns>
     public List<Course> AddLectureCoursesFromGroup(string lectureGroupId, string lectureId);
+
+    public List<LectureCourses> GetUpcomingLecturesForStudent(List<StudentCourse> studentCourses);
 }

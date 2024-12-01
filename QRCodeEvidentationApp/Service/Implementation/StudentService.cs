@@ -41,4 +41,9 @@ public class StudentService : IStudentService
     {
         return _studentCourseRepository.GetStudentsForProfessor(professorId);
     }
+
+    public List<StudentCourse> GetCoursesForStudent(string studentIndex)
+    {
+        return _studentCourseRepository.GetCoursesByStudentIndex(studentIndex);
+    }
 }

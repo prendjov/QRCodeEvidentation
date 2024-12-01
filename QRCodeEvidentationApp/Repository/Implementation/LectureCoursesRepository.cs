@@ -44,6 +44,25 @@ public class LectureCoursesRepository : ILectureCoursesRepository
         
         return ids;
     }
-    
-    // public List<
+
+    public List<LectureCourses> GetUpcomingLecturesForStudent(List<StudentCourse> studentCourses)
+    {
+        // Flatten the list of course and professor IDs from the student's courses
+        var courseProfessorPairs = studentCourses
+            .Where(sc => sc.CourseId.HasValue && !string.IsNullOrEmpty(sc.ProfessorId))
+            .Select(sc => new { CourseId = sc.CourseId.Value, ProfessorId = sc.ProfessorId })
+            .ToList();
+
+        // Query the LectureCourses table
+        var upcomingLectures = _entities
+            .Where(lc => lc.CourseId.HasValue && lc.Lecture != null
+                                              && courseProfessorPairs.Any(cp => 
+                                                  cp.CourseId == lc.CourseId &&
+                                                  cp.ProfessorId == lc.Lecture.ProfessorId)
+                                              && lc.Lecture.StartsAt > DateTime.Now)
+            .Include(x => x.Lecture) // Only future lectures
+            .ToList();
+
+        return upcomingLectures;
+    }
 }

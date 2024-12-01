@@ -17,4 +17,9 @@ public class LectureAttendanceService : ILectureAttendanceService
     {
         return _lectureAttendanceRepository.GetLectureAttendance(lectureId);
     }
+
+    public Task<List<LectureAttendance>> GetLectureAttendanceForStudent(string? studentId)
+    {
+        return _lectureAttendanceRepository.GetLectureByStudentId(studentId);
+    }
 }
