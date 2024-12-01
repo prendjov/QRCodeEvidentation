@@ -22,4 +22,7 @@ public interface IStudentService
     public List<StudentCourse> GetStudentsForProfessor(string professorId);
 
     public List<StudentCourse> GetCoursesForStudent(string studentIndex);
+    
+    
+    public List<Student> GetStudentsForCourse(long? courseId);
 }

@@ -17,18 +17,21 @@ namespace QRCodeEvidentationApp.Service.Implementation
         private readonly IProfessorRepository _professorRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
+        private readonly ILectureRepository _lectureRepository;
 
         public LectureGroupService(ILectureGroupRepository lectureGroupRepository,
             ILectureGroupCourseRepository lectureGroupCourseRepository, 
             IProfessorRepository professorRepository,
             ICourseRepository courseRepository,
-            ILectureAttendanceRepository lectureAttendanceRepository) 
+            ILectureAttendanceRepository lectureAttendanceRepository,
+            ILectureRepository lectureRepository) 
         {
             _lectureGroupCourseRepository = lectureGroupCourseRepository;
             _lectureGroupRepository = lectureGroupRepository;
             _professorRepository = professorRepository;
             _courseRepository = courseRepository;
             _lectureAttendanceRepository = lectureAttendanceRepository;
+            _lectureRepository = lectureRepository;
         }
         public async Task<LectureGroup> Create(LectureGroupDTO data)
         {
@@ -254,6 +257,11 @@ namespace QRCodeEvidentationApp.Service.Implementation
             }
 
             return lectureGroupAnalyticsDto;
+        }
+
+        public List<Lecture> GetLectures(List<string> lectureIds)
+        {
+            return _lectureRepository.GetLecturesByIds(lectureIds);
         }
     }
 }

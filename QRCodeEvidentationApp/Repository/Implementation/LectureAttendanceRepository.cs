@@ -45,4 +45,14 @@ public class LectureAttendanceRepository : ILectureAttendanceRepository
             .Include(l => l.Lecture)
             .ToListAsync();
     }
+
+    public async Task<List<LectureAttendance>> GetLectureAttendancesByStudent(string? studentIndex)
+    {
+        return await _entities.Where(l => l.StudentIndex == studentIndex).ToListAsync();
+    }
+
+    public LectureAttendance? FindStudentRegistration(string studentIndex, string lectureId)
+    {
+        return _entities.Where(l => l.StudentIndex == studentIndex && l.LectureId == lectureId).FirstOrDefault();
+    }
 }

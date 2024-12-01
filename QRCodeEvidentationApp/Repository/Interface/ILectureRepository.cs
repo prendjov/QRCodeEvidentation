@@ -53,4 +53,6 @@ public interface ILectureRepository
     /// <param name="lecture">The lecture that should be created.</param>
     /// <returns>The created lecture.</returns>
     public Task<Lecture> CreateNewLecture(Lecture lecture);
+    
+    public List<Lecture> GetLecturesByIds(List<string> lectureIds);
 }

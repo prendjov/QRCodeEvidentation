@@ -44,6 +44,7 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
+builder.Services.AddTransient<IGeneratePDFDocument, GeneratePDFDocument>();
 
 var app = builder.Build();
 

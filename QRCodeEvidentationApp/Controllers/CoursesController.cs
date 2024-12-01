@@ -11,6 +11,9 @@ using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO.AnalyticsDTO;
 using QRCodeEvidentationApp.Service.Interface;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace QRCodeEvidentationApp.Controllers
 {
@@ -21,18 +24,24 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ICourseService _courseService;
         private readonly ILectureService _lectureService;
         private readonly IStudentService _studentService;
+        private readonly ILectureAttendanceService _lectureAttendanceService;
+        private readonly IGeneratePDFDocument _generatePdfDocument;
 
         public CoursesController(ApplicationDbContext context,
             IProfessorService professorService,
             ICourseService courseService,
             ILectureService lectureService,
-            IStudentService studentService)
+            IStudentService studentService,
+            ILectureAttendanceService lectureAttendanceService,
+            IGeneratePDFDocument generatePdfDocument)
         {
             _context = context;
             _professorService = professorService;
             _courseService = courseService;
             _lectureService = lectureService;
             _studentService = studentService;
+            _lectureAttendanceService = lectureAttendanceService;
+            _generatePdfDocument = generatePdfDocument;
         }
 
         // GET: Courses
@@ -78,8 +87,51 @@ namespace QRCodeEvidentationApp.Controllers
             List<string?> lecturesForCourse = _courseService.GetLectureForCourseId(id);
 
             CourseAnalyticsDTO courseAnalyticsDto = _courseService.GetCourseStatistics(lectures, students, lecturesForCourse);
+
+            courseAnalyticsDto.courseId = id;
             
             return View(courseAnalyticsDto);
+        }
+
+        public async Task<IActionResult> GeneralAnalytics(long? id)
+        {
+            List<Lecture> lecturesForCourse = _courseService.GetLecturesForCourseId(id);
+
+            List<Student> students = _studentService.GetStudentsForCourse(id);
+            
+            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalytics = new List<AggregatedCourseAnalyticsDto>();
+            
+            foreach (Student student in students)
+            {
+                AggregatedCourseAnalyticsDto aggregatedCourseAnalyticsDto = new AggregatedCourseAnalyticsDto();
+                aggregatedCourseAnalyticsDto.Student = student;
+                aggregatedCourseAnalyticsDto.LectureAttendance = new List<LectureAttendanceAnalyticDto>();
+                List<LectureAttendance> lectureAttendancesForStudent =
+                    _lectureAttendanceService.GetLectureAttendanceForStudent(student).Result;
+
+                foreach (Lecture lecture in lecturesForCourse)
+                {
+                    LectureAttendanceAnalyticDto lectureAttendanceAnalyticDto = new LectureAttendanceAnalyticDto();
+                    lectureAttendanceAnalyticDto.Lecture = lecture;
+                    bool IsAttended = lectureAttendancesForStudent
+                        .Any(attendance => attendance.LectureId == lecture.Id);
+
+                    if (IsAttended)
+                    {
+                        lectureAttendanceAnalyticDto.IsPresent = 1;
+                    }
+                    else
+                    {
+                        lectureAttendanceAnalyticDto.IsPresent = 0;
+                    }
+
+                    aggregatedCourseAnalyticsDto.LectureAttendance.Add(lectureAttendanceAnalyticDto);
+                }
+                
+                aggregatedCourseAnalytics.Add(aggregatedCourseAnalyticsDto);
+            }
+            
+            return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalytics);
         }
 
         // // GET: Courses/Create

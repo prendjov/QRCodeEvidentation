@@ -35,7 +35,10 @@ namespace QRCodeEvidentationApp.Repository.Implementation
 
         public async Task<List<LectureGroupCourse>> ListByLectureGroupId(string lectureGroupId)
         {
-            return await _entities.Where(l => l.LectureGroupId == lectureGroupId).ToListAsync();
+            return await _entities
+                .Where(l => l.LectureGroupId == lectureGroupId)
+                .Include(l => l.Course) // Strongly-typed Include
+                .ToListAsync();
         }
     }
 }

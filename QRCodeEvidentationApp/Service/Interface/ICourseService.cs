@@ -35,5 +35,7 @@ public interface ICourseService
     public List<string?> GetLectureForCourseId(long? courseId);
     
     public CourseAnalyticsDTO GetCourseStatistics(List<Lecture> lecturesForProfessor, List<StudentCourse> studentCourses, List<string?> lecturesForCourse);
+    
+    public List<Lecture> GetLecturesForCourseId(long? courseId);
 
 }
