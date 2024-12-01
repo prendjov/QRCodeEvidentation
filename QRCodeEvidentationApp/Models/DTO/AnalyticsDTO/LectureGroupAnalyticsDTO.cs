@@ -13,4 +13,6 @@ public class LectureGroupAnalyticsDTO
     public int AtProfessorNumberOfAttendees = 0;
 
     public int NotAtProfessorNumberOfAttendees = 0;
+    
+    public string groupId { get; set; }
 }

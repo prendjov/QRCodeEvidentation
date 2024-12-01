@@ -125,4 +125,9 @@ public class CourseService : ICourseService
 
         return courseAnalyticsDto;
     }
+
+    public List<Lecture> GetLecturesForCourseId(long? courseId)
+    {
+        return _courseRepository.GetLectureObjectForCourseId(courseId).Result;
+    }
 }

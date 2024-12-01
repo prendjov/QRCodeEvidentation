@@ -13,4 +13,6 @@ public class CourseAnalyticsDTO
     public int AtProfessorNumberOfAttendees = 0;
 
     public int NotAtProfessorNumberOfAttendees = 0;
+    
+    public long? courseId { get; set; }
 }

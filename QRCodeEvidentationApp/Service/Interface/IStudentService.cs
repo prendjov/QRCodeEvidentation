@@ -20,4 +20,7 @@ public interface IStudentService
     public bool CheckStudentInCourse(string studentIndex, List<long?> courseId);
     
     public List<StudentCourse> GetStudentsForProfessor(string professorId);
+    
+    
+    public List<Student> GetStudentsForCourse(long? courseId);
 }

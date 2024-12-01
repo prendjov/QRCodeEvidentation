@@ -8,11 +8,15 @@ public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentCourseRepository _studentCourseRepository;
+    private readonly ILectureGroupCourseRepository _lectureGroupCourseRepository;
     
-    public StudentService(IStudentRepository studentRepository, IStudentCourseRepository studentCourseRepository)
+    public StudentService(IStudentRepository studentRepository,
+        IStudentCourseRepository studentCourseRepository,
+        ILectureGroupCourseRepository lectureGroupCourseRepository)
     {
         _studentRepository = studentRepository;
         _studentCourseRepository = studentCourseRepository;
+        _lectureGroupCourseRepository = lectureGroupCourseRepository;
     }
     
     public Task<Student> GetStudentFromUserEmail(string email)
@@ -40,5 +44,10 @@ public class StudentService : IStudentService
     public List<StudentCourse> GetStudentsForProfessor(string professorId)
     {
         return _studentCourseRepository.GetStudentsForProfessor(professorId);
+    }
+
+    public List<Student> GetStudentsForCourse(long? courseId)
+    {
+        return _studentCourseRepository.GetStudentsForCourse(courseId);
     }
 }
