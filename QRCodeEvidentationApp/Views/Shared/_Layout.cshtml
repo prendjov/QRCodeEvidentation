@@ -33,19 +33,19 @@
                                 if (roles.Contains("PROFESSOR"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Professor">Professor Page</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Lectures" asp-action="Index">Lectures</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Lectures">Lectures</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="LectureGroups" asp-action="Index">Course Groups</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="LectureGroups">Course Groups</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Course Groups</a>
                                     </li>
                                 }
                                 else if (roles.Contains("STUDENT"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Student">Student Page</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Index">Student Page</a>
                                     </li>
                                 }
                             }

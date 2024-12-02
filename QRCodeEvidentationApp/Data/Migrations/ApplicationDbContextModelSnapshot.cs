@@ -732,7 +732,8 @@ namespace QRCodeEvidentationApp.Data.Migrations
                 {
                     b.HasOne("QRCodeEvidentationApp.Models.Lecture", "Lecture")
                         .WithMany()
-                        .HasForeignKey("LectureId");
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("QRCodeEvidentationApp.Models.Student", "Student")
                         .WithMany()

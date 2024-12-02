@@ -40,6 +40,14 @@ namespace QRCodeEvidentationApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<LectureAttendance>(entity =>
+            {
+                entity.HasOne(e => e.Lecture)
+                    .WithMany()
+                    .HasForeignKey(e => e.LectureId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            
             modelBuilder.Entity<CourseAssistant>(entity =>
             {
                 // Configure the relationship with Professor (Assistant)

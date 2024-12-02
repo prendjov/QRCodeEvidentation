@@ -15,7 +15,7 @@ using QuestPDF.Infrastructure;
 
 namespace QRCodeEvidentationApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "PROFESSOR")]
     public class LecturesController : Controller
     {
         private readonly ILectureService _lectureService;
@@ -129,6 +129,12 @@ namespace QRCodeEvidentationApp.Controllers
             
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
 
+            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+            if (lectureProfessor == null)
+            {
+                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+            }
+
             dto.CoursesProfessor = await _courseService.GetCoursesForProfessor(loggedInProfessor.Id);
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
 
@@ -148,8 +154,19 @@ namespace QRCodeEvidentationApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(string id, LectureEditDto lectureDto)
+        public async Task<IActionResult> Edit(string id, LectureEditDto lectureDto)
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+            if (lectureProfessor == null)
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture." });
+            }
+
             if (id != lectureDto.lectureId)
             {
                 return NotFound();
@@ -176,21 +193,27 @@ namespace QRCodeEvidentationApp.Controllers
 
                 if(lectureDto.GroupCourseId != null)
                     _lectureService.AddLectureCoursesFromGroup(lectureDto.GroupCourseId, id);
-
-
-                
-
                 return RedirectToAction(nameof(Index));
             }
             return View(lectureDto);
         }
         
         // GET: Lecture/Delete/5
-        public IActionResult Delete(string? id)
+        public async Task<IActionResult> Delete(string? id)
         {
             if (id == null)
             {
                 return NotFound();
+            }
+            
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+            if (lectureProfessor == null)
+            {
+                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
             }
 
             var lecture = _lectureService.GetLectureById(id);
@@ -201,7 +224,7 @@ namespace QRCodeEvidentationApp.Controllers
         // POST: Lecture/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -210,6 +233,16 @@ namespace QRCodeEvidentationApp.Controllers
 
             try
             {
+                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+                Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+                Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+                if (lectureProfessor == null)
+                {
+                    return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+                }
+
                 _lectureService.DeleteLecture(id);
 
                 return Json(new { success = true, message = "Lecture deleted successfully." });
@@ -228,7 +261,7 @@ namespace QRCodeEvidentationApp.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DisableLecture(string id)
+        public async Task<IActionResult> DisableLecture(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -237,6 +270,16 @@ namespace QRCodeEvidentationApp.Controllers
 
             try
             {
+                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+                Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+                Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+                if (lectureProfessor == null)
+                {
+                    return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+                }
+                
                 Lecture l = _lectureService.DisableLecture(id);
                 return Json(new { success = true, message = "Lecture disabled successfully.", validRegistrationUntil = l.ValidRegistrationUntil});
             }
@@ -247,8 +290,18 @@ namespace QRCodeEvidentationApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult GenerateQRCode(string id)
+        public async Task<IActionResult> GenerateQRCode(string id)
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+            if (lectureProfessor == null)
+            {
+                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+            }
+            
             // Directory to save the QR code image
             string directoryPath = "/home/vane/Desktop";
             string fileName = $"QRCode_{id}.png"; // Define the filename
@@ -275,6 +328,13 @@ namespace QRCodeEvidentationApp.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        public IActionResult DisplayError(string error)
+        {
+            ErrorMessageDTO errorMessageDto = new ErrorMessageDTO();
+            errorMessageDto.Message = error;
+            return View(errorMessageDto);
+        }
         
         private IContainer CellStyle(IContainer container)
         {
@@ -292,8 +352,19 @@ namespace QRCodeEvidentationApp.Controllers
         }
         
         [HttpGet]
-        public IActionResult GetLectureAnalytics(string id)
+        public async Task<IActionResult> GetLectureAnalytics(string id)
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
+            if (lectureProfessor == null)
+            {
+                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+            }
+            
+            
             List<LectureAttendance> lectureAttends = _lectureAttendanceService.GetLectureAttendance(id).Result;
             Lecture lecture = _lectureService.GetLectureById(id);
             // Generate the PDF in memory using QuestPDF

@@ -27,4 +27,8 @@ public interface ICourseRepository
     public Task<List<string?>> GetLectureForCourseId(long? id);
 
     public Task<List<Lecture>> GetLectureObjectForCourseId(long? id);
+    
+    public Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId);
+
+    public Task<CourseAssistant?> GetCourseAssistantCombo(long? id, string? teacherId);
 }

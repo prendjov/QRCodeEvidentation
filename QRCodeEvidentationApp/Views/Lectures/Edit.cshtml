@@ -51,14 +51,7 @@
                     <label for="GroupCourseId">Select Group of Course</label>
                     @Html.DropDownListFor(model => model.GroupCourseId, new SelectList(Model.Groups, "Id", "Name"), "Select Group of Courses", new { @class = "form-control", id = "Groups" })
                 </div>
-                <div class="form-group" id="courseAssistantGroup" style="display: none;">
-                    <label for="CoursesAssistant">Select Assistant</label>
-                    @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesAssistant" })
-                </div>
-                <div class="form-group" id="courseProfessorGroup" style="display: none;">
-                    <label for="CoursesProfessor">Select Professor</label>
-                    @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesProfessor" })
-                </div>
+
                 <div class="form-group">
                     <input type="submit" id="submitBtn" value="Save" class="btn btn-primary" />
                 </div>
@@ -77,8 +70,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var typeDropdown = document.getElementById("Type");
-            var courseAssistantGroup = document.getElementById("courseAssistantGroup");
-            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
             var courseGroups = document.getElementById("courseGroups");
             var errorMessage = document.getElementById("errorMessage");
             var startsAtInput = document.getElementById("StartsAt");
@@ -153,7 +144,7 @@
             function updateRoomDropdown(availableRooms) {
                 // Clear existing options
                 var defaultRoomName = '@Model.lecture.RoomName';
-
+                console.log(defaultRoomName)
                 roomDropdown.innerHTML = '';
 
                 // Populate new options
@@ -170,28 +161,6 @@
                     roomDropdown.appendChild(option);
                 });
             }
-
-
-            function displayCorrectDropdown(selectedValue) {
-                courseAssistantGroup.style.display = "none";
-                courseProfessorGroup.style.display = "none";
-
-                if (selectedValue === "Аудиториски") {
-                    courseAssistantGroup.style.display = "block";
-                    courseGroups.style.display = "block";
-                } else if (selectedValue === "Предавања") {
-                    courseProfessorGroup.style.display = "block";
-                    courseGroups.style.display = "block";
-                }
-            }
-
-            // Display the correct dropdown on page load based on the selected value
-            displayCorrectDropdown(typeDropdown.value);
-
-            // Add event listener for dropdown change
-            typeDropdown.addEventListener("change", function () {
-                displayCorrectDropdown(this.value);
-            });
 
             function validateDates() {
                 var startsAt = new Date(startsAtInput.value);

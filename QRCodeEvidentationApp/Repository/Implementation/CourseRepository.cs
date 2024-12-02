@@ -84,5 +84,17 @@ namespace QRCodeEvidentationApp.Repository.Implementation
         {
             return await _context.LectureCourses.Where(l => l.CourseId.Equals(id)).Select(l => l.Lecture).ToListAsync();
         }
+
+        public async Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId)
+        {
+            return await _context.CourseProfessors.Where(x => x.ProfessorId == teacherId && x.CourseId == id)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<CourseAssistant?> GetCourseAssistantCombo(long? id, string? teacherId)
+        {
+            return await _context.CourseAssistants.Where(x => x.AssistantId == teacherId && x.CourseId == id)
+                .FirstOrDefaultAsync();
+        }
     }
 }

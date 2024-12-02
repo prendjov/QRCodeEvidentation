@@ -15,6 +15,7 @@ using QRCodeEvidentationApp.Service.Interface;
 
 namespace QRCodeEvidentationApp.Controllers
 {
+    [Authorize(Roles = "PROFESSOR")]
     public class LectureGroupsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -45,6 +46,15 @@ namespace QRCodeEvidentationApp.Controllers
             _generatePdfDocument = generatePdfDocument;
         }
 
+        private async Task<bool> IsUserCreatorOfLectureGroup(string lectureGroupId)
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var professor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+    
+            var lectureGroup = await _lectureGroupService.Get(lectureGroupId);
+            return lectureGroup?.ProfessorId == professor.Id;
+        }
+        
         // GET: LectureGroups
         public async Task<IActionResult> Index()
         {
@@ -58,6 +68,12 @@ namespace QRCodeEvidentationApp.Controllers
         // GET: LectureGroups/Details/5
         public async Task<IActionResult> Details(string id)
         {
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
+            
             LectureGroup lecture = await _lectureGroupService.Get(id);
 
             return View(lecture);
@@ -101,6 +117,12 @@ namespace QRCodeEvidentationApp.Controllers
             {
                 return NotFound();
             }
+            
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
 
             var lectureGroup = await _context.LectureGroup.FindAsync(id);
             if (lectureGroup == null)
@@ -121,6 +143,12 @@ namespace QRCodeEvidentationApp.Controllers
             if (id != lectureGroup.Id)
             {
                 return NotFound();
+            }
+            
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
             }
 
             if (ModelState.IsValid)
@@ -154,6 +182,12 @@ namespace QRCodeEvidentationApp.Controllers
             {
                 return NotFound();
             }
+            
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
 
             var lectureGroup = await _context.LectureGroup
                 .Include(l => l.Professor)
@@ -176,6 +210,12 @@ namespace QRCodeEvidentationApp.Controllers
             {
                 _context.LectureGroup.Remove(lectureGroup);
             }
+            
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -189,6 +229,12 @@ namespace QRCodeEvidentationApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAnalytics(string id)
         {
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
+            
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
             List<Lecture> lectures = new List<Lecture>();
@@ -209,6 +255,12 @@ namespace QRCodeEvidentationApp.Controllers
         
         public async Task<IActionResult> GeneralAnalytics(string id)
         {
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
+            
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
             List<Lecture> lectures = new List<Lecture>();
@@ -261,6 +313,13 @@ namespace QRCodeEvidentationApp.Controllers
             }
             
             return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalytics);
+        }
+        
+        public IActionResult DisplayError(string error)
+        {
+            ErrorMessageDTO errorMessageDto = new ErrorMessageDTO();
+            errorMessageDto.Message = error;
+            return View(errorMessageDto);
         }
     }
 }

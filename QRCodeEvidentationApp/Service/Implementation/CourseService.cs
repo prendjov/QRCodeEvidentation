@@ -130,4 +130,23 @@ public class CourseService : ICourseService
     {
         return _courseRepository.GetLectureObjectForCourseId(courseId).Result;
     }
+
+    public bool ProfessorAtCourse(long? courseId, string? professorId)
+    {
+        var courseProfessor = _courseRepository.GetCourseProfessorCombo(courseId, professorId).Result;
+
+        if (courseProfessor != null)
+        {
+            return true;
+        }
+        
+        var courseAssistant = _courseRepository.GetCourseAssistantCombo(courseId, professorId).Result;
+
+        if (courseAssistant != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
