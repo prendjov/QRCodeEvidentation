@@ -109,72 +109,7 @@ namespace QRCodeEvidentationApp.Controllers
 
             return View(data);
         }
-
-        // GET: LectureGroups/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            
-            if (!await IsUserCreatorOfLectureGroup(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "The logged in professor doesn't have access to this lecture group." });
-            }
-
-            var lectureGroup = await _context.LectureGroup.FindAsync(id);
-            if (lectureGroup == null)
-            {
-                return NotFound();
-            }
-            ViewData["ProfessorId"] = new SelectList(_context.Professors, "Id", "Id", lectureGroup.ProfessorId);
-            return View(lectureGroup);
-        }
-
-        // POST: LectureGroups/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,ProfessorId")] LectureGroup lectureGroup)
-        {
-            if (id != lectureGroup.Id)
-            {
-                return NotFound();
-            }
-            
-            if (!await IsUserCreatorOfLectureGroup(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "The logged in professor doesn't have access to this lecture group." });
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(lectureGroup);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LectureGroupExists(lectureGroup.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ProfessorId"] = new SelectList(_context.Professors, "Id", "Id", lectureGroup.ProfessorId);
-            return View(lectureGroup);
-        }
-
+        
         // GET: LectureGroups/Delete/5
         public async Task<IActionResult> Delete(string id)
         {

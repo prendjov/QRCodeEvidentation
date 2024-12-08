@@ -1,71 +1,50 @@
 @model IEnumerable<QRCodeEvidentationApp.Models.Lecture>
 
 @{
-ViewData["Title"] = "Index";
-Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Lectures";
 }
 
-<h1>Index</h1>
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="CreateView">Create New</a>
+<p class="text-end">
+    <a asp-action="CreateView" class="btn btn-success">Create New Lecture</a>
 </p>
-<table class="table">
-    <thead>
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.StartsAt)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Type)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ValidRegistrationUntil)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Room)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Professor)
-        </th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model) {
-    <tr id="lecture-row-@item.Id">
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.StartsAt)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Type)
-        </td>
-        <td id="validRegistrationUntil">
-            @Html.DisplayFor(modelItem => item.ValidRegistrationUntil)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.RoomName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Professor.Id)
-        </td>
-        <td>
-            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            <button class="delete-lecture-btn btn btn-primary" data-delete-lecture-id="@item.Id">Delete</button> |
-            <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@item.Id" data-valid-registration-until="@item.ValidRegistrationUntil">Disable Lecture</button>
-            <a asp-action="GetLectureAnalytics" asp-route-id="@item.Id" class="btn btn-primary">Analytics</a>
-        </td>
-    </tr>
-    }
-    </tbody>
-</table>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Title)</th>
+                <th>@Html.DisplayNameFor(model => model.StartsAt)</th>
+                <th>@Html.DisplayNameFor(model => model.Type)</th>
+                <th>@Html.DisplayNameFor(model => model.ValidRegistrationUntil)</th>
+                <th>@Html.DisplayNameFor(model => model.RoomName)</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr id="lecture-row-@item.Id">
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.StartsAt)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                    <td id="validRegistrationUntil">@Html.DisplayFor(modelItem => item.ValidRegistrationUntil)</td>
+                    <td>@Html.DisplayFor(modelItem => item.RoomName)</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Details</a>
+                            <button class="btn btn-sm btn-danger m-1 delete-lecture-btn" data-delete-lecture-id="@item.Id">Delete</button>
+                            <button class="btn btn-sm btn-warning m-1 disable-lecture-btn" data-lecture-id="@item.Id" data-valid-registration-until="@item.ValidRegistrationUntil">Disable Lecture</button>
+                            <a asp-action="GetLectureAnalytics" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Analytics</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
     <script>

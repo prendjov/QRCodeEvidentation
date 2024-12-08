@@ -252,12 +252,6 @@ namespace QRCodeEvidentationApp.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        [HttpGet]
-        public IActionResult SelectDates()
-        {
-            LectureDto dto = new LectureDto();
-            return View(dto);
-        }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
