@@ -3,82 +3,81 @@
 @model QRCodeEvidentationApp.Models.DTO.LectureEditDto
 
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+ViewData["Title"] = "Edit Lecture";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
 
-<h4>Lecture</h4>
+<h4 class="mb-4">Edit Lecture</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="row justify-content-center">
+    <div class="col-md-6">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="lecture.Id" />
             <input type="hidden" asp-for="lectureId" />
             <input type="hidden" asp-for="lecture.ProfessorId" />
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="lecture.Title" class="control-label"></label>
                 <input asp-for="lecture.Title" class="form-control" />
                 <span asp-validation-for="lecture.Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="lecture.StartsAt" class="control-label"></label>
                 <input asp-for="lecture.StartsAt" id="StartsAt" class="form-control" />
                 <span class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="lecture.EndsAt" class="control-label"></label>
                 <input asp-for="lecture.EndsAt" id="EndsAt" class="form-control" />
                 <span class="text-danger"></span>
             </div>
+
             <div id="lectureDetails">
-                <div class="form-group">
+                <div class="form-group mb-3">
                     <label for="Room">Select Room</label>
                     <select id="RoomId" class="form-control" asp-for="lecture.RoomName"></select>
                 </div>
-                <div class="form-group">
+
+                <div class="form-group mb-3">
                     <label for="Type">Select Type</label>
                     @Html.DropDownListFor(model => model.lecture.Type, new SelectList(Model.Type, Model.lecture.Type), new { @class = "form-control", id = "Type" })
                 </div>
-                <div class="form-group">
+
+                <div class="form-group mb-3">
                     <label asp-for="lecture.ValidRegistrationUntil" class="control-label"></label>
                     <input asp-for="lecture.ValidRegistrationUntil" id="validRegistrationUntil" class="form-control" />
                     <span class="text-danger"></span>
                 </div>
-                <div class="form-group" id="courseGroups">
+
+                <div class="form-group mb-3" id="courseGroups">
                     <label for="GroupCourseId">Select Group of Course</label>
                     @Html.DropDownListFor(model => model.GroupCourseId, new SelectList(Model.Groups, "Id", "Name"), "Select Group of Courses", new { @class = "form-control", id = "Groups" })
                 </div>
-                <div class="form-group" id="courseAssistantGroup" style="display: none;">
-                    <label for="CoursesAssistant">Select Assistant</label>
-                    @Html.DropDownListFor(model => model.CourseAssistantId, new SelectList(Model.CoursesAssistant, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesAssistant" })
+                
+                <!-- Submit Button -->
+                <div class="form-group text-center mt-4">
+                    <input type="submit" value="Save" id="submitBtn" class="btn btn-primary w-100" />
                 </div>
-                <div class="form-group" id="courseProfessorGroup" style="display: none;">
-                    <label for="CoursesProfessor">Select Professor</label>
-                    @Html.DropDownListFor(model => model.CourseProfessorId, new SelectList(Model.CoursesProfessor, "Id", "Course.LastNameRegex", Model.lecture.ProfessorId), new { @class = "form-control", id = "CoursesProfessor" })
-                </div>
-                <div class="form-group">
-                    <input type="submit" id="submitBtn" value="Save" class="btn btn-primary" />
-                </div>
-                <!-- Error message display -->
             </div>
+
             <p id="errorMessage" style="color: red;"></p>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="text-center">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var typeDropdown = document.getElementById("Type");
-            var courseAssistantGroup = document.getElementById("courseAssistantGroup");
-            var courseProfessorGroup = document.getElementById("courseProfessorGroup");
             var courseGroups = document.getElementById("courseGroups");
             var errorMessage = document.getElementById("errorMessage");
             var startsAtInput = document.getElementById("StartsAt");
@@ -153,7 +152,7 @@
             function updateRoomDropdown(availableRooms) {
                 // Clear existing options
                 var defaultRoomName = '@Model.lecture.RoomName';
-
+                console.log(defaultRoomName)
                 roomDropdown.innerHTML = '';
 
                 // Populate new options
@@ -170,28 +169,6 @@
                     roomDropdown.appendChild(option);
                 });
             }
-
-
-            function displayCorrectDropdown(selectedValue) {
-                courseAssistantGroup.style.display = "none";
-                courseProfessorGroup.style.display = "none";
-
-                if (selectedValue === "Аудиториски") {
-                    courseAssistantGroup.style.display = "block";
-                    courseGroups.style.display = "block";
-                } else if (selectedValue === "Предавања") {
-                    courseProfessorGroup.style.display = "block";
-                    courseGroups.style.display = "block";
-                }
-            }
-
-            // Display the correct dropdown on page load based on the selected value
-            displayCorrectDropdown(typeDropdown.value);
-
-            // Add event listener for dropdown change
-            typeDropdown.addEventListener("change", function () {
-                displayCorrectDropdown(this.value);
-            });
 
             function validateDates() {
                 var startsAt = new Date(startsAtInput.value);

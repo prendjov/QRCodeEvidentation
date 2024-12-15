@@ -99,4 +99,8 @@ public interface ILectureService
     public List<Course> AddLectureCoursesFromGroup(string lectureGroupId, string lectureId);
 
     public List<LectureCourses> GetUpcomingLecturesForStudent(List<StudentCourse> studentCourses);
+
+    public bool CheckIfLectureEnded(string id, DateTime registrationTime);
+
+    public bool CheckIfLectureStarted(string id, DateTime registrationTime);
 }

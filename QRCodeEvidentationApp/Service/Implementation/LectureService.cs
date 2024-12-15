@@ -79,6 +79,30 @@ public class LectureService : ILectureService
         return _lectureCourseRepository.GetUpcomingLecturesForStudent(studentCourses);
     }
 
+    public bool CheckIfLectureEnded(string id, DateTime registrationTime)
+    {
+        Lecture lecture = _lectureRepository.GetLectureById(id).Result;
+
+        if (lecture.EndsAt < registrationTime)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool CheckIfLectureStarted(string id, DateTime registrationTime)
+    {
+        Lecture lecture = _lectureRepository.GetLectureById(id).Result;
+
+        if (lecture.StartsAt < registrationTime)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public Lecture DisableLecture(string? lectureId)
     {
         Lecture forDisabeling = _lectureRepository.GetLectureById(lectureId).Result;

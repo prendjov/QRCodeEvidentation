@@ -60,6 +60,18 @@ public class StudentController : Controller
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
         Student student = _studentService.GetStudentFromUserEmail(userEmail).Result;
 
+        if (_lectureService.CheckIfLectureEnded(id, DateTime.Now))
+        {
+            message.Message += "The lecture ended.";
+            return View(message);
+        }
+
+        if (!_lectureService.CheckIfLectureStarted(id, DateTime.Now))
+        {
+            message.Message += "The lecture hasn't started yet.";
+            return View(message);
+        }
+
         List<long?> courseIds = _courseService.GetCoursesIdByLectureId(id);
 
         bool inCourse = _studentService.CheckStudentInCourse(student.StudentIndex, courseIds);

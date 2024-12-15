@@ -1,52 +1,43 @@
 @model QRCodeEvidentationApp.Models.DTO.AnalyticsDTO.LectureGroupAnalyticsDTO
 
 @{
-    ViewBag.Title = "title";
-    Layout = "_Layout";
+ViewBag.Title = "Lecture Group Analytics";
+Layout = "_Layout";
 }
 
-<h2>Lecture Group Analytics</h2>
-<a asp-action="GeneralAnalytics" asp-controller="LectureGroups" asp-route-id="@Model.groupId">Aggregated analytics</a>
-<table class="table">
-    <thead>
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.lecture.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.NumberOfAttendees)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AtProfessorNumberOfAttendees)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.NotAtProfessorNumberOfAttendees)
-        </th>
-        
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model.EachLectureAnalytics) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.lecture.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.NumberOfAttendees)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AtProfessorNumberOfAttendees)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.NotAtProfessorNumberOfAttendees)
-        </td>
-        
-        <td>
-            <a asp-action="Details" asp-controller="Lectures" asp-route-id="@item.lectureId">Details</a> |
-            <a asp-action="GetLectureAnalytics" asp-controller="Lectures" asp-route-id="@item.lectureId">Analytics</a>
-        </td>
-    </tr>
-    }
-    </tbody>
-</table>
+<h1 class="text-center my-4">Lecture Group Analytics</h1>
+
+<p class="text-end">
+    <a asp-action="GeneralAnalytics" asp-controller="LectureGroups" asp-route-id="@Model.groupId" class="btn btn-primary">Aggregated Analytics</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.lecture.Title)</th>
+            <th>@Html.DisplayNameFor(model => model.NumberOfAttendees)</th>
+            <th>@Html.DisplayNameFor(model => model.AtProfessorNumberOfAttendees)</th>
+            <th>@Html.DisplayNameFor(model => model.NotAtProfessorNumberOfAttendees)</th>
+            <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.EachLectureAnalytics)
+        {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.lecture.Title)</td>
+            <td>@Html.DisplayFor(modelItem => item.NumberOfAttendees)</td>
+            <td>@Html.DisplayFor(modelItem => item.AtProfessorNumberOfAttendees)</td>
+            <td>@Html.DisplayFor(modelItem => item.NotAtProfessorNumberOfAttendees)</td>
+            <td class="text-center">
+                <div class="btn-group" role="group">
+                    <a asp-action="Details" asp-controller="Lectures" asp-route-id="@item.lectureId" class="btn btn-sm btn-primary m-1">Details</a>
+                    <a asp-action="GetLectureAnalytics" asp-controller="Lectures" asp-route-id="@item.lectureId" class="btn btn-sm btn-primary m-1">Analytics</a>
+                </div>
+            </td>
+        </tr>
+        }
+        </tbody>
+    </table>
+</div>

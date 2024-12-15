@@ -93,27 +93,36 @@ public class CourseService : ICourseService
         
         foreach (var group in groupedAttendances)
         {
-            string lectureId = group.Key;
-            List<LectureAttendance> attendances = group.Value; // This is the list of LectureAttendance records for that LectureId
-            int AtProfessor = 0;
-            int notAtProfessor = 0;
-            foreach (var attendance in attendances)
+            try
             {
-                if (studentsAtProfessor.Contains(attendance.StudentIndex))
+                string lectureId = group.Key;
+                List<LectureAttendance>
+                    attendances = group.Value; // This is the list of LectureAttendance records for that LectureId
+                int AtProfessor = 0;
+                int notAtProfessor = 0;
+                foreach (var attendance in attendances)
                 {
-                    AtProfessor += 1;
-                    continue;
-                }
-                notAtProfessor += 1;
-            }
+                    if (studentsAtProfessor.Contains(attendance.StudentIndex))
+                    {
+                        AtProfessor += 1;
+                        continue;
+                    }
 
-            CourseAnalyticsDTO analyticsDtoForLecture = new CourseAnalyticsDTO();
-            analyticsDtoForLecture.NumberOfAttendees = attendances.Count();
-            analyticsDtoForLecture.AtProfessorNumberOfAttendees = AtProfessor;
-            analyticsDtoForLecture.NotAtProfessorNumberOfAttendees = notAtProfessor;
-            analyticsDtoForLecture.lectureId = lectureId;
-            analyticsDtoForLecture.lecture = lectureDictionary[lectureId];
-            courseAnalyticsDto.EachLectureAnalytics.Add(analyticsDtoForLecture);
+                    notAtProfessor += 1;
+                }
+
+                CourseAnalyticsDTO analyticsDtoForLecture = new CourseAnalyticsDTO();
+                analyticsDtoForLecture.NumberOfAttendees = attendances.Count();
+                analyticsDtoForLecture.AtProfessorNumberOfAttendees = AtProfessor;
+                analyticsDtoForLecture.NotAtProfessorNumberOfAttendees = notAtProfessor;
+                analyticsDtoForLecture.lectureId = lectureId;
+                analyticsDtoForLecture.lecture = lectureDictionary[lectureId];
+                courseAnalyticsDto.EachLectureAnalytics.Add(analyticsDtoForLecture);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing attendance for student");
+            }
         }
 
         foreach (var analytic in courseAnalyticsDto.EachLectureAnalytics)
@@ -129,5 +138,24 @@ public class CourseService : ICourseService
     public List<Lecture> GetLecturesForCourseId(long? courseId)
     {
         return _courseRepository.GetLectureObjectForCourseId(courseId).Result;
+    }
+
+    public bool ProfessorAtCourse(long? courseId, string? professorId)
+    {
+        var courseProfessor = _courseRepository.GetCourseProfessorCombo(courseId, professorId).Result;
+
+        if (courseProfessor != null)
+        {
+            return true;
+        }
+        
+        var courseAssistant = _courseRepository.GetCourseAssistantCombo(courseId, professorId).Result;
+
+        if (courseAssistant != null)
+        {
+            return true;
+        }
+
+        return false;
     }
 }
