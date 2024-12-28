@@ -103,4 +103,6 @@ public interface ILectureService
     public bool CheckIfLectureEnded(string id, DateTime registrationTime);
 
     public bool CheckIfLectureStarted(string id, DateTime registrationTime);
+    
+    public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures);
 }

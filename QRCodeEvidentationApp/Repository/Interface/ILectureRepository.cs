@@ -55,4 +55,7 @@ public interface ILectureRepository
     public Task<Lecture> CreateNewLecture(Lecture lecture);
     
     public List<Lecture> GetLecturesByIds(List<string> lectureIds);
+
+    public List<Lecture> GetLecturesForProfessorPaginated(string professorId, int page, int pageSize,
+        out int totalLectures);
 }

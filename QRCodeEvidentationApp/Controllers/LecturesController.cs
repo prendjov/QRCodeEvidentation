@@ -41,11 +41,11 @@ namespace QRCodeEvidentationApp.Controllers
         }
 
         // GET: Lecture
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
             // take the logged in user
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            
+    
             // Get the logged in user's roles
             var userRoles = User.Claims
                 .Where(c => c.Type == ClaimTypes.Role)
@@ -54,14 +54,32 @@ namespace QRCodeEvidentationApp.Controllers
 
             List<Lecture> lectures = null;
             bool isProfessor = User.IsInRole("PROFESSOR");
+            int totalLectures = 0; // Variable to store the total number of lectures
+
             if (isProfessor)
             {
                 Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-                lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
+        
+                // Get the paginated lectures and total lecture count
+                lectures = _lectureService.GetLecturesForProfessorPaginated(loggedInProfessor.Id, page, pageSize, out totalLectures);
             }
 
-            return View(lectures);
+            // Calculate total pages based on total lectures and page size
+            var totalPages = (int)Math.Ceiling(totalLectures / (double)pageSize);
+
+            // Pass data to the view including pagination metadata
+            var model = new PaginatedLecturesViewModel
+            {
+                Lectures = lectures,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalLectures = totalLectures
+            };
+
+            return View(model);
         }
+
 
         // GET: Lecture/Details/5
         public IActionResult Details(string? id)
@@ -196,61 +214,6 @@ namespace QRCodeEvidentationApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(lectureDto);
-        }
-        
-        // GET: Lecture/Delete/5
-        public async Task<IActionResult> Delete(string? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            
-            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-
-            Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
-            if (lectureProfessor == null)
-            {
-                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
-            }
-
-            var lecture = _lectureService.GetLectureById(id);
-
-            return View(lecture);
-        }
-
-        // POST: Lecture/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return Json(new { success = false, message = "Invalid lecture ID." });
-            }
-
-            try
-            {
-                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            
-                Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-
-                Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
-                if (lectureProfessor == null)
-                {
-                    return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
-                }
-
-                _lectureService.DeleteLecture(id);
-
-                return Json(new { success = true, message = "Lecture deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
         }
         
         [HttpPost]

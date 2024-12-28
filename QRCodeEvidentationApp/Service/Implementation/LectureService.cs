@@ -103,6 +103,11 @@ public class LectureService : ILectureService
         return false;
     }
 
+    public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures)
+    {
+        return _lectureRepository.GetLecturesForProfessorPaginated(professorId, page, pageSize, out totalLectures);
+    }
+
     public Lecture DisableLecture(string? lectureId)
     {
         Lecture forDisabeling = _lectureRepository.GetLectureById(lectureId).Result;

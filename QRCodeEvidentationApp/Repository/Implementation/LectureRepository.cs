@@ -90,4 +90,24 @@ public class LectureRepository : ILectureRepository
     {
         return _entities.Where(l => lectureIds.Contains(l.Id)).ToList();
     }
+
+    public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures)
+    {
+        var skip = (page - 1) * pageSize;
+
+        // Get the total number of lectures for pagination
+        totalLectures = _context.Lectures
+            .Where(l => l.ProfessorId == professorId)
+            .Count();
+
+        // Get the paginated lectures, ordered by the newest (descending by StartsAt)
+        var lectures = _context.Lectures
+            .Where(l => l.ProfessorId == professorId)
+            .OrderByDescending(l => l.StartsAt) // Order by StartsAt descending to get the newest first
+            .Skip(skip)
+            .Take(pageSize)
+            .ToList();
+
+        return lectures;
+    }
 }
