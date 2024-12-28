@@ -107,4 +107,6 @@ public interface ILectureService
     public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures);
 
     public void BulkInsertLectures(IFormFile csvFile);
+
+    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
 }

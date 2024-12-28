@@ -58,4 +58,6 @@ public interface ILectureRepository
 
     public List<Lecture> GetLecturesForProfessorPaginated(string professorId, int page, int pageSize,
         out int totalLectures);
+    
+    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
 }

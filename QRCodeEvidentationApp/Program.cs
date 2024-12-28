@@ -29,7 +29,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILectureRepository, LectureRepository>();
 builder.Services.AddScoped<IProfessorRepository, ProfessorRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+// builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<ILectureCoursesRepository, LectureCoursesRepository>();
 builder.Services.AddScoped<ILectureGroupRepository, LectureGroupRepository>();
 builder.Services.AddScoped<ILectureGroupCourseRepository, LectureGroupCourseRepository>();
@@ -41,10 +41,10 @@ builder.Services.AddScoped<ILectureService, LectureService>();
 builder.Services.AddScoped<ILectureGroupService, LectureGroupService>();
 builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<IRoomService, RoomService>();
+// builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
-builder.Services.AddTransient<IGeneratePDFDocument, GeneratePDFDocument>();
+builder.Services.AddTransient<IGenerateExcelDocument, GenerateExcelDocument>();
 
 var app = builder.Build();
 

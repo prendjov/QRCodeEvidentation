@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ClosedXML.Excel;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,21 +22,18 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ILectureService _lectureService;
         private readonly IProfessorService _professorService;
         private readonly ICourseService _courseService;
-        private readonly IRoomService _roomService;
         private readonly ILectureGroupService _lectureGroupService;
         private readonly ILectureAttendanceService _lectureAttendanceService;
 
         public LecturesController(ILectureService lectureService, 
             IProfessorService professorService,
             ICourseService courseService,
-            IRoomService roomService,
             ILectureGroupService lectureGroupService,
             ILectureAttendanceService lectureAttendanceService)
         {
             _lectureService = lectureService;
             _professorService = professorService;
             _courseService = courseService;
-            _roomService = roomService;
             _lectureGroupService = lectureGroupService;
             _lectureAttendanceService = lectureAttendanceService;
         }
@@ -125,9 +123,7 @@ namespace QRCodeEvidentationApp.Controllers
             dto.CoursesAssistant = await _courseService.GetCoursesForAssistant(loggedInProfessor.Id);
             dto.Groups = await _lectureGroupService.ListByProfessor(loggedInProfessor.Id);
             dto.loggedInProfessorId = loggedInProfessor.Id;
-            dto.AllRooms = _roomService.GetAllRooms().Result;
-            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
-            
+
             dto.StartsAt = DateTime.Now.Date;
             dto.EndsAt = DateTime.Now.Date;
             dto.ValidRegistrationUntil = DateTime.Now.Date;
@@ -180,9 +176,6 @@ namespace QRCodeEvidentationApp.Controllers
             dto.lecture = lecture;
             dto.lectureId = id;
             
-            dto.AllRooms = _roomService.GetAllRooms().Result;
-            dto.LecturesOnSpecificDate = _lectureService.FilterLectureByDateOrCourse(DateTime.Now, null, null);
-            
             return View(dto);
         }
 
@@ -223,7 +216,6 @@ namespace QRCodeEvidentationApp.Controllers
                 existingLecture.StartsAt = lectureDto.lecture.StartsAt;
                 existingLecture.EndsAt = lectureDto.lecture.EndsAt;
                 existingLecture.ValidRegistrationUntil = lectureDto.lecture.ValidRegistrationUntil;
-                existingLecture.RoomName = lectureDto.lecture.RoomName;
                 existingLecture.Type = lectureDto.lecture.Type;
 
                 _lectureService.EditLecture(existingLecture);
@@ -331,84 +323,68 @@ namespace QRCodeEvidentationApp.Controllers
         public async Task<IActionResult> GetLectureAnalytics(string id)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            
+
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
 
             Lecture lectureProfessor = _lectureService.GetLectureForProfessor(loggedInProfessor.Id);
             if (lectureProfessor == null)
             {
-                return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
+                return RedirectToAction(nameof(DisplayError), new { error = "The logged-in professor doesn't have access to this lecture." });
             }
-            
-            
+
             List<LectureAttendance> lectureAttends = _lectureAttendanceService.GetLectureAttendance(id).Result;
             Lecture lecture = _lectureService.GetLectureById(id);
-            // Generate the PDF in memory using QuestPDF
-            byte[] pdfBytes;
-            using (var memoryStream = new MemoryStream())
+
+            using (var workbook = new XLWorkbook())
             {
-                // Create the PDF document using QuestPDF's fluent API
-                Document.Create(container =>
+                // Create a worksheet
+                var worksheet = workbook.Worksheets.Add("Lecture Attendance");
+
+                // Add header row
+                worksheet.Cell(1, 1).Value = "Index";
+                worksheet.Cell(1, 2).Value = "Name";
+                worksheet.Cell(1, 3).Value = "Last Name";
+                worksheet.Cell(1, 4).Value = "Timestamp";
+
+                // Format header row
+                var headerRange = worksheet.Range(1, 1, 1, 4);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // Populate data rows
+                int row = 2; // Start from the second row
+                foreach (var attendance in lectureAttends)
                 {
-                    container.Page(page =>
+                    worksheet.Cell(row, 1).Value = attendance?.StudentIndex;
+                    worksheet.Cell(row, 2).Value = attendance?.Student?.Name;
+                    worksheet.Cell(row, 3).Value = attendance?.Student?.LastName;
+                    worksheet.Cell(row, 4).Value = attendance?.EvidentedAt.ToString();
+
+                    if (attendance?.EvidentedAt > lecture.ValidRegistrationUntil)
                     {
-                        page.Header().Text("Lecture Attendance Report").Bold().FontSize(20);
+                        // Apply a different style for late attendance
+                        var lateRange = worksheet.Range(row, 1, row, 4);
+                        lateRange.Style.Font.FontColor = XLColor.Red;
+                    }
 
-                        page.Content().Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(50); // Student Index
-                                columns.RelativeColumn();    // Student Name
-                                columns.RelativeColumn();    // Attendance Status
-                                columns.ConstantColumn(100); // Timestamp
-                            });
+                    row++;
+                }
 
-                            // Add table header
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(CellStyle).Text("Index");
-                                header.Cell().Element(CellStyle).Text("Name");
-                                header.Cell().Element(CellStyle).Text("Last name");
-                                header.Cell().Element(CellStyle).Text("Timestamp");
-                            });
+                // Adjust column widths
+                worksheet.Columns().AdjustToContents();
 
-                            // Add table rows from lecture attendance data
-                            foreach (var attendance in lectureAttends)
-                            {
-                                if (attendance?.EvidentedAt > lecture.ValidRegistrationUntil)
-                                {
-                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.StudentIndex);
-                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.Student?.Name);
-                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.Student?.LastName);
-                                    table.Cell().Element(LateAttendanceStyle).Text(attendance?.EvidentedAt.ToString());
-                                }
-                                else
-                                {
-                                    table.Cell().Element(CellStyle).Text(attendance?.StudentIndex);
-                                    table.Cell().Element(CellStyle).Text(attendance?.Student?.Name);
-                                    table.Cell().Element(CellStyle).Text(attendance?.Student?.LastName);
-                                    table.Cell().Element(CellStyle).Text(attendance?.EvidentedAt.ToString());
-                                }
-                            }
-                        });
+                using (var memoryStream = new MemoryStream())
+                {
+                    // Save workbook to memory stream
+                    workbook.SaveAs(memoryStream);
 
-                        page.Footer()
-                            .AlignCenter()
-                            .Text(x =>
-                            {
-                                x.Span("Generated on: ");
-                                x.Span(DateTime.Now.ToString("yyyy-MM-dd"));
-                            });
-                    });
-                }).GeneratePdf(memoryStream);
+                    // Convert memory stream to byte array
+                    byte[] excelBytes = memoryStream.ToArray();
 
-                // Convert memory stream to a byte array
-                pdfBytes = memoryStream.ToArray();
+                    // Return Excel file
+                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Lecture_{id}.xlsx");
+                }
             }
-
-            // Return the PDF as a downloadable file
-            return File(pdfBytes, "application/pdf", $"Lecture_{id}.pdf");
         }
     }
 }

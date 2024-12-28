@@ -38,13 +38,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                 </div>
 
                 <!-- Lecture Details -->
-                <div id="lectureDetails" style="display: none;">
-                    <!-- Room -->
-                    <div class="form-group mb-3">
-                        <label for="Room">Select Room</label>
-                        <select id="RoomId" class="form-select" asp-for="RoomId"></select>
-                    </div>
-
+                <div id="lectureDetails">
                     <!-- Type -->
                     <div class="form-group mb-3">
                         <label for="Type">Lecture Type</label>
@@ -88,113 +82,56 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 </div>
 
 @section Scripts {
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let errorMessage = document.getElementById("errorMessage");
-        var typeDropdown = document.getElementById("Type");
-        var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
-        var submitBtn = document.getElementById("submitBtn");
-        var roomDropdown = document.getElementById("RoomId");
-        var startsAtInput = document.getElementById("StartsAt");
-        var endsAtInput = document.getElementById("EndsAt");
-        var lectureDetails = document.getElementById("lectureDetails");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let errorMessage = document.getElementById("errorMessage");
+            var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
+            var submitBtn = document.getElementById("submitBtn");
+            var startsAtInput = document.getElementById("StartsAt");
+            var endsAtInput = document.getElementById("EndsAt");
 
-        var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings
-        {
-        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        }));
-        var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings
-        {
-        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        }));
-
-        // Display error message if present
-        if ('@Model.ErrMessage') {
-            errorMessage.textContent = '@Model.ErrMessage';
-        }
-
-        function validateStartAndEnd(){
-            var startsAt = new Date(startsAtInput.value);
-            var endsAt = new Date(endsAtInput.value);
-
-            if (startsAt < new Date(Date.now()) || endsAt < new Date(Date.now())){
-                return;
-            }
-
-            if (startsAt > endsAt){
-                errorMessage.innerText = "Start date cannot be bigger than end date";
-            }else {
-                errorMessage.innerText = "";
-            }
+            // Initial validation check
+            validateStartAndEnd();
+            validateDates();
             
-            filterAvailableRooms(startsAt, endsAt);
-        }
+            function validateStartAndEnd() {
+                if (!startsAtInput.value || !endsAtInput.value) {
+                    return; // Skip if any input is empty
+                }
+                var startsAt = new Date(Date.parse(startsAtInput.value));
+                var endsAt = new Date(Date.parse(endsAtInput.value));
 
-        function validateDates() {
-            var startsAt = new Date(startsAtInput.value);
-            var endsAt = new Date(endsAtInput.value);
-            var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
-            if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
-                errorMessage.textContent = "";
-                submitBtn.disabled = false;
-            } else {
-                if (lectureDetails.style.display == "block") {
-                    errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                if (startsAt >= endsAt) {
+                    errorMessage.textContent = "Start date cannot be after end date.";
+                    submitBtn.disabled = true;
+                } else {
+                    errorMessage.textContent = "";
+                    validateDates();
+                }
+            }
+
+            function validateDates() {
+                if (!startsAtInput.value || !endsAtInput.value || !validRegistrationUntilInput.value) {
+                    return; // Skip if any input is empty
+                }
+                var startsAt = new Date(Date.parse(startsAtInput.value));
+                var endsAt = new Date(Date.parse(endsAtInput.value));
+                var validRegistrationUntil = new Date(Date.parse(validRegistrationUntilInput.value));
+
+                if (validRegistrationUntil > startsAt && validRegistrationUntil < endsAt) {
+                    errorMessage.textContent = "";
+                    submitBtn.disabled = false;
+                } else {
+                    errorMessage.textContent = "Valid Registration Until must be between StartsAt and EndsAt.";
                     submitBtn.disabled = true;
                 }
             }
-        }
 
-        function filterAvailableRooms(startsAt, endsAt) {
-            var occupiedRooms = new Set();
-            lecturesOnSpecificDate.forEach(function (lecture) {
-                var lectureStart = new Date(lecture.StartsAt);
-                var lectureEnd = new Date(lecture.EndsAt);
+            // Attach event listeners
+            startsAtInput.addEventListener("input", validateStartAndEnd);
+            endsAtInput.addEventListener("input", validateStartAndEnd);
+            validRegistrationUntilInput.addEventListener("input", validateDates);
 
-                if ((startsAt >= lectureStart && lectureEnd >= startsAt) ||
-                    (endsAt >= lectureStart && lectureEnd >= endsAt) ||
-                    (endsAt >= lectureEnd && startsAt <= lectureStart)) {
-                    if (lecture.Room) occupiedRooms.add(lecture.Room.Name);
-                }
-            });
-
-            var availableRooms = allRooms.filter(function (room) {
-                return !occupiedRooms.has(room.Name);
-            });
-
-            updateRoomDropdown(availableRooms);
-            // Show or hide lecture details based on available rooms
-            if (availableRooms.length > 0) {
-                lectureDetails.style.display = "block";
-                validateDates()
-            } else {
-                lectureDetails.style.display = "none";
-                errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
-            }
-        }
-
-        function updateRoomDropdown(availableRooms) {
-            // Clear existing options
-            roomDropdown.innerHTML = '<option value="">Select a Room</option>';
-
-            roomDropdown.innerHTML = '';
-
-            // Populate new options
-            availableRooms.forEach(function (room) {
-                var option = document.createElement("option");
-                option.value = room.Name; // Assuming Room has Id property
-                option.textContent = room.Name;
-                roomDropdown.appendChild(option);
-            });
-        }
-
-        // Add event listeners for date inputs
-        startsAtInput.addEventListener("input", validateStartAndEnd);
-        endsAtInput.addEventListener("input", validateStartAndEnd);
-        validRegistrationUntilInput.addEventListener("input", validateDates);
-
-        // Initial validation check
-        validateDates();
-    });
-</script>
+        });
+    </script>
 }

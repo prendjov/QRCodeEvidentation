@@ -24,7 +24,7 @@ namespace QRCodeEvidentationApp.Data
 
         public virtual DbSet<ProfessorDetail> ProfessorDetails { get; set; }
 
-        public virtual DbSet<Room> Rooms { get; set; }
+        // public virtual DbSet<Room> Rooms { get; set; }
 
         public virtual DbSet<Semester> Semesters { get; set; }
 

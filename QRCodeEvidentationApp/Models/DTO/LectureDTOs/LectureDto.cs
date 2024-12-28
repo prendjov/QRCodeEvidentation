@@ -36,6 +36,6 @@ public class LectureDto
     public string? ErrMessage { get; set; }
     
     // need these two fields to transfer the available rooms logic on the front-end
-    public List<Room>? AllRooms { get; set; }
-    public List<Lecture>? LecturesOnSpecificDate { get; set; }
+    // public List<Room>? AllRooms { get; set; }
+    // public List<Lecture>? LecturesOnSpecificDate { get; set; }
 }

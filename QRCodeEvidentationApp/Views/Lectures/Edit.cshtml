@@ -39,11 +39,6 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 
             <div id="lectureDetails">
                 <div class="form-group mb-3">
-                    <label for="Room">Select Room</label>
-                    <select id="RoomId" class="form-control" asp-for="lecture.RoomName"></select>
-                </div>
-
-                <div class="form-group mb-3">
                     <label for="Type">Select Type</label>
                     @Html.DropDownListFor(model => model.lecture.Type, new SelectList(Model.Type, Model.lecture.Type), new { @class = "form-control", id = "Type" })
                 </div>
@@ -85,17 +80,6 @@ Layout = "~/Views/Shared/_Layout.cshtml";
             var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
             var roomDropdown = document.getElementById("RoomId");
             var submitBtn = document.getElementById("submitBtn");
-
-
-            var allRooms = @Html.Raw(JsonConvert.SerializeObject(Model.AllRooms, new JsonSerializerSettings
-                           {
-                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                           }));
-            var lecturesOnSpecificDate = @Html.Raw(JsonConvert.SerializeObject(Model.LecturesOnSpecificDate, new JsonSerializerSettings
-                                         {
-                                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                                         }));
-
 
             // Display error message if present
             if ('@Model.ErrMessage') {
@@ -147,27 +131,6 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                     lectureDetails.style.display = "none";
                     errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
                 }
-            }
-
-            function updateRoomDropdown(availableRooms) {
-                // Clear existing options
-                var defaultRoomName = '@Model.lecture.RoomName';
-                console.log(defaultRoomName)
-                roomDropdown.innerHTML = '';
-
-                // Populate new options
-                availableRooms.forEach(function (room) {
-                    // Check if this is the default room
-                    var option = document.createElement("option");
-                    option.value = room.Name; // Assuming Room has Id property
-                    option.textContent = room.Name;
-
-                    if (room.Name === defaultRoomName) {
-                        option.selected = true;
-                    }
-                    
-                    roomDropdown.appendChild(option);
-                });
             }
 
             function validateDates() {

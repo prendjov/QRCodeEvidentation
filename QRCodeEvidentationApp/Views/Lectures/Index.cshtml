@@ -19,7 +19,7 @@
                 <th>@Html.DisplayNameFor(model => model.Lectures[0].StartsAt)</th>
                 <th>@Html.DisplayNameFor(model => model.Lectures[0].Type)</th>
                 <th>@Html.DisplayNameFor(model => model.Lectures[0].ValidRegistrationUntil)</th>
-                <th>@Html.DisplayNameFor(model => model.Lectures[0].RoomName)</th>
+                @* <th>@Html.DisplayNameFor(model => model.Lectures[0].RoomName)</th> *@
                 <th class="text-center">Actions</th>
             </tr>
         </thead>
@@ -33,7 +33,7 @@
                 <td id="#validRegistrationUntil">
                     @(item.ValidRegistrationUntil?.ToString("dd-MM-yyyy HH:mm:ss") ?? "N/A")
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.RoomName)</td>
+                @* <td>@Html.DisplayFor(modelItem => item.RoomName)</td> *@
                 <td class="text-center">
                     <div class="btn-group" role="group">
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Edit</a>
@@ -68,7 +68,6 @@
 
     <script>
         $(document).ready(function () {
-            // Register the Moment.js datetime sorting plugin
             $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
 
             function initializeDisableButtons() {
@@ -113,9 +112,8 @@
                         // Destroy the previous DataTable instance
                         if ($.fn.dataTable.isDataTable('#lecturesTable')) {
                             $('#lecturesTable').DataTable().clear().destroy();
+                            $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
                         }
-
-                        $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
 
                         // Update the table body and pagination controls
                         $('#lecturesTableBody').html($(data).find('#lecturesTableBody').html());
@@ -189,15 +187,6 @@
                     }
                 });
             });
-
-            /*$('.lecture-analytics-btn').click(function (e) {
-                e.preventDefault();
-                var button = $(this);
-                var lectureId = button.data('lecture-id');
-
-                // Redirect to the action that generates and downloads the PDF
-                window.location.href = '@Url.Action("GetLectureAnalytics")' + '?id=' + lectureId;
-                });*/
         });
     </script>
 }

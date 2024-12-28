@@ -27,7 +27,7 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ILectureService _lectureService;
         private readonly IStudentService _studentService;
         private readonly ILectureAttendanceService _lectureAttendanceService;
-        private readonly IGeneratePDFDocument _generatePdfDocument;
+        private readonly IGenerateExcelDocument _generatePdfDocument;
 
         public CoursesController(ApplicationDbContext context,
             IProfessorService professorService,
@@ -35,7 +35,7 @@ namespace QRCodeEvidentationApp.Controllers
             ILectureService lectureService,
             IStudentService studentService,
             ILectureAttendanceService lectureAttendanceService,
-            IGeneratePDFDocument generatePdfDocument)
+            IGenerateExcelDocument generatePdfDocument)
         {
             _context = context;
             _professorService = professorService;
@@ -124,43 +124,52 @@ namespace QRCodeEvidentationApp.Controllers
                     new { error = "You are not assigned as professor to this course." });
             }
             
-            List<Lecture> lecturesForCourse = _courseService.GetLecturesForCourseId(id);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
 
-            List<Student> students = _studentService.GetStudentsForCourse(id);
-            
-            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalytics = new List<AggregatedCourseAnalyticsDto>();
-            
-            foreach (Student student in students)
+
+            List<Lecture> lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
+            // Dictionary<string?, List<LectureAttendance>> attendances =
+            //     new Dictionary<string?, List<LectureAttendance>>();
+            HashSet<Student> students = new HashSet<Student>();
+
+            foreach (Lecture l in lectures)
             {
-                AggregatedCourseAnalyticsDto aggregatedCourseAnalyticsDto = new AggregatedCourseAnalyticsDto();
-                aggregatedCourseAnalyticsDto.Student = student;
-                aggregatedCourseAnalyticsDto.LectureAttendance = new List<LectureAttendanceAnalyticDto>();
-                List<LectureAttendance> lectureAttendancesForStudent =
-                    _lectureAttendanceService.GetLectureAttendanceForStudent(student).Result;
-
-                foreach (Lecture lecture in lecturesForCourse)
+                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
+                foreach (LectureAttendance attendance in lectureAttendances)
                 {
-                    LectureAttendanceAnalyticDto lectureAttendanceAnalyticDto = new LectureAttendanceAnalyticDto();
-                    lectureAttendanceAnalyticDto.Lecture = lecture;
-                    bool IsAttended = lectureAttendancesForStudent
-                        .Any(attendance => attendance.LectureId == lecture.Id);
+                    students.Add(attendance.Student);
+                }
+            }
 
-                    if (IsAttended)
-                    {
-                        lectureAttendanceAnalyticDto.IsPresent = 1;
-                    }
-                    else
-                    {
-                        lectureAttendanceAnalyticDto.IsPresent = 0;
-                    }
+            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalyticsDtos = new List<AggregatedCourseAnalyticsDto>();
+            foreach (Student s in students)
+            {
+                AggregatedCourseAnalyticsDto singleAnalytic = new AggregatedCourseAnalyticsDto();
+                singleAnalytic.Student = s;
+                singleAnalytic.LectureAndAttendance = new Dictionary<string, long>();
+                singleAnalytic.totalAttendances = 0;
 
-                    aggregatedCourseAnalyticsDto.LectureAttendance.Add(lectureAttendanceAnalyticDto);
+                foreach (Lecture l in lectures)
+                {
+                    singleAnalytic.LectureAndAttendance[l.Id] = 0;
                 }
                 
-                aggregatedCourseAnalytics.Add(aggregatedCourseAnalyticsDto);
+                List<LectureAttendance> attendances = _lectureAttendanceService.GetLectureAttendanceForStudent(s).Result;
+
+                foreach (LectureAttendance attendance in attendances)
+                {
+                    if (singleAnalytic.LectureAndAttendance.Keys.Contains(attendance.LectureId))
+                    {
+                        singleAnalytic.LectureAndAttendance[attendance.LectureId] = 1;
+                        singleAnalytic.totalAttendances += 1;
+                    }
+                }
+                
+                aggregatedCourseAnalyticsDtos.Add(singleAnalytic);
             }
-            
-            return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalytics);
+
+            return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
         }
 
         private bool CourseExists(long id)

@@ -4,5 +4,7 @@ public class AggregatedCourseAnalyticsDto
 {
     public Student? Student { get; set; }
     
-    public List<LectureAttendanceAnalyticDto>? LectureAttendance { get; set; }
+    public Dictionary<string, long> LectureAndAttendance { get; set; }
+
+    public long totalAttendances { get; set; }
 }

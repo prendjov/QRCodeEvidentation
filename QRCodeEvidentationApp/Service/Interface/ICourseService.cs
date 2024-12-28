@@ -28,7 +28,7 @@ public interface ICourseService
     public List<long?> GetCoursesIdByLectureId(string? lectureId);
     
     /// <param name="teacherId">The id of the teacher.</param>
-    /// <returns>Returns all the courses for a specific teahcer id, doesn't matter if professor
+    /// <returns>Returns all the courses for a specific teacher id, doesn't matter if professor
     /// or assistant for the course.</returns>
     public List<Course> GetCourses(string? teacherId);
 

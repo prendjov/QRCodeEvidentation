@@ -148,7 +148,6 @@ public class LectureService : ILectureService
                     Title = record.Title ?? string.Empty,
                     StartsAt = record.StartsAt,
                     EndsAt = record.EndsAt,
-                    RoomName = record.RoomId,
                     ProfessorId = record.ProfessorId,
                     Type = record.Type,
                     ValidRegistrationUntil = record.ValidRegistrationUntil
@@ -163,6 +162,11 @@ public class LectureService : ILectureService
         }
     }
 
+    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId)
+    {
+        return _lectureRepository.GetLecturesByProfessorAndCourseId(professorId, courseId);
+    }
+
     public Lecture CreateLecture(LectureDto dtoFilled)
     { 
         Lecture lecture = new Lecture
@@ -171,7 +175,6 @@ public class LectureService : ILectureService
             Title = dtoFilled.Title ?? string.Empty,
             StartsAt = dtoFilled.StartsAt,
             EndsAt = dtoFilled.EndsAt,
-            RoomName = dtoFilled.RoomId,
             ProfessorId = dtoFilled.loggedInProfessorId,
             Type = dtoFilled.TypeSelected,
             ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil

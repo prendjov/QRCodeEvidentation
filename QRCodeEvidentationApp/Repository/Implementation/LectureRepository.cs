@@ -25,7 +25,7 @@ public class LectureRepository : ILectureRepository
 
     public async Task<Lecture> GetLectureByProfessorId(string? professorId)
     {
-        return await _entities.Include("Room").Include("Professor").Where(z => z.ProfessorId != null && z.ProfessorId.Equals(professorId)).FirstOrDefaultAsync();
+        return await _entities.Include("Professor").Where(z => z.ProfessorId != null && z.ProfessorId.Equals(professorId)).FirstOrDefaultAsync();
     }
 
     public async Task<Lecture> GetLectureById(string? lectureId)
@@ -109,5 +109,13 @@ public class LectureRepository : ILectureRepository
             .ToList();
 
         return lectures;
+    }
+
+    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId)
+    {
+        return _entities
+            .Where(l => l.ProfessorId == professorId && 
+                        l.Courses.Any(c => c.CourseId == courseId))
+            .ToList();
     }
 }

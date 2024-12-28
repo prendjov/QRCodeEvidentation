@@ -19,31 +19,17 @@ namespace QRCodeEvidentationApp.Controllers
     public class LectureGroupsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ICourseService _courseService;
         private readonly ILectureGroupService _lectureGroupService;
         private readonly IProfessorService _professorService;
-        private readonly ILectureService _lectureService;
-        private readonly IStudentService _studentService;
-        private readonly ILectureAttendanceService _lectureAttendanceService;
-        private readonly IGeneratePDFDocument _generatePdfDocument;
+
 
         public LectureGroupsController(ApplicationDbContext context, 
-            ICourseService courseService, 
             ILectureGroupService lectureGroupService, 
-            IProfessorService professorService,
-            ILectureService lectureService,
-            IStudentService studentService,
-            ILectureAttendanceService lectureAttendanceService,
-            IGeneratePDFDocument generatePdfDocument)
+            IProfessorService professorService)
         {
             _context = context;
-            _courseService = courseService;
             _lectureGroupService = lectureGroupService;
             _professorService = professorService;
-            _lectureService = lectureService;
-            _studentService = studentService;
-            _lectureAttendanceService = lectureAttendanceService;
-            _generatePdfDocument = generatePdfDocument;
         }
 
         private async Task<bool> IsUserCreatorOfLectureGroup(string lectureGroupId)
@@ -161,94 +147,94 @@ namespace QRCodeEvidentationApp.Controllers
             return _context.LectureGroup.Any(e => e.Id == id);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAnalytics(string id)
-        {
-            if (!await IsUserCreatorOfLectureGroup(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "The logged in professor doesn't have access to this lecture group." });
-            }
-            
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-            List<Lecture> lectures = new List<Lecture>();
-            lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
-            List<StudentCourse> students = new List<StudentCourse>();
-            students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
-            
-            List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
-            
-            List<string> lecturesByLectureGroup = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
-
-            LectureGroupAnalyticsDTO lectureGroupAnalyticsDto =
-                _lectureGroupService.CalculateLectureGroupAnalytics(lecturesByLectureGroup, students, lectures);
-
-            lectureGroupAnalyticsDto.groupId = id;
-            return View(lectureGroupAnalyticsDto);
-        }
-        
-        public async Task<IActionResult> GeneralAnalytics(string id)
-        {
-            if (!await IsUserCreatorOfLectureGroup(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "The logged in professor doesn't have access to this lecture group." });
-            }
-            
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-            List<Lecture> lectures = new List<Lecture>();
-            lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
-            
-            List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
-            
-            List<string> lecturesForCourse = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
-            
-            // take all the lectures that have id in the list of string 
-            List<Lecture> lectureObjects = _lectureGroupService.GetLectures(lecturesForCourse);
-            
-            List<Student> studentsForLectureGroup = new List<Student>();
-            foreach (long? courseId in lectureGroupCourses)
-            {
-                List<Student> students = _studentService.GetStudentsForCourse(courseId);
-                studentsForLectureGroup.AddRange(students);
-            }
-            
-            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalytics = new List<AggregatedCourseAnalyticsDto>();
-            
-            foreach (Student student in studentsForLectureGroup)
-            {
-                AggregatedCourseAnalyticsDto aggregatedCourseAnalyticsDto = new AggregatedCourseAnalyticsDto();
-                aggregatedCourseAnalyticsDto.Student = student;
-                aggregatedCourseAnalyticsDto.LectureAttendance = new List<LectureAttendanceAnalyticDto>();
-                List<LectureAttendance> lectureAttendancesForStudent =
-                    _lectureAttendanceService.GetLectureAttendanceForStudent(student).Result;
-
-                foreach (Lecture lecture in lectureObjects)
-                {
-                    LectureAttendanceAnalyticDto lectureAttendanceAnalyticDto = new LectureAttendanceAnalyticDto();
-                    lectureAttendanceAnalyticDto.Lecture = lecture;
-                    bool IsAttended = lectureAttendancesForStudent
-                        .Any(attendance => attendance.LectureId == lecture.Id);
-
-                    if (IsAttended)
-                    {
-                        lectureAttendanceAnalyticDto.IsPresent = 1;
-                    }
-                    else
-                    {
-                        lectureAttendanceAnalyticDto.IsPresent = 0;
-                    }
-
-                    aggregatedCourseAnalyticsDto.LectureAttendance.Add(lectureAttendanceAnalyticDto);
-                }
-                
-                aggregatedCourseAnalytics.Add(aggregatedCourseAnalyticsDto);
-            }
-            
-            return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalytics);
-        }
+        // [HttpGet]
+        // public async Task<IActionResult> GetAnalytics(string id)
+        // {
+        //     if (!await IsUserCreatorOfLectureGroup(id))
+        //     {
+        //         return RedirectToAction(nameof(DisplayError),
+        //             new { error = "The logged in professor doesn't have access to this lecture group." });
+        //     }
+        //     
+        //     var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        //     Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+        //     List<Lecture> lectures = new List<Lecture>();
+        //     lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
+        //     List<StudentCourse> students = new List<StudentCourse>();
+        //     students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
+        //     
+        //     List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
+        //     
+        //     List<string> lecturesByLectureGroup = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
+        //
+        //     LectureGroupAnalyticsDTO lectureGroupAnalyticsDto =
+        //         _lectureGroupService.CalculateLectureGroupAnalytics(lecturesByLectureGroup, students, lectures);
+        //
+        //     lectureGroupAnalyticsDto.groupId = id;
+        //     return View(lectureGroupAnalyticsDto);
+        // }
+        //
+        // public async Task<IActionResult> GeneralAnalytics(string id)
+        // {
+        //     if (!await IsUserCreatorOfLectureGroup(id))
+        //     {
+        //         return RedirectToAction(nameof(DisplayError),
+        //             new { error = "The logged in professor doesn't have access to this lecture group." });
+        //     }
+        //     
+        //     var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        //     Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+        //     List<Lecture> lectures = new List<Lecture>();
+        //     lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
+        //     
+        //     List<long?> lectureGroupCourses = _lectureGroupService.GetCoursesForLectureGroup(id).Result;
+        //     
+        //     List<string> lecturesForCourse = _lectureGroupService.SelectLecturesForGroup(lectures, lectureGroupCourses);
+        //     
+        //     // take all the lectures that have id in the list of string 
+        //     List<Lecture> lectureObjects = _lectureGroupService.GetLectures(lecturesForCourse);
+        //     
+        //     List<Student> studentsForLectureGroup = new List<Student>();
+        //     foreach (long? courseId in lectureGroupCourses)
+        //     {
+        //         List<Student> students = _studentService.GetStudentsForCourse(courseId);
+        //         studentsForLectureGroup.AddRange(students);
+        //     }
+        //     
+        //     List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalytics = new List<AggregatedCourseAnalyticsDto>();
+        //     
+        //     foreach (Student student in studentsForLectureGroup)
+        //     {
+        //         AggregatedCourseAnalyticsDto aggregatedCourseAnalyticsDto = new AggregatedCourseAnalyticsDto();
+        //         aggregatedCourseAnalyticsDto.Student = student;
+        //         aggregatedCourseAnalyticsDto.LectureAttendance = new List<LectureAttendanceAnalyticDto>();
+        //         List<LectureAttendance> lectureAttendancesForStudent =
+        //             _lectureAttendanceService.GetLectureAttendanceForStudent(student).Result;
+        //
+        //         foreach (Lecture lecture in lectureObjects)
+        //         {
+        //             LectureAttendanceAnalyticDto lectureAttendanceAnalyticDto = new LectureAttendanceAnalyticDto();
+        //             lectureAttendanceAnalyticDto.Lecture = lecture;
+        //             bool IsAttended = lectureAttendancesForStudent
+        //                 .Any(attendance => attendance.LectureId == lecture.Id);
+        //
+        //             if (IsAttended)
+        //             {
+        //                 lectureAttendanceAnalyticDto.IsPresent = 1;
+        //             }
+        //             else
+        //             {
+        //                 lectureAttendanceAnalyticDto.IsPresent = 0;
+        //             }
+        //
+        //             aggregatedCourseAnalyticsDto.LectureAttendance.Add(lectureAttendanceAnalyticDto);
+        //         }
+        //         
+        //         aggregatedCourseAnalytics.Add(aggregatedCourseAnalyticsDto);
+        //     }
+        //     
+        //     return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalytics);
+        // }
         
         public IActionResult DisplayError(string error)
         {
