@@ -80,6 +80,25 @@ namespace QRCodeEvidentationApp.Controllers
             return View(model);
         }
 
+        public IActionResult BulkAddLecturesView()
+        {
+            return View();
+        }
+        
+        [HttpPost]
+        public IActionResult BulkAddLecturesView(IFormFile csvFile)
+        {
+            if (csvFile != null && csvFile.Length > 0)
+            {
+                // PARSE THE CSV RECORDS AND ADD THE RECORDS IN THE DATABASE
+                _lectureService.BulkInsertLectures(csvFile);
+                return RedirectToAction("Index");
+            }
+
+            // If no file is uploaded, return to the same view with an error message
+            ModelState.AddModelError("csvFile", "Please upload a CSV file.");
+            return View();
+        }
 
         // GET: Lecture/Details/5
         public IActionResult Details(string? id)

@@ -1,0 +1,54 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Newtonsoft.Json
+@model QRCodeEvidentationApp.Models.DTO.LectureDto
+
+@{
+ViewData["Title"] = "Bulk Add Lectures";
+Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Bulk Add Lectures</h1>
+    <h4 class="text-muted">Upload CSV File</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <form id="bulkAddForm" asp-action="BulkAddLecturesView" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- CSV File Upload -->
+                <div class="form-group mb-3">
+                    <label for="csvFile" class="form-label">Upload CSV File</label>
+                    <input type="file" name="csvFile" id="csvFile" class="form-control" required />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group text-center mt-4">
+                    <input type="submit" value="Upload CSV" id="submitBtn" class="btn btn-primary w-100" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let errorMessage = document.getElementById("errorMessage");
+        var submitBtn = document.getElementById("submitBtn");
+        var csvFileInput = document.getElementById("csvFile");
+
+        // Add form validation
+        document.getElementById("bulkAddForm").addEventListener("submit", function (event) {
+            if (!csvFileInput.value) {
+                errorMessage.textContent = "Please upload a CSV file.";
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+}

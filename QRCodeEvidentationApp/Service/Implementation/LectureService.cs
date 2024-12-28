@@ -1,9 +1,15 @@
+using System.Globalization;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.Parsers;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Interface;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace QRCodeEvidentationApp.Service.Implementation;
+
 
 public class LectureService : ILectureService
 {
@@ -121,6 +127,40 @@ public class LectureService : ILectureService
     {
         var lecture = _lectureRepository.GetLectureById(lectureId).Result;
         return _lectureRepository.DeleteLecture(lecture).Result;
+    }
+    
+    public void BulkInsertLectures(IFormFile csvFile)
+    {
+        // Open the CSV file
+        using (var stream = csvFile.OpenReadStream())
+        using (var reader = new StreamReader(stream))
+        using (var csv = new CsvHelper.CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+        {
+            // Read the records from the CSV file
+            var records = csv.GetRecords<LectureCsvParser>().ToList();
+
+            // Here, you can perform your bulk insert or process the records
+            foreach (var record in records)
+            {
+                Lecture lecture = new Lecture
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = record.Title ?? string.Empty,
+                    StartsAt = record.StartsAt,
+                    EndsAt = record.EndsAt,
+                    RoomName = record.RoomId,
+                    ProfessorId = record.ProfessorId,
+                    Type = record.Type,
+                    ValidRegistrationUntil = record.ValidRegistrationUntil
+                };
+                
+                Lecture createdLecture = _lectureRepository.CreateNewLecture(lecture).Result;
+                if (record.GroupCourseId != null)
+                {
+                    AddLectureCoursesFromGroup(record.GroupCourseId, lecture.Id);
+                }
+            }
+        }
     }
 
     public Lecture CreateLecture(LectureDto dtoFilled)

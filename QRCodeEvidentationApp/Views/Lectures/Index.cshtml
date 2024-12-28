@@ -8,6 +8,7 @@
 
 <p class="text-end">
     <a asp-action="CreateView" class="btn btn-success">Create New Lecture</a>
+    <a asp-action="BulkAddLecturesView" class="btn btn-info text-white">Bulk add</a>
 </p>
 
 <div class="table-responsive">
@@ -27,10 +28,10 @@
         {
             <tr id="lecture-row-@item.Id">
                 <td>@Html.DisplayFor(modelItem => item.Title)</td>
-                <td>@Html.DisplayFor(modelItem => item.StartsAt)</td>
+                <td>    @(item.StartsAt.ToString("dd-MM-yyyy HH:mm:ss"))</td>
                 <td>@Html.DisplayFor(modelItem => item.Type)</td>
                 <td id="#validRegistrationUntil">
-                    @(item.ValidRegistrationUntil?.ToString("MM-dd-yyyy HH:mm:ss") ?? "N/A")
+                    @(item.ValidRegistrationUntil?.ToString("dd-MM-yyyy HH:mm:ss") ?? "N/A")
                 </td>
                 <td>@Html.DisplayFor(modelItem => item.RoomName)</td>
                 <td class="text-center">
@@ -68,7 +69,17 @@
     <script>
         $(document).ready(function () {
             // Register the Moment.js datetime sorting plugin
-            $.fn.dataTable.moment('MM-DD-YYYY HH:mm:ss');
+            $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
+
+            function initializeDisableButtons() {
+                $('.disable-lecture-btn').each(function () {
+                    var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
+                    var now = new Date();
+                    if (now > validRegistrationUntil) {
+                        $(this).prop('disabled', true);
+                    }
+                });
+            }
 
             // Initialize DataTable
             $('#lecturesTable').DataTable({
@@ -80,66 +91,54 @@
                 responsive: true,      // Enable responsive table
                 order: [],
                 columnDefs: [
-                    {
-                        targets: [0],    // The Title column index (0-based)
-                        searchable: true // Only make Title column searchable
-                    },
-                    {
-                        targets: [1, 3], // The columns with dates (StartsAt and ValidRegistrationUntil)
-                        type: 'date'     // Specify that these columns contain dates
-                    },
-                    {
-                        targets: '_all',  // Make other columns non-searchable
-                        searchable: false
-                    }
+                    { targets: [0], searchable: true },
+                    { targets: [1, 3], type: 'datetime-moment' }, // Use the correct type
+                    { targets: '_all', searchable: false }
                 ]
             });
+
+            initializeDisableButtons();
 
             $(document).on('click', '.page-link', function () {
                 var page = $(this).data('page');
                 loadLectures(page);
             });
 
-            // Load lectures data for the current page
             function loadLectures(page) {
                 $.ajax({
                     url: '@Url.Action("Index")',
                     type: 'GET',
                     data: { page: page },
                     success: function (data) {
-                        // Destroy the previous DataTable instance to clear bindings and settings
+                        // Destroy the previous DataTable instance
                         if ($.fn.dataTable.isDataTable('#lecturesTable')) {
                             $('#lecturesTable').DataTable().clear().destroy();
                         }
 
-                        // Update the table body and pagination controls with the new data
+                        $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
+
+                        // Update the table body and pagination controls
                         $('#lecturesTableBody').html($(data).find('#lecturesTableBody').html());
                         $('#paginationControls').html($(data).find('#paginationControls').html());
 
-                        // Reinitialize the DataTable with the new content
+                        // Reinitialize the DataTable
                         $('#lecturesTable').DataTable({
-                            paging: false,         // Enable pagination
-                            searching: true,       // Enable searching
-                            ordering: true,        // Enable column ordering
-                            lengthChange: true,    // Allow changing page length
-                            autoWidth: false,      // Disable auto width for better responsiveness
-                            responsive: true,      // Enable responsive table
+                            paging: false,
+                            searching: true,
+                            ordering: true,
+                            lengthChange: true,
+                            autoWidth: false,
+                            responsive: true,
                             order: [],
                             columnDefs: [
-                                {
-                                    targets: [0],    // The Title column index (0-based)
-                                    searchable: true // Only make Title column searchable
-                                },
-                                {
-                                    targets: [1, 3], // The columns with dates (StartsAt and ValidRegistrationUntil)
-                                    type: 'date'     // Specify that these columns contain dates
-                                },
-                                {
-                                    targets: '_all',  // Make other columns non-searchable
-                                    searchable: false
-                                }
+                                { targets: [0], searchable: true },
+                                { targets: [1, 3], type: 'datetime-moment' }, // Use the correct type
+                                { targets: '_all', searchable: false }
                             ]
                         });
+
+                        // Reinitialize the disable button logic
+                        initializeDisableButtons();
                     },
                     error: function (xhr, status, error) {
                         alert('Error loading lectures');
@@ -164,7 +163,7 @@
                 return new Intl.DateTimeFormat('en-US', options).format(date);
             }
 
-            $('.disable-lecture-btn').click(function (e) {
+            $(document).on('click', '.disable-lecture-btn', function (e) {
                 e.preventDefault();
                 var button = $(this);
                 var lectureId = button.data('lecture-id');
