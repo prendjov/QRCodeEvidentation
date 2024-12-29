@@ -17,28 +17,33 @@ Layout = "_Layout";
     <table class="table table-bordered table-striped table-hover">
         <thead class="table-dark">
         <tr>
-            <th>@Html.DisplayNameFor(model => model.lecture.Title)</th>
-            <th>@Html.DisplayNameFor(model => model.NumberOfAttendees)</th>
-            @* <th>@Html.DisplayNameFor(model => model.AtProfessorNumberOfAttendees)</th> *@
-            @* <th>@Html.DisplayNameFor(model => model.NotAtProfessorNumberOfAttendees)</th> *@
+            <th>Title</th>
+            <th>Number of attendees</th>
             <th class="text-center">Actions</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var item in Model.EachLectureAnalytics)
+        @if (Model.lecturesAndAttendees != null && Model.lecturesAndAttendees.Any())
         {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => item.lecture.Title)</td>
-            <td>@Html.DisplayFor(modelItem => item.NumberOfAttendees)</td>
-            @* <td>@Html.DisplayFor(modelItem => item.AtProfessorNumberOfAttendees)</td> *@
-            @* <td>@Html.DisplayFor(modelItem => item.NotAtProfessorNumberOfAttendees)</td> *@
-            <td class="text-center">
-                <div class="btn-group" role="group">
-                    <a asp-action="Details" asp-controller="Lectures" asp-route-id="@item.lectureId" class="btn btn-sm btn-primary m-1">Details</a>
-                    <a asp-action="GetLectureAnalytics" asp-controller="Lectures" asp-route-id="@item.lectureId" class="btn btn-sm btn-primary m-1">Analytics</a>
-                </div>
-            </td>
-        </tr>
+            foreach (var entry in Model.lecturesAndAttendees)
+            {
+                <tr>
+                    <td>@entry.Key.Title</td>
+                    <td>@entry.Value</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-controller="Lectures" asp-route-id="@entry.Key.Id" class="btn btn-sm btn-primary m-1">Details</a>
+                            <a asp-action="GetLectureAnalytics" asp-controller="Lectures" asp-route-id="@entry.Key.Id" class="btn btn-sm btn-primary m-1">Analytics</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">No data available.</td>
+            </tr>
         }
         </tbody>
     </table>

@@ -105,17 +105,26 @@ namespace QRCodeEvidentationApp.Controllers
             
             // TODO: IF NUMBEROFSTUDENTSATPROFFESOR / NOTATPROFESSOR IS NOT NEEDED, REMOVE SOME OF THE LOGIC HERE.
             List<Lecture> lectures = new List<Lecture>();
-            lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
-            List<StudentCourse> students = new List<StudentCourse>();
-            students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
-
-            List<string?> lecturesForCourse = _courseService.GetLectureForCourseId(id);
-
-            CourseAnalyticsDTO courseAnalyticsDto = _courseService.GetCourseStatistics(lectures, students, lecturesForCourse);
-
-            courseAnalyticsDto.courseId = id;
+            lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
+            CourseAnalyticsDTO courseAnalytics = new CourseAnalyticsDTO();
+            courseAnalytics.lecturesAndAttendees = new Dictionary<Lecture, long>();
+            courseAnalytics.courseId = id;
+            foreach (Lecture l in lectures)
+            {
+                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
+                courseAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
+            }
             
-            return View(courseAnalyticsDto);
+            // List<StudentCourse> students = new List<StudentCourse>();
+            // students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
+            //
+            // List<string?> lecturesForCourse = _courseService.GetLectureForCourseId(id);
+            //
+            // CourseAnalyticsDTO courseAnalyticsDto = _courseService.GetCourseStatistics(lectures, students, lecturesForCourse);
+
+            // courseAnalyticsDto.courseId = id;
+            
+            return View(courseAnalytics);
         }
 
         public async Task<IActionResult> GeneralAnalytics(long? id)
@@ -131,8 +140,6 @@ namespace QRCodeEvidentationApp.Controllers
 
 
             List<Lecture> lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
-            // Dictionary<string?, List<LectureAttendance>> attendances =
-            //     new Dictionary<string?, List<LectureAttendance>>();
             HashSet<Student> students = new HashSet<Student>();
 
             foreach (Lecture l in lectures)
