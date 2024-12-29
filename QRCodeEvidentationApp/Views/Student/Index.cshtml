@@ -1,62 +1,62 @@
-@model QRCodeEvidentationApp.Models.DTO.StudentDTO.StudentIndexDTO
-
-@{
-ViewData["Title"] = "Lectures overview";
-Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<h1 class="text-center my-4">@ViewData["Title"]</h1>
-
-<h3 class="mt-4">Upcoming Lectures</h3>
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover">
-        <thead class="table-dark">
-        <tr>
-            <th>Lecture Name</th>
-            <th>Lecture Start Time</th>
-            <th>Type</th>
-            <th>Professor</th>
-            <th>Valid Registration Until</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model.upcomingLectures)
-        {
-        <tr id="lecture-row-@item.Id">
-            <td>@Html.DisplayFor(modelItem => item.Title)</td>
-            <td>@Html.DisplayFor(modelItem => item.StartsAt)</td>
-            <td>@Html.DisplayFor(modelItem => item.Type)</td>
-            <td>@Html.DisplayFor(modelItem => item.Professor.Name)</td>
-            <td>@Html.DisplayFor(modelItem => item.ValidRegistrationUntil)</td>
-        </tr>
-        }
-        </tbody>
-    </table>
-</div>
-
-<h3 class="mt-5">Attended Lectures</h3>
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover">
-        <thead class="table-dark">
-        <tr>
-            <th>Lecture Name</th>
-            <th>Lecture Start Time</th>
-            <th>Type</th>
-            <th>Professor</th>
-            <th>Registered At</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model.AlreadyAttendedLectures)
-        {
-        <tr id="lecture-row-@item.Id">
-            <td>@Html.DisplayFor(modelItem => item.Lecture.Title)</td>
-            <td>@Html.DisplayFor(modelItem => item.Lecture.StartsAt)</td>
-            <td>@Html.DisplayFor(modelItem => item.Lecture.Type)</td>
-            <td>@Html.DisplayFor(modelItem => item.Lecture.Professor.Name)</td>
-            <td>@Html.DisplayFor(modelItem => item.EvidentedAt)</td>
-        </tr>
-        }
-        </tbody>
-    </table>
-</div>
+@* @model QRCodeEvidentationApp.Models.DTO.StudentDTO.StudentIndexDTO *@
+@* *@
+@* @{ *@
+@* ViewData["Title"] = "Lectures overview"; *@
+@* Layout = "~/Views/Shared/_Layout.cshtml"; *@
+@* } *@
+@* *@
+@* <h1 class="text-center my-4">@ViewData["Title"]</h1> *@
+@* *@
+@* <h3 class="mt-4">Upcoming Lectures</h3> *@
+@* <div class="table-responsive"> *@
+@*     <table class="table table-bordered table-striped table-hover"> *@
+@*         <thead class="table-dark"> *@
+@*         <tr> *@
+@*             <th>Lecture Name</th> *@
+@*             <th>Lecture Start Time</th> *@
+@*             <th>Type</th> *@
+@*             <th>Professor</th> *@
+@*             <th>Valid Registration Until</th> *@
+@*         </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*         @foreach (var item in Model.upcomingLectures) *@
+@*         { *@
+@*         <tr id="lecture-row-@item.Id"> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Title)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.StartsAt)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Type)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Professor.Name)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.ValidRegistrationUntil)</td> *@
+@*         </tr> *@
+@*         } *@
+@*         </tbody> *@
+@*     </table> *@
+@* </div> *@
+@* *@
+@* <h3 class="mt-5">Attended Lectures</h3> *@
+@* <div class="table-responsive"> *@
+@*     <table class="table table-bordered table-striped table-hover"> *@
+@*         <thead class="table-dark"> *@
+@*         <tr> *@
+@*             <th>Lecture Name</th> *@
+@*             <th>Lecture Start Time</th> *@
+@*             <th>Type</th> *@
+@*             <th>Professor</th> *@
+@*             <th>Registered At</th> *@
+@*         </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*         @foreach (var item in Model.AlreadyAttendedLectures) *@
+@*         { *@
+@*         <tr id="lecture-row-@item.Id"> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Lecture.Title)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Lecture.StartsAt)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Lecture.Type)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.Lecture.Professor.Name)</td> *@
+@*             <td>@Html.DisplayFor(modelItem => item.EvidentedAt)</td> *@
+@*         </tr> *@
+@*         } *@
+@*         </tbody> *@
+@*     </table> *@
+@* </div> *@

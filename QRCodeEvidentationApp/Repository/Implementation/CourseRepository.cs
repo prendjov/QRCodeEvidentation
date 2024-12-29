@@ -2,10 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Repository.Interface;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using QRCodeEvidentationApp.Models.DTO;
 
 namespace QRCodeEvidentationApp.Repository.Implementation
 {

@@ -177,7 +177,8 @@ public class LectureService : ILectureService
             EndsAt = dtoFilled.EndsAt,
             ProfessorId = dtoFilled.loggedInProfessorId,
             Type = dtoFilled.TypeSelected,
-            ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil
+            ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil,
+            LectureGroupId = dtoFilled.GroupCourseId
         };
 
         if (dtoFilled.CourseId.HasValue)

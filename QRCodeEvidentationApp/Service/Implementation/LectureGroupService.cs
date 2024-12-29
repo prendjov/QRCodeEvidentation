@@ -196,69 +196,6 @@ namespace QRCodeEvidentationApp.Service.Implementation
             return result;
         }
 
-        public LectureGroupAnalyticsDTO CalculateLectureGroupAnalytics(List<string> lectureIds, List<StudentCourse> studentCourses, List<Lecture> lectures)
-        {
-            List<LectureAttendance> lectureAttendances = _lectureAttendanceRepository.GetLectureAttendances(lectureIds);
-
-            LectureGroupAnalyticsDTO lectureGroupAnalyticsDto = new LectureGroupAnalyticsDTO();
-            lectureGroupAnalyticsDto.EachLectureAnalytics = new List<LectureGroupAnalyticsDTO>();
-            List<string?> studentsAtProfessor = new List<string?>();
-            foreach (StudentCourse studentCourse in studentCourses)
-            {
-                studentsAtProfessor.Add(studentCourse.StudentStudentIndex);
-            }
-            
-            Dictionary<string, Lecture> lectureDictionary = lectures.ToDictionary(l => l.Id);
-            
-            // Group lecture attendances by LectureId
-            var groupedAttendances = lectureAttendances
-                .GroupBy(a => a.LectureId) // Group by LectureId
-                .ToDictionary(g => g.Key, g => g.ToList());
-            
-            // Ensure all lectureIds are present in the dictionary with an empty list if not grouped
-            foreach (var lectureId in lectureIds)
-            {
-                if (!groupedAttendances.ContainsKey(lectureId))
-                {
-                    groupedAttendances[lectureId] = new List<LectureAttendance>();
-                }
-            }
-            
-            foreach (var group in groupedAttendances)
-            {
-                string lectureId = group.Key;
-                List<LectureAttendance> attendances = group.Value; // This is the list of LectureAttendance records for that LectureId
-                int AtProfessor = 0;
-                int notAtProfessor = 0;
-                foreach (var attendance in attendances)
-                {
-                    if (studentsAtProfessor.Contains(attendance.StudentIndex))
-                    {
-                        AtProfessor += 1;
-                        continue;
-                    }
-                    notAtProfessor += 1;
-                }
-
-                LectureGroupAnalyticsDTO analyticsDtoForLecture = new LectureGroupAnalyticsDTO();
-                analyticsDtoForLecture.NumberOfAttendees = attendances.Count();
-                analyticsDtoForLecture.AtProfessorNumberOfAttendees = AtProfessor;
-                analyticsDtoForLecture.NotAtProfessorNumberOfAttendees = notAtProfessor;
-                analyticsDtoForLecture.lectureId = lectureId;
-                analyticsDtoForLecture.lecture = lectureDictionary[lectureId];
-                lectureGroupAnalyticsDto.EachLectureAnalytics.Add(analyticsDtoForLecture);
-            }
-
-            foreach (var analytic in lectureGroupAnalyticsDto.EachLectureAnalytics)
-            {
-                lectureGroupAnalyticsDto.NumberOfAttendees += analytic.NumberOfAttendees;
-                lectureGroupAnalyticsDto.AtProfessorNumberOfAttendees += analytic.AtProfessorNumberOfAttendees;
-                lectureGroupAnalyticsDto.NotAtProfessorNumberOfAttendees += analytic.NotAtProfessorNumberOfAttendees;
-            }
-
-            return lectureGroupAnalyticsDto;
-        }
-
         public List<Lecture> GetLectures(List<string> lectureIds)
         {
             return _lectureRepository.GetLecturesByIds(lectureIds);

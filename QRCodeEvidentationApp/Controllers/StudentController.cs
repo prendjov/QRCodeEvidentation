@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QRCodeEvidentationApp.Models;
-using QRCodeEvidentationApp.Models.DTO.StudentDTO;
 using QRCodeEvidentationApp.Models.DTO;
 using QRCodeEvidentationApp.Service.Interface;
 
@@ -12,7 +11,6 @@ public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
     private readonly ILectureService _lectureService;
-    private readonly ICourseService _courseService;
     private readonly ILectureAttendanceService _lectureAttendanceService;
 
     public StudentController(IStudentService studentService,
@@ -22,7 +20,6 @@ public class StudentController : Controller
     { 
         _studentService = studentService;
         _lectureService = lectureService;
-        _courseService = courseService;
         _lectureAttendanceService = lectureAttendanceService;
     }
 
@@ -76,7 +73,7 @@ public class StudentController : Controller
 
         // bool inCourse = _studentService.CheckStudentInCourse(student.StudentIndex, courseIds);
         
-        LectureAttendance attendance = _lectureAttendanceService.FindStudentRegistration(student.StudentIndex, id);
+        LectureAttendance? attendance = _lectureAttendanceService.FindStudentRegistration(student.StudentIndex, id);
         //
         // if (!inCourse)
         // {

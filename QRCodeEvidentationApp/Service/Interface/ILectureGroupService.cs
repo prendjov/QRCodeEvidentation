@@ -71,8 +71,6 @@ namespace QRCodeEvidentationApp.Service.Interface
         /// <param name="courseIds">The courses that are in the lecture group.</param>
         /// <returns>A list of lecture ids that belong to certain lecture group.</returns>
         public List<string> SelectLecturesForGroup(List<Lecture> lectures, List<long?> courseIds);
-
-        public LectureGroupAnalyticsDTO CalculateLectureGroupAnalytics(List<string> lectureIds, List<StudentCourse> studentCourses, List<Lecture> lectures);
         
         public List<Lecture> GetLectures(List<string> lectureIds);
     }

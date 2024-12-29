@@ -51,7 +51,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 
                 <div class="form-group mb-3" id="courseGroups">
                     <label for="GroupCourseId">Select Group of Course</label>
-                    @Html.DropDownListFor(model => model.GroupCourseId, new SelectList(Model.Groups, "Id", "Name"), "Select Group of Courses", new { @class = "form-control", id = "Groups" })
+                    @Html.DropDownListFor(model => model.GroupCourseId, new SelectList(Model.Groups, "Id", "Name", Model.lecture.LectureGroup.Name), new { @class = "form-control", id = "Groups" })
                 </div>
                 
                 <!-- Submit Button -->
@@ -70,98 +70,53 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var typeDropdown = document.getElementById("Type");
-            var courseGroups = document.getElementById("courseGroups");
-            var errorMessage = document.getElementById("errorMessage");
-            var startsAtInput = document.getElementById("StartsAt");
-            var endsAtInput = document.getElementById("EndsAt");
-            var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
-            var roomDropdown = document.getElementById("RoomId");
-            var submitBtn = document.getElementById("submitBtn");
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var errorMessage = document.getElementById("errorMessage");
+        var startsAtInput = document.getElementById("StartsAt");
+        var endsAtInput = document.getElementById("EndsAt");
+        var validRegistrationUntilInput = document.getElementById("validRegistrationUntil");
+        var submitBtn = document.getElementById("submitBtn");
 
-            // Display error message if present
-            if ('@Model.ErrMessage') {
-                errorMessage.textContent = '@Model.ErrMessage';
+        // Initial state: Disable the button
+        submitBtn.disabled = true;
+
+        function validateDates() {
+            var startsAt = new Date(startsAtInput.value);
+            var endsAt = new Date(endsAtInput.value);
+            var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
+
+            if (isNaN(startsAt) || isNaN(endsAt) || isNaN(validRegistrationUntil)) {
+                // If any date is invalid, disable the button
+                errorMessage.textContent = "Please fill in all date fields with valid dates.";
+                submitBtn.disabled = true;
+                return;
             }
 
-            function validateStartAndEnd(){
-                var startsAt = new Date(startsAtInput.value);
-                var endsAt = new Date(endsAtInput.value);
-
-                if (startsAt < new Date(Date.now()) || endsAt < new Date(Date.now())){
-                    console.log(startsAt + "////" + endsAt)
-                    return;
-                }
-
-                // Filter and update the room dropdown based on the dates
-                filterAvailableRooms(startsAt, endsAt);
+            if (startsAt >= endsAt) {
+                errorMessage.textContent = "StartsAt must be before EndsAt.";
+                submitBtn.disabled = true;
+                return;
             }
 
-            function filterAvailableRooms(startsAt, endsAt) {
-                var occupiedRooms = new Set();
-                var currentLectureId = '@Model.lectureId';
-                lecturesOnSpecificDate.forEach(function (lecture) {
-                    var lectureStart = new Date(lecture.StartsAt);
-                    var lectureEnd = new Date(lecture.EndsAt);
-
-                    if ((startsAt >= lectureStart && lectureEnd >= startsAt) ||
-                        (endsAt >= lectureStart && lectureEnd >= endsAt) ||
-                        (endsAt >= lectureEnd && startsAt <= lectureStart)) {
-                        if (lecture.Room && !(lecture.Id === currentLectureId)) {
-                            occupiedRooms.add(lecture.Room.Name);
-                        }
-                    }
-                });
-
-                var availableRooms = allRooms.filter(function (room) {
-                    return !occupiedRooms.has(room.Name);
-                });
-                
-                console.log(availableRooms.length)
-
-                updateRoomDropdown(availableRooms);
-                // Show or hide lecture details based on available rooms
-                if (availableRooms.length > 0) {
-                    errorMessage.innerText = ""
-                    lectureDetails.style.display = "block";
-                    validateDates()
-                } else {
-                    lectureDetails.style.display = "none";
-                    errorMessage.innerText = "There are no available rooms for the specified time period. Please choose another start time or end time."
-                }
+            if (!(startsAt <= validRegistrationUntil && validRegistrationUntil <= endsAt)) {
+                errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
+                submitBtn.disabled = true;
+                return;
             }
 
-            function validateDates() {
-                var startsAt = new Date(startsAtInput.value);
-                var endsAt = new Date(endsAtInput.value);
-                var validRegistrationUntil = new Date(validRegistrationUntilInput.value);
-                console.log(startsAt)
-                console.log(endsAt)
-                console.log(validRegistrationUntil)
-                if (startsAt < validRegistrationUntil && validRegistrationUntil < endsAt) {
-                    errorMessage.textContent = "";
-                    submitBtn.disabled = false;
-                } else {
-                    if (lectureDetails.style.display == "block") {
-                        errorMessage.textContent = "ValidRegistrationUntil must be between StartsAt and EndsAt.";
-                        submitBtn.disabled = true;
-                    }
-                }
-            }
+            // All validations passed
+            errorMessage.textContent = "";
+            submitBtn.disabled = false;
+        }
 
-            validRegistrationUntilInput.addEventListener("input", validateDates);
+        // Attach event listeners to date inputs
+        startsAtInput.addEventListener("input", validateDates);
+        endsAtInput.addEventListener("input", validateDates);
+        validRegistrationUntilInput.addEventListener("input", validateDates);
 
-            // Initial validation check
-            validateDates();
-
-
-            // Add event listeners for date inputs
-            startsAtInput.addEventListener("input", validateStartAndEnd);
-            endsAtInput.addEventListener("input", validateStartAndEnd);
-            
-            validateStartAndEnd()
-        });
-    </script>
+        // Perform initial validation
+        validateDates();
+    });
+</script>
 }

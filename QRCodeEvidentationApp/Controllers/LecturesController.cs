@@ -304,21 +304,6 @@ namespace QRCodeEvidentationApp.Controllers
             return View(errorMessageDto);
         }
         
-        private IContainer CellStyle(IContainer container)
-        {
-            return container.PaddingVertical(0).PaddingHorizontal(0).Border(1).BorderColor(Colors.Black);
-        }
-
-        private IContainer LateAttendanceStyle(IContainer container)
-        {
-            return container
-                .Background("#FF0000") // Set the background color to red
-                .PaddingVertical(0)
-                .PaddingHorizontal(0)
-                .Border(1)
-                .BorderColor("#000000");
-        }
-        
         [HttpGet]
         public async Task<IActionResult> GetLectureAnalytics(string id)
         {

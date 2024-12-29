@@ -102,6 +102,8 @@ namespace QRCodeEvidentationApp.Controllers
             
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+            
+            // TODO: IF NUMBEROFSTUDENTSATPROFFESOR / NOTATPROFESSOR IS NOT NEEDED, REMOVE SOME OF THE LOGIC HERE.
             List<Lecture> lectures = new List<Lecture>();
             lectures = _lectureService.GetLecturesForProfessor(loggedInProfessor.Id);
             List<StudentCourse> students = new List<StudentCourse>();
@@ -170,11 +172,6 @@ namespace QRCodeEvidentationApp.Controllers
             }
 
             return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
-        }
-
-        private bool CourseExists(long id)
-        {
-            return _context.Courses.Any(e => e.Id == id);
         }
         
         public IActionResult DisplayError(string error)

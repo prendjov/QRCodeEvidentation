@@ -26,5 +26,9 @@ namespace QRCodeEvidentationApp.Models
         public virtual Professor? Professor { get; set; }
 
         public virtual ICollection<LectureCourses> Courses { get; set; } = new List<LectureCourses>();
+        
+        public string? LectureGroupId {get; set;}
+        
+        public virtual LectureGroup? LectureGroup { get; set; }
     }
 }
