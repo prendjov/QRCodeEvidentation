@@ -56,7 +56,7 @@ public interface ILectureRepository
     
     public List<Lecture> GetLecturesByIds(List<string> lectureIds);
 
-    public List<Lecture> GetLecturesForProfessorPaginated(string professorId, int page, int pageSize,
+    public List<Lecture> GetLecturesForProfessorFiltered(string professorId, int page, int pageSize, int startsAtSorting, string lectureTypeFilter,
         out int totalLectures);
     
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);

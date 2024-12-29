@@ -91,26 +91,43 @@ public class LectureRepository : ILectureRepository
         return _entities.Where(l => lectureIds.Contains(l.Id)).ToList();
     }
 
-    public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures)
+    public List<Lecture> GetLecturesForProfessorFiltered(
+        string? professorId, 
+        int page, 
+        int pageSize, 
+        int startsAtSorting, 
+        string lectureTypeFilter, 
+        out int totalLectures)
     {
         var skip = (page - 1) * pageSize;
 
-        // Get the total number of lectures for pagination
-        totalLectures = _context.Lectures
-            .Where(l => l.ProfessorId == professorId)
-            .Count();
+        // Base query with professor filter
+        var query = _context.Lectures
+            .Where(l => l.ProfessorId == professorId);
 
-        // Get the paginated lectures, ordered by the newest (descending by StartsAt)
-        var lectures = _context.Lectures
-            .Where(l => l.ProfessorId == professorId)
-            .OrderByDescending(l => l.StartsAt) // Order by StartsAt descending to get the newest first
+        // Apply lecture type filter if specified
+        if (lectureTypeFilter == "Предавања" || lectureTypeFilter == "Аудиториски")
+        {
+            query = query.Where(l => l.Type == lectureTypeFilter);
+        }
+
+        // Apply sorting based on startsAtSorting
+        query = startsAtSorting == 0 
+            ? query.OrderByDescending(l => l.StartsAt) 
+            : query.OrderBy(l => l.StartsAt);
+
+        // Get total lectures for pagination
+        totalLectures = query.Count();
+
+        // Paginate results
+        var lectures = query
             .Skip(skip)
             .Take(pageSize)
             .ToList();
 
         return lectures;
     }
-
+    
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId)
     {
         return _entities

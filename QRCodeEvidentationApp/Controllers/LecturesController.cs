@@ -39,7 +39,7 @@ namespace QRCodeEvidentationApp.Controllers
         }
 
         // GET: Lecture
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, int startsAtSorting = 0, string lecturesTypeFilter = "")
         {
             // take the logged in user
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -59,7 +59,7 @@ namespace QRCodeEvidentationApp.Controllers
                 Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
         
                 // Get the paginated lectures and total lecture count
-                lectures = _lectureService.GetLecturesForProfessorPaginated(loggedInProfessor.Id, page, pageSize, out totalLectures);
+                lectures = _lectureService.GetLecturesForProfessorFiltered(loggedInProfessor.Id, page, pageSize, startsAtSorting, lecturesTypeFilter, out totalLectures);
             }
 
             // Calculate total pages based on total lectures and page size

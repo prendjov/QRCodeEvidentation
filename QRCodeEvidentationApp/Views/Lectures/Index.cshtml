@@ -11,6 +11,28 @@
     <a asp-action="BulkAddLecturesView" class="btn btn-info text-white">Bulk add</a>
 </p>
 
+<div class="d-flex mb-3">
+    <!-- Sorting Dropdown -->
+    <div>
+        <label for="sortSelector">Sort by:</label>
+        <select id="sortSelector" class="form-control d-inline-block w-auto">
+            <option value="0">StartsAt (Descending)</option>
+            <option value="1">StartsAt (Ascending)</option>
+        </select>
+    </div>
+
+    <!-- Filtering Dropdown -->
+    <div>
+        <label for="typeFilter">Filter by Type:</label>
+        <select id="typeFilter" class="form-control d-inline-block w-auto">
+            <option value="">All</option>
+            <option value="Предавања">Предавања</option>
+            <option value="Аудиториски">Аудиториски</option>
+        </select>
+    </div>
+</div>
+
+
 <div class="table-responsive">
     <table id="lecturesTable" class="table table-bordered table-striped table-hover">
         <thead class="table-dark">
@@ -49,17 +71,26 @@
 </div>
 
 <!-- Pagination controls -->
-<div class="text-center">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <nav aria-label="Page navigation">
         <ul class="pagination" id="paginationControls">
             @for (var i = 1; i <= Model.TotalPages; i++)
             {
-            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                <a class="page-link" href="javascript:void(0);" data-page="@i">@i</a>
-            </li>
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="javascript:void(0);" data-page="@i">@i</a>
+                </li>
             }
         </ul>
     </nav>
+    <div>
+        <span>Total Lectures: @Model.TotalLectures</span>
+        <select id="pageSizeSelector" class="form-control">
+            @foreach (var size in new[] { 10, 20, 50 })
+            {
+            <!option value="@size" @(size == Model.PageSize ? "selected" : "")>@size</!option>
+            }
+        </select>
+    </div>
 </div>
 
 @section Scripts {
@@ -68,6 +99,11 @@
 
     <script>
         $(document).ready(function () {
+        
+            // Event listeners for dropdown changes
+            $('#sortSelector, #typeFilter').change(fetchLectures);
+            fetchLectures();
+
             $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
 
             function initializeDisableButtons() {
@@ -84,7 +120,7 @@
             $('#lecturesTable').DataTable({
                 paging: false,         // Enable pagination
                 searching: true,       // Enable searching
-                ordering: true,        // Enable column ordering
+                ordering: false,        // Enable column ordering
                 lengthChange: true,    // Allow changing page length
                 autoWidth: false,      // Disable auto width for better responsiveness
                 responsive: true,      // Enable responsive table
@@ -98,24 +134,57 @@
 
             initializeDisableButtons();
 
+            // Handle page click
             $(document).on('click', '.page-link', function () {
-                var page = $(this).data('page');
-                loadLectures(page);
+                var page = $(this)
+                $('.page-link').closest('.page-item').removeClass('active');
+
+                $(this).closest('.page-item').addClass('active');
+                fetchLectures();
             });
 
-            function loadLectures(page) {
+            // Handle page size change
+            $('#pageSizeSelector').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            $('#sortSelector').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            $('#typeFilter').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            function fetchLectures() {
+                const sortOption = $('#sortSelector').val();
+                const typeFilter = $('#typeFilter').val();
+                const pageSize = $('#pageSizeSelector').val();
+                const page = $('.active').children().data('page') || 1; // Default to 1 if no page is active
+                
+                console.log(page)
+
                 $.ajax({
                     url: '@Url.Action("Index")',
                     type: 'GET',
-                    data: { page: page },
+                    data: {
+                        page: page,
+                        pageSize: pageSize,
+                        startsAtSorting: sortOption,
+                        lecturesTypeFilter: typeFilter
+                    },
                     success: function (data) {
-                        // Destroy the previous DataTable instance
+                        // Update the table and pagination
                         if ($.fn.dataTable.isDataTable('#lecturesTable')) {
                             $('#lecturesTable').DataTable().clear().destroy();
-                            $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
                         }
 
-                        // Update the table body and pagination controls
                         $('#lecturesTableBody').html($(data).find('#lecturesTableBody').html());
                         $('#paginationControls').html($(data).find('#paginationControls').html());
 
@@ -123,14 +192,14 @@
                         $('#lecturesTable').DataTable({
                             paging: false,
                             searching: true,
-                            ordering: true,
+                            ordering: false,
                             lengthChange: true,
                             autoWidth: false,
                             responsive: true,
                             order: [],
                             columnDefs: [
                                 { targets: [0], searchable: true },
-                                { targets: [1, 3], type: 'datetime-moment' }, // Use the correct type
+                                { targets: [1, 3], type: 'datetime-moment' }, // Correct type for datetime
                                 { targets: '_all', searchable: false }
                             ]
                         });
@@ -139,7 +208,7 @@
                         initializeDisableButtons();
                     },
                     error: function (xhr, status, error) {
-                        alert('Error loading lectures');
+                        alert('Error fetching lectures');
                     }
                 });
             }

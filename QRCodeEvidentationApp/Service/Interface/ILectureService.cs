@@ -104,7 +104,7 @@ public interface ILectureService
 
     public bool CheckIfLectureStarted(string id, DateTime registrationTime);
     
-    public List<Lecture> GetLecturesForProfessorPaginated(string? professorId, int page, int pageSize, out int totalLectures);
+    public List<Lecture> GetLecturesForProfessorFiltered(string? professorId, int page, int pageSize, int startsAtSorting, string lectureTypeFilter, out int totalLectures);
 
     public void BulkInsertLectures(IFormFile csvFile);
 
