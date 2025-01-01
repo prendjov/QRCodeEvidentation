@@ -31,4 +31,6 @@ public interface ICourseRepository
     public Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId);
 
     public Task<CourseAssistant?> GetCourseAssistantCombo(long? id, string? teacherId);
+
+    public Course Get(long courseId);
 }

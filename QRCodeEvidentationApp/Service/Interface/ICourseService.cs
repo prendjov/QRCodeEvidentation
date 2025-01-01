@@ -39,4 +39,6 @@ public interface ICourseService
     public List<Lecture> GetLecturesForCourseId(long? courseId);
 
     public bool ProfessorAtCourse(long? courseId, string? professorId);
+
+    public Course GetCourse(long courseId);
 }

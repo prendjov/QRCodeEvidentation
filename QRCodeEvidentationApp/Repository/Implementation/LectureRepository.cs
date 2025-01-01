@@ -135,4 +135,10 @@ public class LectureRepository : ILectureRepository
                         l.Courses.Any(c => c.CourseId == courseId))
             .ToList();
     }
+
+    public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId)
+    {
+        return _entities
+            .Where(l => l.ProfessorId == professorId && l.LectureGroupId == courseGroupId)
+            .ToList();    }
 }

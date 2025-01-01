@@ -109,4 +109,7 @@ public interface ILectureService
     public void BulkInsertLectures(IFormFile csvFile);
 
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
+    
+    public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId);
+
 }

@@ -92,5 +92,10 @@ namespace QRCodeEvidentationApp.Repository.Implementation
             return await _context.CourseAssistants.Where(x => x.AssistantId == teacherId && x.CourseId == id)
                 .FirstOrDefaultAsync();
         }
+
+        public Course Get(long courseId)
+        {
+            return _context.Courses.Where(c => c.Id == courseId).FirstOrDefault();
+        }
     }
 }

@@ -21,15 +21,24 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILectureGroupService _lectureGroupService;
         private readonly IProfessorService _professorService;
+        private readonly ILectureService _lectureService;
+        private readonly ILectureAttendanceService _lectureAttendanceService;
+        private readonly IGenerateExcelDocument _generateDocumentService;
 
 
         public LectureGroupsController(ApplicationDbContext context, 
             ILectureGroupService lectureGroupService, 
-            IProfessorService professorService)
+            IProfessorService professorService,
+            ILectureService lectureService,
+            ILectureAttendanceService lectureAttendanceService,
+            IGenerateExcelDocument generateDocumentService)
         {
             _context = context;
             _lectureGroupService = lectureGroupService;
             _professorService = professorService;
+            _lectureService = lectureService;
+            _lectureAttendanceService = lectureAttendanceService;
+            _generateDocumentService = generateDocumentService;
         }
 
         private async Task<bool> IsUserCreatorOfLectureGroup(string lectureGroupId)
@@ -147,6 +156,96 @@ namespace QRCodeEvidentationApp.Controllers
             ErrorMessageDTO errorMessageDto = new ErrorMessageDTO();
             errorMessageDto.Message = error;
             return View(errorMessageDto);
+        }
+        
+         public async Task<IActionResult> Analytics(string id)
+        {
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
+            
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+            
+            List<Lecture> lectures = new List<Lecture>();
+            lectures = _lectureService.GetLecturesByProfessorAndCourseGroupId(loggedInProfessor.Id, id);
+            CourseGroupAnalyticsDTO courseAnalytics = new CourseGroupAnalyticsDTO();
+            courseAnalytics.lecturesAndAttendees = new Dictionary<Lecture, long>();
+            courseAnalytics.courseGroupId = id;
+            foreach (Lecture l in lectures)
+            {
+                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
+                courseAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
+            }
+            
+            return View(courseAnalytics);
+        }
+
+        public async Task<IActionResult> GeneralAnalytics(string id)
+        {
+            if (!await IsUserCreatorOfLectureGroup(id))
+            {
+                return RedirectToAction(nameof(DisplayError),
+                    new { error = "The logged in professor doesn't have access to this lecture group." });
+            }
+            
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
+
+
+            List<Lecture> lectures = _lectureService.GetLecturesByProfessorAndCourseGroupId(loggedInProfessor.Id, id);
+            HashSet<Student> students = new HashSet<Student>();
+
+            foreach (Lecture l in lectures)
+            {
+                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
+                foreach (LectureAttendance attendance in lectureAttendances)
+                {
+                    students.Add(attendance.Student);
+                }
+            }
+
+            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalyticsDtos = new List<AggregatedCourseAnalyticsDto>();
+            foreach (Student s in students)
+            {
+                AggregatedCourseAnalyticsDto singleAnalytic = new AggregatedCourseAnalyticsDto();
+                singleAnalytic.Student = s;
+                singleAnalytic.LectureAndAttendance = new Dictionary<string, long>();
+                singleAnalytic.totalAttendances = 0;
+
+                foreach (Lecture l in lectures)
+                {
+                    singleAnalytic.LectureAndAttendance[l.Id] = 0;
+                }
+                
+                List<LectureAttendance> attendances = _lectureAttendanceService.GetLectureAttendanceForStudent(s).Result;
+
+                foreach (LectureAttendance attendance in attendances)
+                {
+                    if (singleAnalytic.LectureAndAttendance.Keys.Contains(attendance.LectureId))
+                    {
+                        singleAnalytic.LectureAndAttendance[attendance.LectureId] = 1;
+                        singleAnalytic.totalAttendances += 1;
+                    }
+                }
+                
+                aggregatedCourseAnalyticsDtos.Add(singleAnalytic);
+            }
+
+            LectureGroup lectureGroup = _lectureGroupService.Get(id).Result;
+            
+            var result = _generateDocumentService.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
+
+            if (result is FileContentResult fileResult)
+            {
+                // Change the FileDownloadName
+                fileResult.FileDownloadName = "aggregated_analytics_" + lectureGroup.Name + "_" + DateTime.Now + ".xlsx";
+                return fileResult;
+            }
+            
+            return result;
         }
     }
 }

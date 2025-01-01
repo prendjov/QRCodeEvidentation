@@ -7,4 +7,8 @@ public class AggregatedCourseAnalyticsDto
     public Dictionary<string, long> LectureAndAttendance { get; set; }
 
     public long totalAttendances { get; set; }
+    
+    public LectureGroup lectureGroup { get; set; }
+    
+    public Course course { get; set; }
 }

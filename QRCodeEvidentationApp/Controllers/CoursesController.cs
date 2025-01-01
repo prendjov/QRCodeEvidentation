@@ -27,7 +27,7 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ILectureService _lectureService;
         private readonly IStudentService _studentService;
         private readonly ILectureAttendanceService _lectureAttendanceService;
-        private readonly IGenerateExcelDocument _generatePdfDocument;
+        private readonly IGenerateExcelDocument _generateDocumentService;
 
         public CoursesController(ApplicationDbContext context,
             IProfessorService professorService,
@@ -35,7 +35,7 @@ namespace QRCodeEvidentationApp.Controllers
             ILectureService lectureService,
             IStudentService studentService,
             ILectureAttendanceService lectureAttendanceService,
-            IGenerateExcelDocument generatePdfDocument)
+            IGenerateExcelDocument generateDocumentService)
         {
             _context = context;
             _professorService = professorService;
@@ -43,7 +43,7 @@ namespace QRCodeEvidentationApp.Controllers
             _lectureService = lectureService;
             _studentService = studentService;
             _lectureAttendanceService = lectureAttendanceService;
-            _generatePdfDocument = generatePdfDocument;
+            _generateDocumentService = generateDocumentService;
         }
         
         private bool IsProfessorAssignedCourse(long? courseId)
@@ -103,7 +103,6 @@ namespace QRCodeEvidentationApp.Controllers
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
             
-            // TODO: IF NUMBEROFSTUDENTSATPROFFESOR / NOTATPROFESSOR IS NOT NEEDED, REMOVE SOME OF THE LOGIC HERE.
             List<Lecture> lectures = new List<Lecture>();
             lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
             CourseAnalyticsDTO courseAnalytics = new CourseAnalyticsDTO();
@@ -115,19 +114,10 @@ namespace QRCodeEvidentationApp.Controllers
                 courseAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
             }
             
-            // List<StudentCourse> students = new List<StudentCourse>();
-            // students = _studentService.GetStudentsForProfessor(loggedInProfessor.Id);
-            //
-            // List<string?> lecturesForCourse = _courseService.GetLectureForCourseId(id);
-            //
-            // CourseAnalyticsDTO courseAnalyticsDto = _courseService.GetCourseStatistics(lectures, students, lecturesForCourse);
-
-            // courseAnalyticsDto.courseId = id;
-            
             return View(courseAnalytics);
         }
 
-        public async Task<IActionResult> GeneralAnalytics(long? id)
+        public async Task<IActionResult> GeneralAnalytics(long id)
         {
             if (!IsProfessorAssignedCourse(id))
             {
@@ -177,8 +167,19 @@ namespace QRCodeEvidentationApp.Controllers
                 
                 aggregatedCourseAnalyticsDtos.Add(singleAnalytic);
             }
+            
+            Course course = _courseService.GetCourse(id);
+            
+            var result = _generateDocumentService.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
 
-            return _generatePdfDocument.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
+            if (result is FileContentResult fileResult)
+            {
+                // Change the FileDownloadName
+                fileResult.FileDownloadName = "aggregated_analytics_" + course.LastNameRegex + "_" + DateTime.Now + ".xlsx";
+                return fileResult;
+            }
+            
+            return result;
         }
         
         public IActionResult DisplayError(string error)

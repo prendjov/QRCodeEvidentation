@@ -60,4 +60,7 @@ public interface ILectureRepository
         out int totalLectures);
     
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
+    public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId);
+    
+    
 }
