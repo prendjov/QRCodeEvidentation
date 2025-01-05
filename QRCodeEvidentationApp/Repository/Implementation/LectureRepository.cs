@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.Parsers;
 using QRCodeEvidentationApp.Repository.Interface;
 
 namespace QRCodeEvidentationApp.Repository.Implementation;
@@ -113,4 +114,28 @@ public class LectureRepository : ILectureRepository
         return _entities
             .Where(l => l.ProfessorId == professorId && l.LectureGroupId == courseGroupId)
             .ToList();    }
+
+    public void BulkInsertLectures(List<LectureCsvParser> lectureCsvFormat, string professorEmail)
+    {
+        Professor professor = _context.Professors.Where(p => p.Email == professorEmail).FirstOrDefault();
+        foreach (var record in lectureCsvFormat)
+        {
+            Lecture lecture = new Lecture
+            {
+                Id = Guid.NewGuid().ToString(),
+                Title = record.Title ?? string.Empty,
+                StartsAt = record.StartsAt,
+                EndsAt = record.EndsAt,
+                ProfessorId = professor.Id,
+                Professor = professor,
+                Type = record.Type,
+                ValidRegistrationUntil = record.ValidRegistrationUntil,
+                LectureGroupId = record.GroupCourseId
+            };
+            
+            _entities.Add(lecture);
+        }
+        
+        _context.SaveChangesAsync();
+    }
 }

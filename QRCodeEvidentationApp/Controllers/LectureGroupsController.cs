@@ -21,20 +21,18 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ILectureGroupService _lectureGroupService;
         private readonly IProfessorService _professorService;
         private readonly ILectureService _lectureService;
-        private readonly ILectureAttendanceService _lectureAttendanceService;
         private readonly IGenerateExcelDocument _generateDocumentService;
+        private readonly ICourseService _courseService;
         
         public LectureGroupsController( 
             ILectureGroupService lectureGroupService, 
             IProfessorService professorService,
             ILectureService lectureService,
-            ILectureAttendanceService lectureAttendanceService,
             IGenerateExcelDocument generateDocumentService)
         {
             _lectureGroupService = lectureGroupService;
             _professorService = professorService;
             _lectureService = lectureService;
-            _lectureAttendanceService = lectureAttendanceService;
             _generateDocumentService = generateDocumentService;
         }
 
@@ -89,7 +87,7 @@ namespace QRCodeEvidentationApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("Name,SelectedCourses,ProfessorId,Courses")] LectureGroupDTO data)
+        public IActionResult Create([Bind("Name,SelectedCourses,ProfessorId,Courses")] LectureGroupDTO data)
         {            
             if (ModelState.IsValid)
             {
@@ -97,7 +95,7 @@ namespace QRCodeEvidentationApp.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            data = await _lectureGroupService.PrepareForCreate(User.Identity.Name);
+            data = _lectureGroupService.PrepareForCreate(User.Identity.Name).Result;
 
             return View(data);
         }
@@ -162,15 +160,7 @@ namespace QRCodeEvidentationApp.Controllers
             
             List<Lecture> lectures = new List<Lecture>();
             lectures = _lectureService.GetLecturesByProfessorAndCourseGroupId(loggedInProfessor.Id, id);
-            CourseGroupAnalyticsDTO courseAnalytics = new CourseGroupAnalyticsDTO();
-            courseAnalytics.lecturesAndAttendees = new Dictionary<Lecture, long>();
-            courseAnalytics.courseGroupId = id;
-            foreach (Lecture l in lectures)
-            {
-                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
-                courseAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
-            }
-            
+            CourseGroupAnalyticsDTO courseAnalytics = _lectureGroupService.GetLecturesCourseGroupAnalytics(lectures, id);
             return View(courseAnalytics);
         }
 

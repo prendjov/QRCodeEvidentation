@@ -34,5 +34,7 @@ namespace QRCodeEvidentationApp.Service.Interface
         public Task<LectureGroupDTO> PrepareForCreate(string professorId);
 
         public void Delete(string id);
+        
+        public CourseGroupAnalyticsDTO GetLecturesCourseGroupAnalytics(List<Lecture> lectures, string id);
     }
 }

@@ -9,9 +9,6 @@ using QRCodeEvidentationApp.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using QRCodeEvidentationApp.Service.Implementation;
 using QRCoder;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 
 
 namespace QRCodeEvidentationApp.Controllers
@@ -25,13 +22,18 @@ namespace QRCodeEvidentationApp.Controllers
         private readonly ILectureGroupService _lectureGroupService;
         private readonly ILectureAttendanceService _lectureAttendanceService;
         private readonly IGenerateExcelDocument _generateExcelService;
+        private readonly IQrCodeService _qrCodeService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public LecturesController(ILectureService lectureService, 
             IProfessorService professorService,
             ICourseService courseService,
             ILectureGroupService lectureGroupService,
             ILectureAttendanceService lectureAttendanceService,
-            IGenerateExcelDocument generateExcelService)
+            IGenerateExcelDocument generateExcelService,
+            IQrCodeService qrCodeService,
+            IWebHostEnvironment webHostEnvironment
+            )
         {
             _lectureService = lectureService;
             _professorService = professorService;
@@ -39,6 +41,8 @@ namespace QRCodeEvidentationApp.Controllers
             _lectureGroupService = lectureGroupService;
             _lectureAttendanceService = lectureAttendanceService;
             _generateExcelService = generateExcelService;
+            _qrCodeService = qrCodeService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Lecture
@@ -92,10 +96,13 @@ namespace QRCodeEvidentationApp.Controllers
             if (csvFile != null && csvFile.Length > 0)
             {
                 // PARSE THE CSV RECORDS AND ADD THE RECORDS IN THE DATABASE
-                _lectureService.BulkInsertLectures(csvFile);
+                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                
+                
+                _lectureService.BulkInsertLectures(csvFile, userEmail);
                 return RedirectToAction("Index");
             }
-
+            
             // If no file is uploaded, return to the same view with an error message
             ModelState.AddModelError("csvFile", "Please upload a CSV file.");
             return View();
@@ -268,30 +275,17 @@ namespace QRCodeEvidentationApp.Controllers
             {
                 return RedirectToAction(nameof(DisplayError), new { error = "The logged in professor doesn't have access to this lecture."});
             }
-            
-            // Directory to save the QR code image
-            string directoryPath = "/home/vane/Desktop";
-            string fileName = $"QRCode_{id}.png"; // Define the filename
-            string filePath = Path.Combine(directoryPath, fileName);
 
             try
             {
-                using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-                using (QRCodeData qrCodeData =
-                       qrGenerator.CreateQrCode("https://localhost:5097/Student/RegisterAttendance/" + id,
-                           QRCodeGenerator.ECCLevel.Q))
-                using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
-                {
-                    // Get the QR code image as a byte array
-                    byte[] qrCodeImage = qrCode.GetGraphic(20);
+                string url = "https://localhost:5097/Student/RegisterAttendance/" + id;
+                string overlayImagePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Resources", "Image", "finki_logo.png");
+                byte[] qrCodeImage = _qrCodeService.GenerateQRCodeWithImage(url, overlayImagePath);
 
-                    // Return the byte array as a file result
-                    return File(qrCodeImage, "image/png");
-                }
+                return File(qrCodeImage, "image/png");
             }
             catch (Exception ex)
             {
-                // Handle exceptions (e.g., log the error)
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

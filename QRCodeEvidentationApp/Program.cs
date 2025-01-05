@@ -41,6 +41,7 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
 builder.Services.AddTransient<IGenerateExcelDocument, GenerateExcelDocument>();
+builder.Services.AddTransient<IQrCodeService, QrCodeService>();
 
 var app = builder.Build();
 

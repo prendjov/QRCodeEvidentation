@@ -22,7 +22,7 @@ namespace QRCodeEvidentationApp.Repository.Interface
         /// </summary>
         /// <param name="lectureGroup">Lecture group to be deleted</param>
         /// <returns>The deleted lecture group</returns>
-        public Task<LectureGroup> Delete(LectureGroup lectureGroup);
+        public LectureGroup Delete(LectureGroup lectureGroup);
         /// <summary>
         /// Returns the Lecture Group assigned to the ID
         /// </summary>

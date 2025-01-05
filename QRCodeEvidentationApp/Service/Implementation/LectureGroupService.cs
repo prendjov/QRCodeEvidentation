@@ -15,14 +15,17 @@ namespace QRCodeEvidentationApp.Service.Implementation
         private readonly ILectureGroupRepository _lectureGroupRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly ILectureRepository _lectureRepository;
+        private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
 
         public LectureGroupService(ILectureGroupRepository lectureGroupRepository,
             ICourseRepository courseRepository,
-            ILectureRepository lectureRepository) 
+            ILectureRepository lectureRepository,
+            ILectureAttendanceRepository lectureAttendanceRepository) 
         {
             _lectureGroupRepository = lectureGroupRepository;
             _courseRepository = courseRepository;
             _lectureRepository = lectureRepository;
+            _lectureAttendanceRepository = lectureAttendanceRepository;
         }
         public LectureGroup Create(LectureGroupDTO data)
         {
@@ -66,6 +69,20 @@ namespace QRCodeEvidentationApp.Service.Implementation
             LectureGroup lectureGroup = Get(id).Result;
             
             _lectureGroupRepository.Delete(lectureGroup);
+        }
+
+        public CourseGroupAnalyticsDTO GetLecturesCourseGroupAnalytics(List<Lecture> lectures, string id)
+        {
+            CourseGroupAnalyticsDTO courseGroupAnalytics = new CourseGroupAnalyticsDTO();
+            courseGroupAnalytics.lecturesAndAttendees = new Dictionary<Lecture, long>();
+            courseGroupAnalytics.courseGroupId = id;
+            foreach (Lecture l in lectures)
+            {
+                List<LectureAttendance> lectureAttendances = _lectureAttendanceRepository.GetLectureAttendance(l.Id).Result;
+                courseGroupAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
+            }
+
+            return courseGroupAnalytics;
         }
 
         public async Task<LectureGroupDTO> PrepareForUpdate(string professorId, string lectureGroupId)

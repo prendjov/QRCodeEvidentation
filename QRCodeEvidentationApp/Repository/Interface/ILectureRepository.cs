@@ -1,3 +1,5 @@
+using QRCodeEvidentationApp.Models.Parsers;
+
 namespace QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Models;
 
@@ -52,6 +54,6 @@ public interface ILectureRepository
     
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
     public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId);
-    
-    
+
+    public void BulkInsertLectures(List<LectureCsvParser> lectureCsvFormat, string professorEmail);
 }

@@ -88,7 +88,7 @@ public class LectureService : ILectureService
         return _lectureRepository.DeleteLecture(lecture).Result;
     }
     
-    public void BulkInsertLectures(IFormFile csvFile)
+    public void BulkInsertLectures(IFormFile csvFile, string professorEmail)
     {
         // Open the CSV file
         using (var stream = csvFile.OpenReadStream())
@@ -98,23 +98,7 @@ public class LectureService : ILectureService
             // Read the records from the CSV file
             var records = csv.GetRecords<LectureCsvParser>().ToList();
 
-            // Here, you can perform your bulk insert or process the records
-            foreach (var record in records)
-            {
-                Lecture lecture = new Lecture
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Title = record.Title ?? string.Empty,
-                    StartsAt = record.StartsAt,
-                    EndsAt = record.EndsAt,
-                    ProfessorId = record.ProfessorId,
-                    Type = record.Type,
-                    ValidRegistrationUntil = record.ValidRegistrationUntil,
-                    LectureGroupId = record.GroupCourseId
-                };
-                
-                Lecture createdLecture = _lectureRepository.CreateNewLecture(lecture).Result;
-            }
+            _lectureRepository.BulkInsertLectures(records, professorEmail);
         }
     }
 

@@ -36,10 +36,10 @@ namespace QRCodeEvidentationApp.Repository.Implementation
             return lectureGroup;
         }
 
-        public async Task<LectureGroup> Delete(LectureGroup lectureGroup)
+        public LectureGroup Delete(LectureGroup lectureGroup)
         {
             _entities.Remove(lectureGroup);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
 
             return lectureGroup;
         }

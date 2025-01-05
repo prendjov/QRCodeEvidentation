@@ -15,7 +15,6 @@ public class StudentController : Controller
 
     public StudentController(IStudentService studentService,
         ILectureService lectureService,
-        ICourseService courseService,
         ILectureAttendanceService lectureAttendanceService)
     { 
         _studentService = studentService;

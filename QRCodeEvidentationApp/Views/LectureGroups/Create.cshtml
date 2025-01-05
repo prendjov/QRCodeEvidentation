@@ -25,9 +25,8 @@ ViewData["Title"] = "Create";
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="SelectedCourses" class="form-label">Courses</label>
+                <span>Select courses:</span>
                 <select asp-for="SelectedCourses" asp-items="@(new SelectList(Model.Courses, "Id", "LastNameRegex"))" class="form-control" multiple="multiple">
-                    <option value="">Select Courses</option>
                 </select>
                 <span asp-validation-for="SelectedCourses" class="text-danger"></span>
             </div>

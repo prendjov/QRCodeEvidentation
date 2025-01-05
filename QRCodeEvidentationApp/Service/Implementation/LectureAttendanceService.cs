@@ -18,11 +18,6 @@ public class LectureAttendanceService : ILectureAttendanceService
         return _lectureAttendanceRepository.GetLectureAttendance(lectureId);
     }
 
-    public Task<List<LectureAttendance>> GetLectureAttendanceForStudent(string? studentId)
-    {
-        return _lectureAttendanceRepository.GetLectureByStudentId(studentId);
-    }
-
     public async Task<List<LectureAttendance>> GetLectureAttendanceForStudent(Student student)
     {
         string? studentIndex = student.StudentIndex;

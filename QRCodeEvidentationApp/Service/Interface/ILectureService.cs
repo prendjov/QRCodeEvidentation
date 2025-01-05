@@ -52,7 +52,7 @@ public interface ILectureService
     
     public List<Lecture> GetLecturesForProfessorFiltered(string? professorId, int page, int pageSize, int startsAtSorting, string lectureTypeFilter, out int totalLectures);
 
-    public void BulkInsertLectures(IFormFile csvFile);
+    public void BulkInsertLectures(IFormFile csvFile, string professorEmail);
 
     public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
     
