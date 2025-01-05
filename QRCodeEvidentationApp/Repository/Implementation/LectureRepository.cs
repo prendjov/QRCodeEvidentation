@@ -30,37 +30,9 @@ public class LectureRepository : ILectureRepository
 
     public async Task<Lecture> GetLectureById(string? lectureId)
     {
-        return _entities.Where(d => d.Id == lectureId).Include(l => l.LectureGroup).Include(d => d.Courses).ThenInclude(dc => dc.Course).FirstOrDefault();
+        return _entities.Where(d => d.Id == lectureId).Include(d => d.LectureGroup).ThenInclude(dc => dc.Courses).FirstOrDefault();
     }
-
-    public async Task<List<Lecture>> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
-    {
-        // var filterByDate = _entities.Where(l =>
-        //     l.StartsAt >= dateFrom && l.EndsAt <= dateTo);
-        //
-        // if (coursesIds != null)
-        // {
-        //     filterByDate
-        // }
-        var query = _entities.AsQueryable();
-
-        if (dateFrom.HasValue)
-        {
-            query = query.Where(l => l.StartsAt >= dateFrom);
-        }
-
-        if (dateTo.HasValue)
-        {
-            query = query.Where(l => l.StartsAt <= dateTo);
-        }
-
-        if (coursesIds != null)
-        {
-            query = query.Where(l => l.Courses.Any(c => c.CourseId != null && coursesIds.Contains(c.CourseId.Value)));
-        }
-        
-        return await query.ToListAsync();
-    }
+    
 
     public Lecture UpdateLecture(Lecture lecture)
     {
@@ -132,7 +104,7 @@ public class LectureRepository : ILectureRepository
     {
         return _entities
             .Where(l => l.ProfessorId == professorId && 
-                        l.Courses.Any(c => c.CourseId == courseId))
+                        l.LectureGroup.Courses.Any(c => c.Id == courseId))
             .ToList();
     }
 

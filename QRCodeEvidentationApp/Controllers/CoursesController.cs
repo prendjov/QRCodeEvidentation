@@ -21,29 +21,15 @@ namespace QRCodeEvidentationApp.Controllers
     [Authorize(Roles = "PROFESSOR")]
     public class CoursesController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IProfessorService _professorService;
         private readonly ICourseService _courseService;
-        private readonly ILectureService _lectureService;
-        private readonly IStudentService _studentService;
-        private readonly ILectureAttendanceService _lectureAttendanceService;
-        private readonly IGenerateExcelDocument _generateDocumentService;
 
-        public CoursesController(ApplicationDbContext context,
+        public CoursesController(
             IProfessorService professorService,
-            ICourseService courseService,
-            ILectureService lectureService,
-            IStudentService studentService,
-            ILectureAttendanceService lectureAttendanceService,
-            IGenerateExcelDocument generateDocumentService)
+            ICourseService courseService)
         {
-            _context = context;
             _professorService = professorService;
             _courseService = courseService;
-            _lectureService = lectureService;
-            _studentService = studentService;
-            _lectureAttendanceService = lectureAttendanceService;
-            _generateDocumentService = generateDocumentService;
         }
         
         private bool IsProfessorAssignedCourse(long? courseId)
@@ -68,7 +54,7 @@ namespace QRCodeEvidentationApp.Controllers
         }
 
         // GET: Courses/Details/5
-        public async Task<IActionResult> Details(long? id)
+        public async Task<IActionResult> Details(long id)
         {
             if (id == null)
             {
@@ -81,105 +67,13 @@ namespace QRCodeEvidentationApp.Controllers
                     new { error = "You are not assigned as professor to this course." });
             }
 
-            var course = await _context.Courses
-                .Include(c => c.Semester)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var course = _courseService.GetCourse(id);
             if (course == null)
             {
                 return NotFound();
             }
 
             return View(course);
-        }
-        
-        public async Task<IActionResult> Analytics(long? id)
-        {
-            if (!IsProfessorAssignedCourse(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "You are not assigned as professor to this course." });
-            }
-            
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-            
-            List<Lecture> lectures = new List<Lecture>();
-            lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
-            CourseAnalyticsDTO courseAnalytics = new CourseAnalyticsDTO();
-            courseAnalytics.lecturesAndAttendees = new Dictionary<Lecture, long>();
-            courseAnalytics.courseId = id;
-            foreach (Lecture l in lectures)
-            {
-                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
-                courseAnalytics.lecturesAndAttendees[l] = lectureAttendances.Count;
-            }
-            
-            return View(courseAnalytics);
-        }
-
-        public async Task<IActionResult> GeneralAnalytics(long id)
-        {
-            if (!IsProfessorAssignedCourse(id))
-            {
-                return RedirectToAction(nameof(DisplayError),
-                    new { error = "You are not assigned as professor to this course." });
-            }
-            
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-
-
-            List<Lecture> lectures = _lectureService.GetLecturesByProfessorAndCourseId(loggedInProfessor.Id, id);
-            HashSet<Student> students = new HashSet<Student>();
-
-            foreach (Lecture l in lectures)
-            {
-                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
-                foreach (LectureAttendance attendance in lectureAttendances)
-                {
-                    students.Add(attendance.Student);
-                }
-            }
-
-            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalyticsDtos = new List<AggregatedCourseAnalyticsDto>();
-            foreach (Student s in students)
-            {
-                AggregatedCourseAnalyticsDto singleAnalytic = new AggregatedCourseAnalyticsDto();
-                singleAnalytic.Student = s;
-                singleAnalytic.LectureAndAttendance = new Dictionary<string, long>();
-                singleAnalytic.totalAttendances = 0;
-
-                foreach (Lecture l in lectures)
-                {
-                    singleAnalytic.LectureAndAttendance[l.Id] = 0;
-                }
-                
-                List<LectureAttendance> attendances = _lectureAttendanceService.GetLectureAttendanceForStudent(s).Result;
-
-                foreach (LectureAttendance attendance in attendances)
-                {
-                    if (singleAnalytic.LectureAndAttendance.Keys.Contains(attendance.LectureId))
-                    {
-                        singleAnalytic.LectureAndAttendance[attendance.LectureId] = 1;
-                        singleAnalytic.totalAttendances += 1;
-                    }
-                }
-                
-                aggregatedCourseAnalyticsDtos.Add(singleAnalytic);
-            }
-            
-            Course course = _courseService.GetCourse(id);
-            
-            var result = _generateDocumentService.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
-
-            if (result is FileContentResult fileResult)
-            {
-                // Change the FileDownloadName
-                fileResult.FileDownloadName = "aggregated_analytics_" + course.LastNameRegex + "_" + DateTime.Now + ".xlsx";
-                return fileResult;
-            }
-            
-            return result;
         }
         
         public IActionResult DisplayError(string error)

@@ -42,26 +42,26 @@
                     @Html.DisplayFor(model => model.ValidRegistrationUntil)
                 </dd>
 
-                @* <dt class="col-sm-3 text-muted"> *@
-                @*     @Html.DisplayNameFor(model => model.Room) *@
-                @* </dt> *@
-                @* <dd class="col-sm-9"> *@
-                @*     @Html.DisplayFor(model => model.RoomName) *@
-                @* </dd> *@
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.LectureGroup)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.LectureGroup.Name)
+                </dd>
                 <dt class="col-sm-3 text-muted">
                     Courses:
                 </dt>
                 <dd class="col-sm-9">
                     <div class="mt-3">
-                        @foreach (var item in Model.Courses)
+                        @foreach (var item in Model.LectureGroup.Courses)
                         {
                         <div class="mb-4">
                             <div class="card shadow-sm">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <h5 class="card-title mb-0">
-                                        @Html.DisplayFor(modelItem => item.Course.LastNameRegex)
+                                        @Html.DisplayFor(modelItem => item.LastNameRegex)
                                     </h5>
-                                    <a href="@Url.Action("Details", "Courses", new { id = item.Course.Id })" class="btn btn-outline-primary btn-sm">View Details</a>
+                                    <a href="@Url.Action("Details", "Courses", new { id = item.Id })" class="btn btn-outline-primary btn-sm">View Details</a>
                                 </div>
                             </div>
                         </div>

@@ -23,10 +23,7 @@ public interface ICourseRepository
     /// <returns>Returns all the courses for a specific teahcer id, doesn't matter if professor
     /// or assistant for the course.</returns>
     public Task<List<Course>> GetCourses(string? teacherId);
-
-    public Task<List<string?>> GetLectureForCourseId(long? id);
-
-    public Task<List<Lecture>> GetLectureObjectForCourseId(long? id);
+    
     
     public Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId);
 

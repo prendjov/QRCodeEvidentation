@@ -34,9 +34,9 @@ Layout = "~/Views/Shared/_Layout.cshtml";
                             <div class="card shadow-sm">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <h5 class="card-title mb-0">
-                                        @Html.DisplayFor(modelItem => item.Course.LastNameRegex)
+                                        @Html.DisplayFor(modelItem => item.LastNameRegex)
                                     </h5>
-                                    <a href="@Url.Action("Details", "Courses", new { id = item.Course.Id })" class="btn btn-outline-primary btn-sm">View Details</a>
+                                    <a href="@Url.Action("Details", "Courses", new { id = item.Id })" class="btn btn-outline-primary btn-sm">View Details</a>
                                 </div>
                             </div>
                         </div>

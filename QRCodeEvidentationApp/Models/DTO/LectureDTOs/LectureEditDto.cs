@@ -14,8 +14,6 @@ public class LectureEditDto
     
     public List<CourseProfessor>? CoursesProfessor { get; set; }
     
-    public List<CourseAssistant>? CoursesAssistant { get; set; }
-
     public List<LectureGroup>? Groups { get; set; }
     
     public long? CourseId { get; set; }
@@ -26,8 +24,4 @@ public class LectureEditDto
     
     public string? GroupCourseId { get; set; }
     public string? ErrMessage { get; set; }
-    
-    // need these two fields to transfer the available rooms logic on the front-end
-    // public List<Room>? AllRooms { get; set; }
-    // public List<Lecture>? LecturesOnSpecificDate { get; set; }
 }

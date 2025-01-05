@@ -11,14 +11,12 @@ namespace QRCodeEvidentationApp.Service.Implementation;
 public class CourseService : ICourseService
 {
     private readonly ICourseRepository _courseRepository;
-    private readonly ILectureCoursesRepository _lectureCoursesRepository;
     private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
 
-    public CourseService(ICourseRepository courseRepository, ILectureCoursesRepository lectureCoursesRepository,
+    public CourseService(ICourseRepository courseRepository,
         ILectureAttendanceRepository lectureAttendanceRepository)
     {
         _courseRepository = courseRepository;
-        _lectureCoursesRepository = lectureCoursesRepository;
         _lectureAttendanceRepository = lectureAttendanceRepository;
     }
 
@@ -31,39 +29,13 @@ public class CourseService : ICourseService
     {
         return await _courseRepository.GetCoursesForAssistant(assistantId);
     }
-
-    public List<long?> GetCoursesIdByLectureId(string? lectureId)
-    {
-        try
-        {
-            return _lectureCoursesRepository.GetCoursesForLecture(lectureId);
-        }
-        catch (Exception e)
-        {
-            throw new InvalidOperationException();
-        }
-    }
+    
 
     public List<Course> GetCourses(string? teacherId)
     {
         return _courseRepository.GetCourses(teacherId).Result;
     }
-
-    public List<string?> GetLectureForCourseId(long? courseId)
-    {
-        List<string?> lectureIds = _courseRepository.GetLectureForCourseId(courseId).Result;
-        return lectureIds;
-    }
-
-    public CourseAnalyticsDTO GetCourseStatistics(List<Lecture> lecturesForProfessor, List<StudentCourse> studentCourses, List<string?> lecturesForCourse)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<Lecture> GetLecturesForCourseId(long? courseId)
-    {
-        return _courseRepository.GetLectureObjectForCourseId(courseId).Result;
-    }
+    
 
     public bool ProfessorAtCourse(long? courseId, string? professorId)
     {

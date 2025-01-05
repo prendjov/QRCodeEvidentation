@@ -70,17 +70,7 @@ namespace QRCodeEvidentationApp.Repository.Implementation
 
             return courses;
         }
-
-        public async Task<List<string?>> GetLectureForCourseId(long? id)
-        {
-            return await _context.LectureCourses.Where(l => l.CourseId.Equals(id)).Select(l => l.LectureId).ToListAsync();
-        }
-
-        public async Task<List<Lecture>> GetLectureObjectForCourseId(long? id)
-        {
-            return await _context.LectureCourses.Where(l => l.CourseId.Equals(id)).Select(l => l.Lecture).ToListAsync();
-        }
-
+        
         public async Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId)
         {
             return await _context.CourseProfessors.Where(x => x.ProfessorId == teacherId && x.CourseId == id)
@@ -95,7 +85,7 @@ namespace QRCodeEvidentationApp.Repository.Implementation
 
         public Course Get(long courseId)
         {
-            return _context.Courses.Where(c => c.Id == courseId).FirstOrDefault();
+            return _context.Courses.Where(c => c.Id == courseId).Include(c => c.Semester).FirstOrDefault();
         }
     }
 }

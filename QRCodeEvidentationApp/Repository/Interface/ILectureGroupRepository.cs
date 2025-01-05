@@ -1,4 +1,5 @@
 ﻿using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.DTO;
 
 namespace QRCodeEvidentationApp.Repository.Interface
 {
@@ -9,7 +10,7 @@ namespace QRCodeEvidentationApp.Repository.Interface
         /// </summary>
         /// <param name="lectureGroup">Lecture group to be created</param>
         /// <returns>The created lecture group</returns>
-        public Task<LectureGroup> Create(LectureGroup lectureGroup);
+        public LectureGroup Create(LectureGroupDTO lectureGroup);
         /// <summary>
         /// Updates the Lecture Group from the parameter
         /// </summary>

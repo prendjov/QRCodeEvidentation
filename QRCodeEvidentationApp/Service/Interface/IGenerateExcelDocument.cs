@@ -6,5 +6,7 @@ namespace QRCodeEvidentationApp.Service.Interface;
 
 public interface IGenerateExcelDocument
 {
-    public IActionResult GenerateDocument(List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalytics, List<Lecture> lectures);
+    public IActionResult GenerateDocument(Professor loggedInProfessor, string groupId);
+
+    public IActionResult GenerateForSingleLecture(List<LectureAttendance> lectureAttends, Lecture lecture);
 }

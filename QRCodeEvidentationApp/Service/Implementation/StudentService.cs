@@ -7,16 +7,10 @@ namespace QRCodeEvidentationApp.Service.Implementation;
 public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly IStudentCourseRepository _studentCourseRepository;
-    private readonly ILectureGroupCourseRepository _lectureGroupCourseRepository;
     
-    public StudentService(IStudentRepository studentRepository,
-        IStudentCourseRepository studentCourseRepository,
-        ILectureGroupCourseRepository lectureGroupCourseRepository)
+    public StudentService(IStudentRepository studentRepository)
     {
         _studentRepository = studentRepository;
-        _studentCourseRepository = studentCourseRepository;
-        _lectureGroupCourseRepository = lectureGroupCourseRepository;
     }
     
     public Task<Student> GetStudentFromUserEmail(string email)
@@ -24,35 +18,4 @@ public class StudentService : IStudentService
         return _studentRepository.GetStudentByEmail(email);
     }
 
-    public bool CheckStudentInCourse(string studentIndex, List<long?> courseId)
-    {
-        List<long?> coursesForStudent = _studentRepository.GetCoursesForStudent(studentIndex);
-        foreach (long? id in courseId)
-        {
-            foreach (long? id_student in coursesForStudent)
-            {
-                if (id_student == id)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public List<StudentCourse> GetStudentsForProfessor(string professorId)
-    {
-        return _studentCourseRepository.GetStudentsForProfessor(professorId);
-    }
-
-    public List<Student> GetStudentsForCourse(long? courseId)
-    {
-        return _studentCourseRepository.GetStudentsForCourse(courseId);
-    }
-
-    public List<StudentCourse> GetCoursesForStudent(string studentIndex)
-    {
-        return _studentCourseRepository.GetCoursesByStudentIndex(studentIndex);
-    }
 }

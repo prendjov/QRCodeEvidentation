@@ -18,22 +18,19 @@ namespace QRCodeEvidentationApp.Controllers
     [Authorize(Roles = "PROFESSOR")]
     public class LectureGroupsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly ILectureGroupService _lectureGroupService;
         private readonly IProfessorService _professorService;
         private readonly ILectureService _lectureService;
         private readonly ILectureAttendanceService _lectureAttendanceService;
         private readonly IGenerateExcelDocument _generateDocumentService;
-
-
-        public LectureGroupsController(ApplicationDbContext context, 
+        
+        public LectureGroupsController( 
             ILectureGroupService lectureGroupService, 
             IProfessorService professorService,
             ILectureService lectureService,
             ILectureAttendanceService lectureAttendanceService,
             IGenerateExcelDocument generateDocumentService)
         {
-            _context = context;
             _lectureGroupService = lectureGroupService;
             _professorService = professorService;
             _lectureService = lectureService;
@@ -119,9 +116,8 @@ namespace QRCodeEvidentationApp.Controllers
                     new { error = "The logged in professor doesn't have access to this lecture group." });
             }
 
-            var lectureGroup = await _context.LectureGroup
-                .Include(l => l.Professor)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var lectureGroup = _lectureGroupService.Get(id).Result;
+            
             if (lectureGroup == null)
             {
                 return NotFound();
@@ -135,19 +131,14 @@ namespace QRCodeEvidentationApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var lectureGroup = await _context.LectureGroup.FindAsync(id);
-            if (lectureGroup != null)
-            {
-                _context.LectureGroup.Remove(lectureGroup);
-            }
-            
             if (!await IsUserCreatorOfLectureGroup(id))
             {
                 return RedirectToAction(nameof(DisplayError),
                     new { error = "The logged in professor doesn't have access to this lecture group." });
             }
 
-            await _context.SaveChangesAsync();
+            _lectureGroupService.Delete(id);
+            
             return RedirectToAction(nameof(Index));
         }
         
@@ -193,50 +184,10 @@ namespace QRCodeEvidentationApp.Controllers
             
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             Professor loggedInProfessor = await _professorService.GetProfessorFromUserEmail(userEmail ?? throw new InvalidOperationException());
-
-
-            List<Lecture> lectures = _lectureService.GetLecturesByProfessorAndCourseGroupId(loggedInProfessor.Id, id);
-            HashSet<Student> students = new HashSet<Student>();
-
-            foreach (Lecture l in lectures)
-            {
-                List<LectureAttendance> lectureAttendances = _lectureAttendanceService.GetLectureAttendance(l.Id).Result;
-                foreach (LectureAttendance attendance in lectureAttendances)
-                {
-                    students.Add(attendance.Student);
-                }
-            }
-
-            List<AggregatedCourseAnalyticsDto> aggregatedCourseAnalyticsDtos = new List<AggregatedCourseAnalyticsDto>();
-            foreach (Student s in students)
-            {
-                AggregatedCourseAnalyticsDto singleAnalytic = new AggregatedCourseAnalyticsDto();
-                singleAnalytic.Student = s;
-                singleAnalytic.LectureAndAttendance = new Dictionary<string, long>();
-                singleAnalytic.totalAttendances = 0;
-
-                foreach (Lecture l in lectures)
-                {
-                    singleAnalytic.LectureAndAttendance[l.Id] = 0;
-                }
-                
-                List<LectureAttendance> attendances = _lectureAttendanceService.GetLectureAttendanceForStudent(s).Result;
-
-                foreach (LectureAttendance attendance in attendances)
-                {
-                    if (singleAnalytic.LectureAndAttendance.Keys.Contains(attendance.LectureId))
-                    {
-                        singleAnalytic.LectureAndAttendance[attendance.LectureId] = 1;
-                        singleAnalytic.totalAttendances += 1;
-                    }
-                }
-                
-                aggregatedCourseAnalyticsDtos.Add(singleAnalytic);
-            }
+            
+            var result = _generateDocumentService.GenerateDocument(loggedInProfessor, id);
 
             LectureGroup lectureGroup = _lectureGroupService.Get(id).Result;
-            
-            var result = _generateDocumentService.GenerateDocument(aggregatedCourseAnalyticsDtos, lectures);
 
             if (result is FileContentResult fileResult)
             {

@@ -20,23 +20,10 @@ public interface ICourseService
     /// <returns>A list of courses for the assistant.</returns>
     public Task<List<CourseAssistant>> GetCoursesForAssistant(string? assistantId);
     
-    /// <summary>
-    /// Returns the courses ids for a given lectureid.
-    /// </summary>
-    /// <param name="lectureId">The id of the lecture.</param>
-    /// <returns>List of course ids.</returns>
-    public List<long?> GetCoursesIdByLectureId(string? lectureId);
-    
     /// <param name="teacherId">The id of the teacher.</param>
     /// <returns>Returns all the courses for a specific teacher id, doesn't matter if professor
     /// or assistant for the course.</returns>
     public List<Course> GetCourses(string? teacherId);
-
-    public List<string?> GetLectureForCourseId(long? courseId);
-    
-    public CourseAnalyticsDTO GetCourseStatistics(List<Lecture> lecturesForProfessor, List<StudentCourse> studentCourses, List<string?> lecturesForCourse);
-    
-    public List<Lecture> GetLecturesForCourseId(long? courseId);
 
     public bool ProfessorAtCourse(long? courseId, string? professorId);
 

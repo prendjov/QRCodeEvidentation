@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QRCodeEvidentationApp.Data;
 using QRCodeEvidentationApp.Models;
+using QRCodeEvidentationApp.Models.DTO;
 using QRCodeEvidentationApp.Repository.Interface;
 
 namespace QRCodeEvidentationApp.Repository.Implementation
@@ -16,13 +17,23 @@ namespace QRCodeEvidentationApp.Repository.Implementation
             _entities = context.Set<LectureGroup>();
         }
 
-        public async Task<LectureGroup> Create(LectureGroup lectureGroup)
+        public LectureGroup Create(LectureGroupDTO data)
         {
-            var createdLectureGroup = _entities.Add(lectureGroup);
-            _context.SaveChanges();
+            LectureGroup lectureGroup = new LectureGroup
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = data.Name,
+                ProfessorId = data.ProfessorId
+            };
+            
+            lectureGroup.Courses = _context.Courses
+                .Where(c => data.SelectedCourses.Contains(c.Id))
+                .ToList();
+            
+            _entities.Add(lectureGroup);
+            _context.SaveChangesAsync();
 
-            return createdLectureGroup.Entity;
-
+            return lectureGroup;
         }
 
         public async Task<LectureGroup> Delete(LectureGroup lectureGroup)
@@ -36,8 +47,8 @@ namespace QRCodeEvidentationApp.Repository.Implementation
         public async Task<LectureGroup> GetById(string lectureGroupId)
         {
             return await _entities.Where(d => d.Id == lectureGroupId)
+                .Include(lc => lc.Professor)
                 .Include(gc => gc.Courses)
-                .ThenInclude(course => course.Course)
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException();
         }
 
