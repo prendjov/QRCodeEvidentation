@@ -45,12 +45,12 @@ public class GenerateExcelDocument : IGenerateExcelDocument
         {
             AggregatedCourseAnalyticsDto singleAnalytic = new AggregatedCourseAnalyticsDto();
             singleAnalytic.Student = s;
-            singleAnalytic.LectureAndAttendance = new Dictionary<string, long>();
+            singleAnalytic.LectureAndAttendance = new Dictionary<string, Attendance>();
             singleAnalytic.totalAttendances = 0;
 
             foreach (Lecture l in lectures)
             {
-                singleAnalytic.LectureAndAttendance[l.Id] = 0;
+                singleAnalytic.LectureAndAttendance[l.Id] = new Attendance(0, false);
             }
                 
             List<LectureAttendance> attendances = _lectureAttendanceService.GetLectureAttendanceForStudent(s).Result;
@@ -59,8 +59,16 @@ public class GenerateExcelDocument : IGenerateExcelDocument
             {
                 if (singleAnalytic.LectureAndAttendance.Keys.Contains(attendance.LectureId))
                 {
-                    singleAnalytic.LectureAndAttendance[attendance.LectureId] = 1;
+                    Attendance attendanceStats = singleAnalytic.LectureAndAttendance[attendance.LectureId];
+
+                    if (attendance.Lecture.ValidRegistrationUntil < attendance.EvidentedAt)
+                    {
+                        attendanceStats.isLate = true;
+                    }
+                    attendanceStats.isAttended = 1;
                     singleAnalytic.totalAttendances += 1;
+                    
+                    singleAnalytic.LectureAndAttendance[attendance.LectureId] = attendanceStats;
                 }
             }
                 
@@ -114,8 +122,14 @@ public class GenerateExcelDocument : IGenerateExcelDocument
                 int columnNumber = 2;
                 foreach (Lecture l in lectures)
                 {
-                    long presentInt = analytic.LectureAndAttendance[l.Id];
-                    worksheet.Cell(currentRow, columnNumber).Value = presentInt;
+                    Attendance wasAttended = analytic.LectureAndAttendance[l.Id];
+
+                    if (wasAttended.isLate)
+                    {
+                        worksheet.Cell(currentRow, columnNumber).Style.Fill.BackgroundColor = XLColor.Red;
+                    }
+                    
+                    worksheet.Cell(currentRow, columnNumber).Value = wasAttended.isAttended;
                     columnNumber += 1;
                 }
 
