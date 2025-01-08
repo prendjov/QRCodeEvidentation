@@ -17,29 +17,29 @@ namespace QRCodeEvidentationApp.Data
         public virtual DbSet<Lecture> Lectures { get; set; }
 
         public virtual DbSet<LectureAttendance> LectureAttendances { get; set; }
-
-        public virtual DbSet<LectureCourses> LectureCourses { get; set; }
-
+        
         public virtual DbSet<Professor> Professors { get; set; }
-
-        public virtual DbSet<ProfessorDetail> ProfessorDetails { get; set; }
-
-        public virtual DbSet<Room> Rooms { get; set; }
-
+        
         public virtual DbSet<Semester> Semesters { get; set; }
 
         public virtual DbSet<Student> Students { get; set; }
 
         public virtual DbSet<StudentCourse> StudentCourses { get; set; }
-
-        public virtual DbSet<StudyProgram> StudyPrograms { get; set; }
-
+        
         public virtual DbSet<CourseAssistant> CourseAssistants { get; set; }
 
         public virtual DbSet<CourseProfessor> CourseProfessors{ get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<LectureAttendance>(entity =>
+            {
+                entity.HasOne(e => e.Lecture)
+                    .WithMany()
+                    .HasForeignKey(e => e.LectureId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            
             modelBuilder.Entity<CourseAssistant>(entity =>
             {
                 // Configure the relationship with Professor (Assistant)
@@ -48,8 +48,28 @@ namespace QRCodeEvidentationApp.Data
                       .HasForeignKey(e => e.AssistantId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
-
+            
+            modelBuilder.Entity<Course>()
+                .HasMany(c => c.LectureGroups)
+                .WithMany(lg => lg.Courses)
+                .UsingEntity<Dictionary<string, object>>(
+                    "CourseLectureGroup", // Junction table name
+                    j => j.HasOne<LectureGroup>().WithMany().HasForeignKey("LectureGroupId"),
+                    j => j.HasOne<Course>().WithMany().HasForeignKey("CourseId"),
+                    j =>
+                    {
+                        j.HasKey("LectureGroupId", "CourseId"); // Composite key
+                        j.ToTable("CustomCourseLectureGroupTable"); // Table name
+                    });
+            
+            modelBuilder.Entity<Lecture>()
+                .HasOne(l => l.LectureGroup)
+                .WithMany(lg => lg.Lectures)
+                .HasForeignKey(l => l.LectureGroupId)
+                .OnDelete(DeleteBehavior.Cascade); 
+            
             base.OnModelCreating(modelBuilder);
         }
+        public DbSet<QRCodeEvidentationApp.Models.LectureGroup> LectureGroup { get; set; } = default!;
     }
 }

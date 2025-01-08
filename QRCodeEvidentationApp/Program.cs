@@ -6,6 +6,7 @@ using QRCodeEvidentationApp.Repository.Implementation;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Implementation;
 using QRCodeEvidentationApp.Service.Interface;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,18 +22,25 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddRazorPages();
 
+QuestPDF.Settings.License = LicenseType.Community;
+
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped(typeof(ILectureRepository), typeof(LectureRepository));
-builder.Services.AddScoped(typeof(IProfessorRepository), typeof(ProfessorRepository));
-builder.Services.AddScoped(typeof(ICourseRepository<CourseUserBaseEntity>), typeof(CourseRepository<CourseUserBaseEntity>));
-builder.Services.AddScoped(typeof(IRoomRepository), typeof(RoomRepository));
-builder.Services.AddScoped(typeof(ILectureCoursesRepository), typeof(LectureCoursesRepository));
+builder.Services.AddScoped<ILectureRepository, LectureRepository>();
+builder.Services.AddScoped<IProfessorRepository, ProfessorRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ILectureGroupRepository, LectureGroupRepository>();
+builder.Services.AddScoped<ILectureAttendanceRepository, LectureAttendanceRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
-builder.Services.AddTransient<ILectureService, LectureService>();
-builder.Services.AddTransient<IProfessorService, ProfessorService>();
-builder.Services.AddTransient<ICourseService, CourseService>();
-builder.Services.AddTransient<IRoomService, RoomService>();
+builder.Services.AddScoped<ILectureService, LectureService>();
+builder.Services.AddScoped<ILectureGroupService, LectureGroupService>();
+builder.Services.AddScoped<IProfessorService, ProfessorService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddTransient<IStudentService, StudentService>();
+builder.Services.AddTransient<ILectureAttendanceService, LectureAttendanceService>();
+builder.Services.AddTransient<IGenerateExcelDocument, GenerateExcelDocument>();
+builder.Services.AddTransient<IQrCodeService, QrCodeService>();
 
 var app = builder.Build();
 

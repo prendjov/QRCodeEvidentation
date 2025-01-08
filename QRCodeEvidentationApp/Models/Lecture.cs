@@ -13,7 +13,7 @@ namespace QRCodeEvidentationApp.Models
         
         public DateTime EndsAt { get; set; }
 
-        public string? RoomName { get; set; }
+        // public string? RoomName { get; set; }
 
         public string? ProfessorId { get; set; }
 
@@ -21,10 +21,12 @@ namespace QRCodeEvidentationApp.Models
 
         public DateTime? ValidRegistrationUntil { get; set; }
 
-        public virtual Room? Room { get; set; }
+        // public virtual Room? Room { get; set; }
 
         public virtual Professor? Professor { get; set; }
-
-        public virtual ICollection<LectureCourses> Courses { get; set; } = new List<LectureCourses>();
+        
+        public string? LectureGroupId {get; set;}
+        
+        public virtual LectureGroup? LectureGroup { get; set; }
     }
 }

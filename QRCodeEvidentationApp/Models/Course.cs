@@ -32,5 +32,6 @@ public partial class Course
     public virtual Semester? Semester { get; set; }
 
     public virtual ICollection<StudentCourse> StudentCourses { get; set; } = new List<StudentCourse>();
-
+    
+    public virtual ICollection<LectureGroup> LectureGroups { get; set; } = new List<LectureGroup>();
 }

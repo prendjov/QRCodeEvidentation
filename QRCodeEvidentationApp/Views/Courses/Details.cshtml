@@ -1,0 +1,44 @@
+@model QRCodeEvidentationApp.Models.Course
+
+@{
+ViewData["Title"] = "Course Details";
+}
+
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
+
+<div class="card shadow-lg">
+    <div class="card-header bg-black text-white">
+        <h4 class="mb-0">Course Information</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 font-weight-bold">Study Year</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.StudyYear)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Last Name Regex</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.LastNameRegex)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Number of First Enrollments</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NumberOfFirstEnrollments)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Number of Re-Enrollments</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NumberOfReEnrollments)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Group Portion</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.GroupPortion)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Groups</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Groups)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">English</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.English)</dd>
+
+            <dt class="col-sm-3 font-weight-bold">Semester</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Semester.Code)</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4 text-center">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

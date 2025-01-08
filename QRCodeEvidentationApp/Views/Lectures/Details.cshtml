@@ -5,55 +5,83 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<h1 class="text-center">Lecture Details</h1>
 
-<div>
-    <h4>Lecture</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartsAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartsAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Type)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Type)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ValidRegistrationUntil)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ValidRegistrationUntil)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Room)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Room.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Professor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Professor.Id)
-        </dd>
-    </dl>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-black text-white">
+            <h4 class="card-title">Lecture Information</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.Title)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Title)
+                </dd>
+
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.StartsAt)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.StartsAt)
+                </dd>
+
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.Type)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Type)
+                </dd>
+
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.ValidRegistrationUntil)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.ValidRegistrationUntil)
+                </dd>
+
+                <dt class="col-sm-3 text-muted">
+                    @Html.DisplayNameFor(model => model.LectureGroup)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.LectureGroup.Name)
+                </dd>
+                <dt class="col-sm-3 text-muted">
+                    Courses:
+                </dt>
+                <dd class="col-sm-9">
+                    <div class="mt-3">
+                        @foreach (var item in Model.LectureGroup.Courses)
+                        {
+                        <div class="mb-4">
+                            <div class="card shadow-sm">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">
+                                        @Html.DisplayFor(modelItem => item.LastNameRegex)
+                                    </h5>
+                                    <a href="@Url.Action("Details", "Courses", new { id = item.Id })" class="btn btn-outline-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@Model.Id" data-valid-registration-until="@Model.ValidRegistrationUntil">Disable Lecture</button>
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-4 text-center">
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning btn-sm">Edit</a>
+    <button class="disable-lecture-btn btn btn-danger btn-sm mx-2" data-lecture-id="@Model.Id" data-valid-registration-until="@Model.ValidRegistrationUntil">Disable Lecture</button>
+    <button class="btn btn-primary btn-sm mx-2 generate-qr-btn" data-lecture-id="@Model.Id">Generate QR</button>
+    <a asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
 </div>
+
+<div id="qrCodeContainer" class="mt-4 text-center"></div>
+
 
 @section Scripts {
     <script>
@@ -87,6 +115,45 @@
                     },
                     error: function (xhr, status, error) {
                         alert('Error disabling lecture');
+                    }
+                });
+            });
+
+            // Generate QR button click event
+            $('.generate-qr-btn').click(function (e) {
+                e.preventDefault();
+                var button = $(this);
+                var lectureId = button.data('lecture-id');
+
+                $.ajax({
+                    url: '@Url.Action("GenerateQRCode")',
+                    type: 'POST',
+                    data: {
+                        id: lectureId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    xhrFields: {
+                        responseType: 'blob' // Expect binary response
+                    },
+                    success: function (blob) {
+                        console.log(blob); // Check if this is a Blob
+                        if (blob instanceof Blob) {
+                            var url = URL.createObjectURL(blob);
+                            var qrImage = '<img src="' + url + '" alt="QR Code" />';
+
+                            // Create download link
+                            var downloadLink = '<a href="' + url + '" download="QRCode_' + lectureId + '.png">Download QR Code</a>';
+
+                            // Display QR code image and download link in a div
+                            $('#qrCodeContainer').html(qrImage + '<br>' + downloadLink);
+
+                            // Clean up the object URL after a short delay
+                            setTimeout(() => URL.revokeObjectURL(url), 10000); // Adjust delay as needed
+                        } else {
+                            console.error('Response is not a Blob');
+                        }},
+                    error: function (xhr, status, error) {
+                        alert('Error generating QR code');
                     }
                 });
             });

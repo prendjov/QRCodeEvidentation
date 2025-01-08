@@ -1,19 +1,25 @@
+using System.Globalization;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using QRCodeEvidentationApp.Models;
 using QRCodeEvidentationApp.Models.DTO;
+using QRCodeEvidentationApp.Models.Parsers;
 using QRCodeEvidentationApp.Repository.Interface;
 using QRCodeEvidentationApp.Service.Interface;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace QRCodeEvidentationApp.Service.Implementation;
+
 
 public class LectureService : ILectureService
 {
     private readonly ILectureRepository _lectureRepository;
-    private readonly ILectureCoursesRepository _lectureCourseRepository;
+    private readonly ILectureAttendanceRepository _lectureAttendanceRepository;
 
-    public LectureService(ILectureRepository lectureRepository, ILectureCoursesRepository lectureCoursesRepository)
+    public LectureService(ILectureRepository lectureRepository, ILectureAttendanceRepository lectureAttendanceRepository)
     {
         _lectureRepository = lectureRepository;
-        _lectureCourseRepository = lectureCoursesRepository;
+        _lectureAttendanceRepository = lectureAttendanceRepository;
     }
     
     public List<Lecture> GetLecturesForProfessor(string? professorId)
@@ -31,14 +37,40 @@ public class LectureService : ILectureService
         return _lectureRepository.GetLectureById(lectureId).Result;
     }
 
-    public List<Lecture> FilterLectureByDateOrCourse(DateTime? dateFrom, DateTime? dateTo, List<long>? coursesIds)
-    {
-        return _lectureRepository.FilterLectureByDateOrCourse(dateFrom, dateTo, coursesIds).Result;
-    }
-
     public Lecture EditLecture(Lecture lecture)
     {
+        Lecture originalLecture = _lectureRepository.GetLectureById(lecture.Id).Result;
+
         return _lectureRepository.UpdateLecture(lecture);
+    }
+
+    public bool CheckIfLectureEnded(string id, DateTime registrationTime)
+    {
+        Lecture lecture = _lectureRepository.GetLectureById(id).Result;
+
+        if (lecture.EndsAt < registrationTime)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool CheckIfLectureStarted(string id, DateTime registrationTime)
+    {
+        Lecture lecture = _lectureRepository.GetLectureById(id).Result;
+
+        if (lecture.StartsAt < registrationTime)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public List<Lecture> GetLecturesForProfessorFiltered(string? professorId, int page, int pageSize, int startsAtSorting, string lectureTypeFilter, out int totalLectures)
+    {
+        return _lectureRepository.GetLecturesForProfessorFiltered(professorId, page, pageSize, startsAtSorting, lectureTypeFilter, out totalLectures);
     }
 
     public Lecture DisableLecture(string? lectureId)
@@ -55,32 +87,43 @@ public class LectureService : ILectureService
         var lecture = _lectureRepository.GetLectureById(lectureId).Result;
         return _lectureRepository.DeleteLecture(lecture).Result;
     }
+    
+    public void BulkInsertLectures(IFormFile csvFile, string professorEmail)
+    {
+        // Open the CSV file
+        using (var stream = csvFile.OpenReadStream())
+        using (var reader = new StreamReader(stream))
+        using (var csv = new CsvHelper.CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+        {
+            // Read the records from the CSV file
+            var records = csv.GetRecords<LectureCsvParser>().ToList();
+
+            _lectureRepository.BulkInsertLectures(records, professorEmail);
+        }
+    }
+
+    public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId)
+    {
+        return _lectureRepository.GetLecturesByProfessorAndCourseGroupId(professorId, courseGroupId);
+    }
 
     public Lecture CreateLecture(LectureDto dtoFilled)
     { 
-        // Create the lecture entity from the DTO
         Lecture lecture = new Lecture
         {
-            Id = Guid.NewGuid().ToString(), // Assuming you want to generate a new ID
+            Id = Guid.NewGuid().ToString(),
             Title = dtoFilled.Title ?? string.Empty,
             StartsAt = dtoFilled.StartsAt,
             EndsAt = dtoFilled.EndsAt,
-            RoomName = dtoFilled.RoomId,
             ProfessorId = dtoFilled.loggedInProfessorId,
             Type = dtoFilled.TypeSelected,
-            ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil
+            ValidRegistrationUntil = dtoFilled.ValidRegistrationUntil,
+            LectureGroupId = dtoFilled.GroupCourseId
         };
+        
+        Lecture createdLecture = _lectureRepository.CreateNewLecture(lecture).Result;
 
-        // Add the courses related to the lecture
-        if (dtoFilled.CourseId.HasValue)
-        {
-            lecture.Courses.Add(_lectureCourseRepository.CreateLectureCourse(new LectureCourses
-            {
-                LectureId = lecture.Id,
-                CourseId = dtoFilled.CourseId.Value,
-            }));
-        }
-        return _lectureRepository.CreateNewLecture(lecture).Result;
+        return createdLecture;
     }
 
     public bool CheckValidRegistrationDate(DateTime startsAt, DateTime endsAt, DateTime? validRegistrationUntil)
@@ -111,5 +154,20 @@ public class LectureService : ILectureService
         }
 
         return true;
+    }
+
+    public void RegisterAttendance(Student student, string? lectureId, DateTime evidentedAt)
+    {
+
+        LectureAttendance lectureAttendance = new LectureAttendance()
+        {
+            Id = Guid.NewGuid().ToString(),
+            StudentIndex = student.StudentIndex,
+            LectureId = lectureId,
+            EvidentedAt = evidentedAt,
+            Student = student
+        };
+
+        _lectureAttendanceRepository.RegisterAttendance(lectureAttendance);
     }
 }

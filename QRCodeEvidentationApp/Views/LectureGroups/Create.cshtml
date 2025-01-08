@@ -1,0 +1,49 @@
+﻿@model QRCodeEvidentationApp.Models.DTO.LectureGroupDTO
+
+@{
+ViewData["Title"] = "Create";
+}
+
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
+
+<h4 class="text-center">Create Lecture Group</h4>
+<hr />
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <input type="hidden" asp-for="ProfessorId" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="form-label">Lecture Group Name</label>
+                <input asp-for="Name" class="form-control" placeholder="Enter the lecture group name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <span>Select courses:</span>
+                <select asp-for="SelectedCourses" asp-items="@(new SelectList(Model.Courses, "Id", "LastNameRegex"))" class="form-control" multiple="multiple">
+                </select>
+                <span asp-validation-for="SelectedCourses" class="text-danger"></span>
+            </div>
+
+            <div class="form-group text-center mb-3">
+                <input type="submit" value="Create" class="btn btn-success btn-lg" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-link">Back to List</a>
+</div>
+
+@section Scripts {
+@{
+await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+}

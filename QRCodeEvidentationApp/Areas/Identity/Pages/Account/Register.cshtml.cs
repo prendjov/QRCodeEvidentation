@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.Extensions.Logging;
+using QRCodeEvidentationApp.Data;
+using QRCodeEvidentationApp.Models;
 
 namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 {
@@ -33,6 +35,7 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly ApplicationDbContext _context;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -40,7 +43,8 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -49,6 +53,7 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
             _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
@@ -125,10 +130,31 @@ namespace QRCodeEvidentationApp.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    var defaultrole = _roleManager.FindByNameAsync(GetRoleId(user.UserName)).Result;
+                    var roleId = GetRoleId(user.UserName);
+                    var defaultrole = _roleManager.FindByNameAsync(roleId).Result;
+                    var resultRandom = _roleManager.Roles.Where(d => d.Name == roleId).FirstOrDefault();
 
                     if (defaultrole != null)
                     {
+                        if (roleId.Equals("PROFESSOR"))
+                        {
+                            _context.Professors.Add(new Professor()
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                Email = user.Email,
+                                Name = user.UserName.Split(".")[0]
+                            });
+                            _context.SaveChanges();
+                        }
+                        else if (roleId.Equals("STUDENT"))
+                        {
+                            _context.Students.Add(new Student()
+                            {
+                                StudentIndex = user.UserName,
+                                Email = user.Email
+                            });
+                            _context.SaveChanges();
+                        }
                         IdentityResult roleresult = await _userManager.AddToRoleAsync(user, defaultrole.Name);
                     }
 

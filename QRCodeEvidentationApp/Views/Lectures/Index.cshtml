@@ -1,143 +1,263 @@
-@model IEnumerable<QRCodeEvidentationApp.Models.Lecture>
+@model QRCodeEvidentationApp.Models.DTO.PaginatedLecturesViewModel
 
 @{
-ViewData["Title"] = "Index";
-Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Lectures";
 }
 
-<h1>Index</h1>
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="CreateView">Create New</a>
+<p class="text-end">
+    <a asp-action="CreateView" class="btn btn-success">Create New Lecture</a>
+    <a asp-action="BulkAddLecturesView" class="btn btn-info text-white">Bulk add</a>
 </p>
-<table class="table">
-    <thead>
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.StartsAt)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Type)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ValidRegistrationUntil)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Room)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Professor)
-        </th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model) {
-    <tr id="lecture-row-@item.Id">
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.StartsAt)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Type)
-        </td>
-        <td id="validRegistrationUntil">
-            @Html.DisplayFor(modelItem => item.ValidRegistrationUntil)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.RoomName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Professor.Id)
-        </td>
-        <td>
-            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            <button class="delete-lecture-btn btn btn-primary" data-delete-lecture-id="@item.Id">Delete</button> |
-            <button class="disable-lecture-btn btn btn-primary" data-lecture-id="@item.Id" data-valid-registration-until="@item.ValidRegistrationUntil">Disable Lecture</button>
-        </td>
-    </tr>
-    }
-    </tbody>
-</table>
+
+<div class="d-flex mb-3">
+    <!-- Sorting Dropdown -->
+    <div>
+        <label for="sortSelector">Sort by:</label>
+        <select id="sortSelector" class="form-control d-inline-block w-auto">
+            <option value="0">StartsAt (Descending)</option>
+            <option value="1">StartsAt (Ascending)</option>
+        </select>
+    </div>
+
+    <!-- Filtering Dropdown -->
+    <div>
+        <label for="typeFilter">Filter by Type:</label>
+        <select id="typeFilter" class="form-control d-inline-block w-auto">
+            <option value="">All</option>
+            <option value="Предавања">Предавања</option>
+            <option value="Аудиториски">Аудиториски</option>
+        </select>
+    </div>
+</div>
+
+
+<div class="table-responsive">
+    <table id="lecturesTable" class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Lectures[0].Title)</th>
+                <th>@Html.DisplayNameFor(model => model.Lectures[0].StartsAt)</th>
+                <th>@Html.DisplayNameFor(model => model.Lectures[0].Type)</th>
+                <th>@Html.DisplayNameFor(model => model.Lectures[0].ValidRegistrationUntil)</th>
+                @* <th>@Html.DisplayNameFor(model => model.Lectures[0].RoomName)</th> *@
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+    <tbody id="lecturesTableBody">
+        @foreach (var item in Model.Lectures)
+        {
+            <tr id="lecture-row-@item.Id">
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>    @(item.StartsAt.ToString("dd-MM-yyyy HH:mm:ss"))</td>
+                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                <td id="#validRegistrationUntil">
+                    @(item.ValidRegistrationUntil?.ToString("dd-MM-yyyy HH:mm:ss") ?? "N/A")
+                </td>
+                @* <td>@Html.DisplayFor(modelItem => item.RoomName)</td> *@
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Details</a>
+                        <button class="btn btn-sm btn-warning m-1 disable-lecture-btn" data-lecture-id="@item.Id" data-valid-registration-until="@item.ValidRegistrationUntil">Disable Lecture</button>
+                        <a asp-action="GetLectureAnalytics" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Analytics</a>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination controls -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <nav aria-label="Page navigation">
+        <ul class="pagination" id="paginationControls">
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="javascript:void(0);" data-page="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+    <div>
+        <span>Total Lectures: @Model.TotalLectures</span>
+        <select id="pageSizeSelector" class="form-control">
+            @foreach (var size in new[] { 10, 20, 50 })
+            {
+            <!option value="@size" @(size == Model.PageSize ? "selected" : "")>@size</!option>
+            }
+        </select>
+    </div>
+</div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.13.5/sorting/datetime-moment.js"></script>
+
     <script>
-    $(document).ready(function () {
-        $('.disable-lecture-btn').each(function () {
-            var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
-            var now = new Date();
-            if (now > validRegistrationUntil) {
-                $(this).prop('disabled', true);
+        $(document).ready(function () {
+        
+            // Event listeners for dropdown changes
+            $('#sortSelector, #typeFilter').change(fetchLectures);
+            fetchLectures();
+
+            $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
+
+            function initializeDisableButtons() {
+                $('.disable-lecture-btn').each(function () {
+                    var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
+                    var now = new Date();
+                    if (now > validRegistrationUntil) {
+                        $(this).prop('disabled', true);
+                    }
+                });
             }
-        });
 
-        function formatDate(date) {
-            var options = {
-                month: 'numeric', day: 'numeric', year: 'numeric',
-                hour: 'numeric', minute: 'numeric', second: 'numeric',
-                hour12: true
-            };
-            return new Intl.DateTimeFormat('en-US', options).format(date);
-        }
+            // Initialize DataTable
+            $('#lecturesTable').DataTable({
+                paging: false,         // Enable pagination
+                searching: true,       // Enable searching
+                ordering: false,        // Enable column ordering
+                lengthChange: true,    // Allow changing page length
+                autoWidth: false,      // Disable auto width for better responsiveness
+                responsive: true,      // Enable responsive table
+                order: [],
+                columnDefs: [
+                    { targets: [0], searchable: true },
+                    { targets: [1, 3], type: 'datetime-moment' }, // Use the correct type
+                    { targets: '_all', searchable: false }
+                ]
+            });
 
-        $('.disable-lecture-btn').click(function (e) {
-            e.preventDefault();
-            var button = $(this);
-            var lectureId = button.data('lecture-id');
-            $.ajax({
-                url: '@Url.Action("DisableLecture")',
-                type: 'POST',
-                data: {
-                    id: lectureId,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (result) {
-                    if (result.success) {
-                        alert(result.message);
-                        button.prop('disabled', true);
-                        var formattedDate = formatDate(new Date(result.validRegistrationUntil));
-                        $('#lecture-row-' + lectureId).find('#validRegistrationUntil').text(formattedDate);
-                    } else {
-                        alert('Error: ' + result.message);
+            initializeDisableButtons();
+
+            // Handle page click
+            $(document).on('click', '.page-link', function () {
+                var page = $(this)
+                $('.page-link').closest('.page-item').removeClass('active');
+
+                $(this).closest('.page-item').addClass('active');
+                fetchLectures();
+            });
+
+            // Handle page size change
+            $('#pageSizeSelector').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            $('#sortSelector').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            $('#typeFilter').on('change', function () {
+                $('.page-link').closest('.page-item').removeClass('active'); // Remove previous 'active'
+                $('.page-link[data-page="1"]').closest('.page-item').addClass('active'); // Set page 1 as 'active'
+                fetchLectures();
+            });
+
+            function fetchLectures() {
+                const sortOption = $('#sortSelector').val();
+                const typeFilter = $('#typeFilter').val();
+                const pageSize = $('#pageSizeSelector').val();
+                const page = $('.active').children().data('page') || 1; // Default to 1 if no page is active
+                
+                console.log(page)
+
+                $.ajax({
+                    url: '@Url.Action("Index")',
+                    type: 'GET',
+                    data: {
+                        page: page,
+                        pageSize: pageSize,
+                        startsAtSorting: sortOption,
+                        lecturesTypeFilter: typeFilter
+                    },
+                    success: function (data) {
+                        // Update the table and pagination
+                        if ($.fn.dataTable.isDataTable('#lecturesTable')) {
+                            $('#lecturesTable').DataTable().clear().destroy();
+                        }
+
+                        $('#lecturesTableBody').html($(data).find('#lecturesTableBody').html());
+                        $('#paginationControls').html($(data).find('#paginationControls').html());
+
+                        // Reinitialize the DataTable
+                        $('#lecturesTable').DataTable({
+                            paging: false,
+                            searching: true,
+                            ordering: false,
+                            lengthChange: true,
+                            autoWidth: false,
+                            responsive: true,
+                            order: [],
+                            columnDefs: [
+                                { targets: [0], searchable: true },
+                                { targets: [1, 3], type: 'datetime-moment' }, // Correct type for datetime
+                                { targets: '_all', searchable: false }
+                            ]
+                        });
+
+                        // Reinitialize the disable button logic
+                        initializeDisableButtons();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error fetching lectures');
                     }
-                },
-                error: function (xhr, status, error) {
-                    alert('Error disabling lecture');
+                });
+            }
+
+            $('.disable-lecture-btn').each(function () {
+                var validRegistrationUntil = new Date($(this).data('valid-registration-until'));
+                var now = new Date();
+                if (now > validRegistrationUntil) {
+                    $(this).prop('disabled', true);
                 }
             });
-        });
 
-        $('.delete-lecture-btn').click(function (e) {
-            e.preventDefault();
-            var button = $(this);
-            var lectureId = button.data('delete-lecture-id');
-            $.ajax({
-                url: '@Url.Action("Delete")',
-                type: 'POST',
-                data: {
-                    id: lectureId,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (result) {
-                    if (result.success) {
-                        alert(result.message);
-                        // Remove the row from the table
-                        $('#lecture-row-' + lectureId).remove();
-                    } else {
-                        alert('Error: ' + result.message);
+            function formatDate(date) {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+
+                return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+            }
+
+            $(document).on('click', '.disable-lecture-btn', function (e) {
+                e.preventDefault();
+                var button = $(this);
+                var lectureId = button.data('lecture-id');
+                $.ajax({
+                    url: '@Url.Action("DisableLecture")',
+                    type: 'POST',
+                    data: {
+                        id: lectureId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            alert(result.message);
+                            button.prop('disabled', true);
+                            var formattedDate = formatDate(new Date(result.validRegistrationUntil));
+                            $('#lecture-row-' + lectureId).find('td').eq(3).text(formattedDate);
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error disabling lecture');
                     }
-                },
-                error: function (xhr, status, error) {
-                    alert('Error deleting lecture');
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 }

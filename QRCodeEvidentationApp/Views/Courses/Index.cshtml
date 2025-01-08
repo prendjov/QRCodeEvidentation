@@ -1,0 +1,45 @@
+@model IEnumerable<QRCodeEvidentationApp.Models.Course>
+
+@{
+    ViewData["Title"] = "Courses";
+}
+
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.StudyYear)</th>
+                <th>@Html.DisplayNameFor(model => model.LastNameRegex)</th>
+                <th>@Html.DisplayNameFor(model => model.NumberOfFirstEnrollments)</th>
+                <th>@Html.DisplayNameFor(model => model.NumberOfReEnrollments)</th>
+                <th>@Html.DisplayNameFor(model => model.GroupPortion)</th>
+                <th>@Html.DisplayNameFor(model => model.Groups)</th>
+                <th>@Html.DisplayNameFor(model => model.English)</th>
+                <th>@Html.DisplayNameFor(model => model.Semester.Code)</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.StudyYear)</td>
+                    <td>@Html.DisplayFor(modelItem => item.LastNameRegex)</td>
+                    <td>@Html.DisplayFor(modelItem => item.NumberOfFirstEnrollments)</td>
+                    <td>@Html.DisplayFor(modelItem => item.NumberOfReEnrollments)</td>
+                    <td>@Html.DisplayFor(modelItem => item.GroupPortion)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Groups)</td>
+                    <td>@Html.DisplayFor(modelItem => item.English)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Semester.Code)</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary m-1">Details</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

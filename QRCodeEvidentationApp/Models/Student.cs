@@ -20,6 +20,4 @@ public partial class Student
     public string? StudyProgramCode { get; set; }
 
     public virtual ICollection<StudentCourse> StudentCourses { get; set; } = new List<StudentCourse>();
-
-    public virtual StudyProgram? StudyProgramCodeNavigation { get; set; }
 }
