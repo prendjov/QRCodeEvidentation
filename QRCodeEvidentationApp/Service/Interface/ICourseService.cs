@@ -25,7 +25,12 @@ public interface ICourseService
     /// or assistant for the course.</returns>
     public List<Course> GetCourses(string? teacherId);
 
+    /// <param name="courseId">The id of the course.</param>
+    /// <param name="professorId">The id of the professor.</param>
+    /// <returns>Boolean value true if the professor is assigned to the specified course, else returns false.</returns>
     public bool ProfessorAtCourse(long? courseId, string? professorId);
 
+    /// <param name="courseId">The id of the course.</param>
+    /// <returns>Course object.</returns>
     public Course GetCourse(long courseId);
 }

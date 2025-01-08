@@ -100,14 +100,6 @@ public class LectureRepository : ILectureRepository
 
         return lectures;
     }
-    
-    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId)
-    {
-        return _entities
-            .Where(l => l.ProfessorId == professorId && 
-                        l.LectureGroup.Courses.Any(c => c.Id == courseId))
-            .ToList();
-    }
 
     public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId)
     {

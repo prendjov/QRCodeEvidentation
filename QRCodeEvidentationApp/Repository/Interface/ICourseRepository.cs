@@ -24,10 +24,17 @@ public interface ICourseRepository
     /// or assistant for the course.</returns>
     public Task<List<Course>> GetCourses(string? teacherId);
     
-    
+    /// <param name="id">The id of the course.</param>
+    /// <param name="teacherId">The id of the professor.</param>
+    /// <returns>Returns CourseProfessor object.</returns>
     public Task<CourseProfessor?> GetCourseProfessorCombo(long? id, string? teacherId);
 
+    /// <param name="id">The id of the course.</param>
+    /// <param name="teacherId">The id of the professor.</param>
+    /// <returns>Returns CourseAssistant object.</returns>
     public Task<CourseAssistant?> GetCourseAssistantCombo(long? id, string? teacherId);
-
+    
+    /// <param name="courseId">The id of the course.</param>
+    /// <returns>Returns Course object.</returns>
     public Course Get(long courseId);
 }

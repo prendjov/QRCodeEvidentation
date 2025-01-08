@@ -20,9 +20,9 @@ public interface ILectureService
     public Lecture GetLectureById(string? lectureId);
 
     /// <summary>
-    /// Edits the lecture with the specified identifier.
+    /// Edits Lecture record in database.
     /// </summary>
-    /// <param name="lectureId">The identifier of the lecture to be edited.</param>
+    /// <param name="lecture">Lecture object.</param>
     /// <returns>The edited lecture.</returns>
     public Lecture EditLecture(Lecture lecture);
 
@@ -48,14 +48,25 @@ public interface ILectureService
     /// <param name="lectureId">Unique identifier for the lecture.</param>
     /// <param name="evidentedAt">The time when the student was registered as present.</param>
     public void RegisterAttendance(Student student, string? lectureId, DateTime evidentedAt);
-
     
+    /// <param name="professorId">Id of professor.</param>
+    /// <param name="page">Page number of the pagination.</param>
+    /// <param name="pageSize">Long number of how many Lectures to be displayed on each page.</param>
+    /// <param name="startsAtSorting">0 or 1 value. 0 is descending order, 1 is ascending.</param>
+    /// <param name="lectureTypeFilter">Предавања or Аудиториски as Lecture type. It can also be empty string, meaning no type filter was applied.</param>
+    /// <param name="totalLectures">Total Lectures created by the specified professor..</param>
+    /// <returns>List of Lectures based on all the filters.</returns>
     public List<Lecture> GetLecturesForProfessorFiltered(string? professorId, int page, int pageSize, int startsAtSorting, string lectureTypeFilter, out int totalLectures);
 
+    /// <param name="csvFile">IFormFile object with the data in csv. The CSV must have the following headers:
+    /// Title, StartsAt, EndsAt, ValidRegistrationUntil, Type, GroupCourseId.</param>
+    /// <param name="professorEmail">The email of the professor.</param>
+    /// <returns>List of Lectures based on all the filters.</returns>
     public void BulkInsertLectures(IFormFile csvFile, string professorEmail);
-
-    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId);
     
+    /// <param name="professorId">The id of the professor</param>
+    /// <param name="courseGroupId">The id of the courseGroup.</param>
+    /// <returns>List of Lectures by the specified professor for the specified course group.</returns>
     public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId);
 
 }

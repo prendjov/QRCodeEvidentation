@@ -20,17 +20,4 @@ public class StudentRepository : IStudentRepository
     {
         return await _entities.SingleOrDefaultAsync(x => x.Email.Equals(email)) ?? throw new InvalidOperationException();
     }
-
-    public List<long?> GetCoursesForStudent(string index)
-    {
-        Student student = _entities.Where(i => i.StudentIndex.Equals(index)).Include("StudentCourses").FirstOrDefault();
-        List<long?> courses = new List<long?>();
-        
-        foreach (var obj in student.StudentCourses)
-        {
-            courses.Add(obj.CourseId);
-        }
-
-        return courses;
-    }
 }

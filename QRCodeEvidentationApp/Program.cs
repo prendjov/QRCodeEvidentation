@@ -32,7 +32,6 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ILectureGroupRepository, LectureGroupRepository>();
 builder.Services.AddScoped<ILectureAttendanceRepository, LectureAttendanceRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IStudentCourseRepository, StudentCourseRepository>();
 
 builder.Services.AddScoped<ILectureService, LectureService>();
 builder.Services.AddScoped<ILectureGroupService, LectureGroupService>();

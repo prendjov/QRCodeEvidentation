@@ -102,11 +102,6 @@ public class LectureService : ILectureService
         }
     }
 
-    public List<Lecture> GetLecturesByProfessorAndCourseId(string? professorId, long? courseId)
-    {
-        return _lectureRepository.GetLecturesByProfessorAndCourseId(professorId, courseId);
-    }
-
     public List<Lecture> GetLecturesByProfessorAndCourseGroupId(string? professorId, string courseGroupId)
     {
         return _lectureRepository.GetLecturesByProfessorAndCourseGroupId(professorId, courseGroupId);
